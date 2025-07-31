@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Round Robin Tournament Manager</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #334155;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        h1, h2 {
+            color: #1e293b;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+        }
+        button {
+            background-color: #6366f1;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: #4f46e5;
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden; /* Ensures rounded corners apply to content */
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background-color: #e0e7ff;
+            color: #3730a3;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 500px;
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+            text-decoration: none;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #475569;
+        }
+        .form-group input[type="number"] {
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        .message-box {
+            display: none;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001;
+            text-align: center;
+            max-width: 300px;
+            width: 90%;
+            border: 1px solid #e2e8f0;
+        }
+        .message-box p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: #334155;
+        }
+        .message-box button {
+            background-color: #6366f1;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .message-box button:hover {
+            background-color: #4f46e5;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-6 md:p-8">
+
+    <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg">
+        <h1 class="text-4xl text-center mb-6 font-bold text-indigo-800">Tournament Manager</h1>
+
+        <!-- Team Input Section -->
+        <div class="mb-8 p-6 bg-indigo-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl font-semibold mb-4 text-indigo-700">1. Enter Team Names (8 Teams)</h2>
+            <div id="teamInputs" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- Team input fields will be generated here by JS -->
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button id="generateScheduleBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1">
+                    Generate Schedule
+                </button>
+                <button id="resetTournamentBtn" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1">
+                    Reset Tournament
+                </button>
+            </div>
+        </div>
+
+        <!-- Schedule Section -->
+        <div class="mb-8 p-6 bg-blue-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl font-semibold mb-4 text-blue-700">2. Match Schedule</h2>
+            <div id="scheduleContainer" class="overflow-x-auto">
+                <table id="scheduleTable" class="min-w-full bg-white rounded-lg overflow-hidden">
+                    <thead>
+                        <tr>
+                            <th class="py-3 px-4 bg-blue-200 text-blue-800">Round</th>
+                            <th class="py-3 px-4 bg-blue-200 text-blue-800">Match</th>
+                            <th class="py-3 px-4 bg-blue-200 text-blue-800">Score</th>
+                            <th class="py-3 px-4 bg-blue-200 text-blue-800">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleBody">
+                        <!-- Schedule will be rendered here by JS -->
+                        <tr><td colspan="4" class="text-center py-4 text-gray-500">Generate schedule to see matches.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Standings Section -->
+        <div class="p-6 bg-green-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl font-semibold mb-4 text-green-700">3. Tournament Standings</h2>
+            <div id="standingsContainer" class="overflow-x-auto">
+                <table id="standingsTable" class="min-w-full bg-white rounded-lg overflow-hidden">
+                    <thead>
+                        <tr>
+                            <th class="py-3 px-4 bg-green-200 text-green-800">Rank</th>
+                            <th class="py-3 px-4 bg-green-200 text-green-800">Team</th>
+                            <th class="py-3 px-4 bg-green-200 text-green-800">P</th>
+                            <th class="py-3 px-4 bg-green-200 text-green-800">W</th>
+                            <th class="py-3 px-4 bg-green-200 text-green-800">D</th>
+                            <th class="py-3 px-4 bg-green-200 text-green-800">L</th>
+                            <th class="py-3 px-4 bg-green-200 text-green-800">GF</th>
+                            <th class="py-3 px-4 bg-green-200 text-green-800">GA</th>
+                            <th class="py-3 px-4 bg-green-200 text-green-800">GD</th>
+                            <th class="py-3 px-4 bg-green-200 text-green-800">Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standingsBody">
+                        <!-- Standings will be rendered here by JS -->
+                        <tr><td colspan="10" class="text-center py-4 text-gray-500">Enter scores to see standings.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Score Input Modal -->
+    <div id="scoreModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalBtn">&times;</span>
+            <h3 class="text-2xl font-semibold mb-6 text-gray-800">Enter Match Score</h3>
+            <p id="modalMatchInfo" class="text-lg font-medium mb-4 text-gray-700"></p>
+            <form id="scoreForm">
+                <div class="form-group">
+                    <label for="scoreTeam1" id="labelTeam1" class="text-gray-600"></label>
+                    <input type="number" id="scoreTeam1" min="0" value="0" class="w-full p-2 border rounded-md focus:ring focus:ring-indigo-200">
+                </div>
+                <div class="form-group">
+                    <label for="scoreTeam2" id="labelTeam2" class="text-gray-600"></label>
+                    <input type="number" id="scoreTeam2" min="0" value="0" class="w-full p-2 border rounded-md focus:ring focus:ring-indigo-200">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg mt-4 shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1">
+                    Save Score
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Message Box -->
+    <div id="messageBox" class="message-box">
+        <p id="messageText"></p>
+        <button id="messageBoxOkBtn">OK</button>
+    </div>
+
+    <script>
+        // Global variables for tournament data
+        const NUM_TEAMS = 8;
+        let teams = [];
+        let matches = [];
+        let standings = {};
+        let currentMatchIndex = -1; // To keep track of which match is being edited
+
+        // DOM Elements
+        const teamInputsDiv = document.getElementById('teamInputs');
+        const generateScheduleBtn = document.getElementById('generateScheduleBtn');
+        const resetTournamentBtn = document.getElementById('resetTournamentBtn');
+        const scheduleBody = document.getElementById('scheduleBody');
+        const standingsBody = document.getElementById('standingsBody');
+        const scoreModal = document.getElementById('scoreModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalMatchInfo = document.getElementById('modalMatchInfo');
+        const labelTeam1 = document.getElementById('labelTeam1');
+        const labelTeam2 = document.getElementById('labelTeam2');
+        const scoreTeam1Input = document.getElementById('scoreTeam1');
+        const scoreTeam2Input = document.getElementById('scoreTeam2');
+        const scoreForm = document.getElementById('scoreForm');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const messageBoxOkBtn = document.getElementById('messageBoxOkBtn');
+
+        /**
+         * Displays a custom message box.
+         * @param {string} message - The message to display.
+         */
+        function showMessageBox(message) {
+            messageText.textContent = message;
+            messageBox.style.display = 'block';
+        }
+
+        /**
+         * Hides the custom message box.
+         */
+        function hideMessageBox() {
+            messageBox.style.display = 'none';
+        }
+
+        /**
+         * Initializes the team input fields.
+         */
+        function initializeTeamInputs() {
+            teamInputsDiv.innerHTML = '';
+            for (let i = 0; i < NUM_TEAMS; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `teamName${i}`;
+                input.placeholder = `Team ${i + 1} Name`;
+                input.classList.add('p-3', 'border', 'border-gray-300', 'rounded-lg', 'focus:outline-none', 'focus:ring-2', 'focus:ring-indigo-500');
+                teamInputsDiv.appendChild(input);
+            }
+        }
+
+        /**
+         * Saves the current tournament state to localStorage.
+         */
+        function saveData() {
+            localStorage.setItem('tournamentTeams', JSON.stringify(teams));
+            localStorage.setItem('tournamentMatches', JSON.stringify(matches));
+            localStorage.setItem('tournamentStandings', JSON.stringify(standings));
+        }
+
+        /**
+         * Loads the tournament state from localStorage.
+         */
+        function loadData() {
+            const savedTeams = localStorage.getItem('tournamentTeams');
+            const savedMatches = localStorage.getItem('tournamentMatches');
+            const savedStandings = localStorage.getItem('tournamentStandings');
+
+            if (savedTeams && savedMatches && savedStandings) {
+                try {
+                    teams = JSON.parse(savedTeams);
+                    matches = JSON.parse(savedMatches);
+                    standings = JSON.parse(savedStandings);
+
+                    // Populate team input fields
+                    teams.forEach((teamName, index) => {
+                        const input = document.getElementById(`teamName${index}`);
+                        if (input) {
+                            input.value = teamName;
+                        }
+                    });
+
+                    renderSchedule();
+                    renderStandings();
+                    showMessageBox('Tournament data loaded successfully!');
+                } catch (e) {
+                    console.error("Failed to parse stored data:", e);
+                    showMessageBox('Error loading saved data. Starting fresh.');
+                    resetTournament(); // Reset if data is corrupted
+                }
+            } else {
+                showMessageBox('No saved tournament data found. Please enter team names and generate a schedule.');
+            }
+        }
+
+        /**
+         * Generates the round-robin schedule using the circle method.
+         * @param {Array<string>} teamNames - An array of team names.
+         * @returns {Array<Object>} An array of match objects.
+         */
+        function generateRoundRobinSchedule(teamNames) {
+            const n = teamNames.length;
+            if (n % 2 !== 0) {
+                console.error("Number of teams must be even for this scheduling method.");
+                return []; // Or handle odd number of teams (add a dummy team)
+            }
+
+            const schedule = [];
+            const fixedTeam = teamNames[0];
+            const rotatingTeams = teamNames.slice(1);
+
+            for (let round = 0; round < n - 1; round++) {
+                // Match fixed team with the first rotating team
+                schedule.push({
+                    team1: fixedTeam,
+                    team2: rotatingTeams[0],
+                    score1: null,
+                    score2: null,
+                    played: false,
+                    round: round + 1
+                });
+
+                // Match remaining rotating teams
+                for (let i = 1; i < n / 2; i++) {
+                    schedule.push({
+                        team1: rotatingTeams[i],
+                        team2: rotatingTeams[n - 1 - i],
+                        score1: null,
+                        score2: null,
+                        played: false,
+                        round: round + 1
+                    });
+                }
+
+                // Rotate teams: last team moves to second position, others shift
+                const lastTeam = rotatingTeams.pop();
+                rotatingTeams.unshift(lastTeam);
+            }
+            return schedule;
+        }
+
+        /**
+         * Renders the match schedule table.
+         */
+        function renderSchedule() {
+            scheduleBody.innerHTML = '';
+            if (matches.length === 0) {
+                scheduleBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">No schedule generated yet.</td></tr>';
+                return;
+            }
+
+            let currentRound = 0;
+            matches.forEach((match, index) => {
+                if (match.round !== currentRound) {
+                    currentRound = match.round;
+                    const roundHeaderRow = document.createElement('tr');
+                    roundHeaderRow.innerHTML = `<td colspan="4" class="py-2 px-4 bg-blue-100 text-blue-700 font-semibold text-center">Round ${currentRound}</td>`;
+                    scheduleBody.appendChild(roundHeaderRow);
+                }
+
+                const row = document.createElement('tr');
+                const scoreDisplay = match.played ? `${match.score1} - ${match.score2}` : 'N/A';
+                const actionButtonText = match.played ? 'Edit Score' : 'Enter Score';
+                const actionButtonClass = match.played ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-indigo-500 hover:bg-indigo-600';
+
+                row.innerHTML = `
+                    <td class="py-3 px-4">${match.round}</td>
+                    <td class="py-3 px-4">${match.team1} vs ${match.team2}</td>
+                    <td class="py-3 px-4 font-medium">${scoreDisplay}</td>
+                    <td class="py-3 px-4">
+                        <button data-index="${index}" class="enter-score-btn ${actionButtonClass} text-white text-sm py-2 px-4 rounded-md shadow-sm">
+                            ${actionButtonText}
+                        </button>
+                    </td>
+                `;
+                scheduleBody.appendChild(row);
+            });
+
+            // Add event listeners to new buttons
+            document.querySelectorAll('.enter-score-btn').forEach(button => {
+                button.addEventListener('click', openScoreModal);
+            });
+        }
+
+        /**
+         * Calculates and renders the tournament standings.
+         */
+        function calculateAndRenderStandings() {
+            // Initialize standings for all teams
+            standings = {};
+            teams.forEach(teamName => {
+                standings[teamName] = {
+                    played: 0,
+                    wins: 0,
+                    draws: 0,
+                    losses: 0,
+                    goalsFor: 0,
+                    goalsAgainst: 0,
+                    goalDifference: 0,
+                    points: 0
+                };
+            });
+
+            // Process each played match
+            matches.forEach(match => {
+                if (match.played) {
+                    const team1Stats = standings[match.team1];
+                    const team2Stats = standings[match.team2];
+
+                    team1Stats.played++;
+                    team2Stats.played++;
+                    team1Stats.goalsFor += match.score1;
+                    team1Stats.goalsAgainst += match.score2;
+                    team2Stats.goalsFor += match.score2;
+                    team2Stats.goalsAgainst += match.score1;
+
+                    if (match.score1 > match.score2) {
+                        team1Stats.wins++;
+                        team1Stats.points += 3;
+                        team2Stats.losses++;
+                    } else if (match.score1 < match.score2) {
+                        team2Stats.wins++;
+                        team2Stats.points += 3;
+                        team1Stats.losses++;
+                    } else {
+                        team1Stats.draws++;
+                        team1Stats.points += 1;
+                        team2Stats.draws++;
+                        team2Stats.points += 1;
+                    }
+                    team1Stats.goalDifference = team1Stats.goalsFor - team1Stats.goalsAgainst;
+                    team2Stats.goalDifference = team2Stats.goalsFor - team2Stats.goalsAgainst;
+                }
+            });
+
+            renderStandings();
+            saveData(); // Save standings after calculation
+        }
+
+        /**
+         * Renders the standings table.
+         */
+        function renderStandings() {
+            standingsBody.innerHTML = '';
+            const sortedStandings = Object.values(standings).sort((a, b) => {
+                if (b.points !== a.points) {
+                    return b.points - a.points;
+                }
+                if (b.goalDifference !== a.goalDifference) {
+                    return b.goalDifference - a.goalDifference;
+                }
+                return b.goalsFor - a.goalsFor; // More goals scored as tie-breaker
+            });
+
+            if (sortedStandings.length === 0 || sortedStandings.every(s => s.played === 0)) {
+                standingsBody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-gray-500">Enter scores to see standings.</td></tr>';
+                return;
+            }
+
+            sortedStandings.forEach((teamStats, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="py-3 px-4 font-bold">${index + 1}</td>
+                    <td class="py-3 px-4">${teamStats.teamName}</td>
+                    <td class="py-3 px-4">${teamStats.played}</td>
+                    <td class="py-3 px-4">${teamStats.wins}</td>
+                    <td class="py-3 px-4">${teamStats.draws}</td>
+                    <td class="py-3 px-4">${teamStats.losses}</td>
+                    <td class="py-3 px-4">${teamStats.goalsFor}</td>
+                    <td class="py-3 px-4">${teamStats.goalsAgainst}</td>
+                    <td class="py-3 px-4">${teamStats.goalDifference}</td>
+                    <td class="py-3 px-4 font-bold text-lg text-green-700">${teamStats.points}</td>
+                `;
+                standingsBody.appendChild(row);
+            });
+        }
+
+        /**
+         * Opens the score input modal for a specific match.
+         * @param {Event} event - The click event from the "Enter Score" button.
+         */
+        function openScoreModal(event) {
+            currentMatchIndex = parseInt(event.target.dataset.index);
+            const match = matches[currentMatchIndex];
+
+            modalMatchInfo.textContent = `${match.team1} vs ${match.team2}`;
+            labelTeam1.textContent = `${match.team1} Score:`;
+            labelTeam2.textContent = `${match.team2} Score:`;
+
+            scoreTeam1Input.value = match.score1 !== null ? match.score1 : 0;
+            scoreTeam2Input.value = match.score2 !== null ? match.score2 : 0;
+
+            scoreModal.style.display = 'flex'; // Use flex to center
+        }
+
+        /**
+         * Closes the score input modal.
+         */
+        function closeScoreModal() {
+            scoreModal.style.display = 'none';
+        }
+
+        /**
+         * Handles the score form submission.
+         * @param {Event} event - The form submit event.
+         */
+        function handleScoreSubmit(event) {
+            event.preventDefault();
+
+            const score1 = parseInt(scoreTeam1Input.value);
+            const score2 = parseInt(scoreTeam2Input.value);
+
+            if (isNaN(score1) || isNaN(score2) || score1 < 0 || score2 < 0) {
+                showMessageBox('Please enter valid non-negative numbers for scores.');
+                return;
+            }
+
+            matches[currentMatchIndex].score1 = score1;
+            matches[currentMatchIndex].score2 = score2;
+            matches[currentMatchIndex].played = true;
+
+            closeScoreModal();
+            renderSchedule(); // Re-render schedule to show updated score
+            calculateAndRenderStandings(); // Re-calculate and render standings
+            saveData(); // Save updated data
+            showMessageBox('Score saved successfully!');
+        }
+
+        /**
+         * Resets the entire tournament data.
+         */
+        function resetTournament() {
+            localStorage.clear();
+            teams = [];
+            matches = [];
+            standings = {};
+            currentMatchIndex = -1;
+            initializeTeamInputs(); // Re-initialize with empty inputs
+            renderSchedule(); // Clear schedule table
+            renderStandings(); // Clear standings table
+            showMessageBox('Tournament reset successfully!');
+        }
+
+        // --- Event Listeners ---
+        generateScheduleBtn.addEventListener('click', () => {
+            teams = [];
+            let allTeamsValid = true;
+            for (let i = 0; i < NUM_TEAMS; i++) {
+                const input = document.getElementById(`teamName${i}`);
+                const teamName = input.value.trim();
+                if (teamName === '') {
+                    allTeamsValid = false;
+                    break;
+                }
+                teams.push(teamName);
+            }
+
+            if (!allTeamsValid) {
+                showMessageBox(`Please enter names for all ${NUM_TEAMS} teams.`);
+                return;
+            }
+
+            // Check for duplicate team names
+            const uniqueTeams = new Set(teams);
+            if (uniqueTeams.size !== NUM_TEAMS) {
+                showMessageBox('Team names must be unique. Please check for duplicates.');
+                return;
+            }
+
+            matches = generateRoundRobinSchedule(teams);
+            renderSchedule();
+            calculateAndRenderStandings(); // Initialize standings after schedule generation
+            saveData();
+            showMessageBox('Schedule generated! Now enter scores for matches.');
+        });
+
+        resetTournamentBtn.addEventListener('click', resetTournament);
+        closeModalBtn.addEventListener('click', closeScoreModal);
+        scoreForm.addEventListener('submit', handleScoreSubmit);
+        messageBoxOkBtn.addEventListener('click', hideMessageBox);
+
+        // Initialize on page load
+        window.onload = function() {
+            initializeTeamInputs();
+            loadData(); // Attempt to load saved data
+        };
+
+    </script>
+</body>
+</html>
