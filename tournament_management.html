@@ -568,13 +568,42 @@
         function renderStandings() {
             standingsBody.innerHTML = '';
             const sortedStandings = Object.values(standings).sort((a, b) => {
+                // Primary tie-breaker: Points
                 if (b.points !== a.points) {
                     return b.points - a.points;
                 }
-                if (b.goalDifference !== a.goalDifference) {
-                    return b.goalDifference - a.goalDifference;
+                // Secondary tie-breaker: Goals For (total individual game points)
+                if (b.goalsFor !== a.goalsFor) {
+                    return b.goalsFor - a.goalsFor;
                 }
-                return b.goalsFor - a.goalsFor; // More individual game points scored as tie-breaker
+
+                // Tertiary tie-breaker: Head-to-head result
+                // Find the match between team 'a' and team 'b'
+                const headToHeadMatch = matches.find(match =>
+                    (match.team1 === a.teamName && match.team2 === b.teamName && match.played) ||
+                    (match.team1 === b.teamName && match.team2 === a.teamName && match.played)
+                );
+
+                if (headToHeadMatch) {
+                    let aScoreInH2H, bScoreInH2H;
+                    if (headToHeadMatch.team1 === a.teamName) {
+                        aScoreInH2H = headToHeadMatch.score1;
+                        bScoreInH2H = headToHeadMatch.score2;
+                    } else {
+                        aScoreInH2H = headToHeadMatch.score2;
+                        bScoreInH2H = headToHeadMatch.score1;
+                    }
+
+                    if (aScoreInH2H > bScoreInH2H) {
+                        return -1; // 'a' ranks higher
+                    } else if (aScoreInH2H < bScoreInH2H) {
+                        return 1; // 'b' ranks higher
+                    }
+                    // If head-to-head was a draw, proceed to next tie-breaker
+                }
+
+                // Fallback tie-breaker: Goal Difference (if points, GF, and head-to-head are all tied or head-to-head not played/drawn)
+                return b.goalDifference - a.goalDifference;
             });
 
             if (sortedStandings.length === 0 || sortedStandings.every(s => s.played === 0)) {
