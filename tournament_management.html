@@ -254,16 +254,11 @@
     <div id="scoreModal" class="modal">
         <div class="modal-content">
             <span class="close-button" id="closeModalBtn">&times;</span>
-            <h3 class="text-2xl font-semibold mb-6 text-gray-800">Enter Match Score</h3>
+            <h3 class="text-2xl font-semibold mb-6 text-gray-800">Enter Match Scores (4 Games)</h3>
             <p id="modalMatchInfo" class="text-lg font-medium mb-4 text-gray-700"></p>
             <form id="scoreForm">
-                <div class="form-group">
-                    <label for="scoreTeam1" id="labelTeam1" class="text-gray-600"></label>
-                    <input type="number" id="scoreTeam1" min="0" value="0" class="w-full p-2 border rounded-md focus:ring focus:ring-indigo-200">
-                </div>
-                <div class="form-group">
-                    <label for="scoreTeam2" id="labelTeam2" class="text-gray-600"></label>
-                    <input type="number" id="scoreTeam2" min="0" value="0" class="w-full p-2 border rounded-md focus:ring focus:ring-indigo-200">
+                <div id="individualGamesContainer">
+                    <!-- Individual game inputs will be dynamically generated here -->
                 </div>
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg mt-4 shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1">
                     Save Score
@@ -281,7 +276,12 @@
     <script>
         // Global variables for tournament data
         const NUM_TEAMS = 8;
-        let teams = [];
+        // Number of individual games played per team match (i.e., 4v4)
+        const GAMES_PER_MATCH = 4;
+        // Total number of players allowed per team (4 main + 4 reserve)
+        const TOTAL_PLAYERS_PER_TEAM = 8;
+
+        let teams = []; // Will now store objects: { name: "Team Name", players: ["Player1", "Player2", ..., "Player8"] }
         let matches = [];
         let standings = {};
         let currentMatchIndex = -1; // To keep track of which match is being edited
@@ -295,10 +295,8 @@
         const scoreModal = document.getElementById('scoreModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const modalMatchInfo = document.getElementById('modalMatchInfo');
-        const labelTeam1 = document.getElementById('labelTeam1');
-        const labelTeam2 = document.getElementById('labelTeam2');
-        const scoreTeam1Input = document.getElementById('scoreTeam1');
-        const scoreTeam2Input = document.getElementById('scoreTeam2');
+        const individualGamesContainer = document.getElementById('individualGamesContainer');
+
         const scoreForm = document.getElementById('scoreForm');
         const messageBox = document.getElementById('messageBox');
         const messageText = document.getElementById('messageText');
@@ -321,17 +319,41 @@
         }
 
         /**
-         * Initializes the team input fields.
+         * Initializes the team input fields, including player names.
          */
         function initializeTeamInputs() {
             teamInputsDiv.innerHTML = '';
             for (let i = 0; i < NUM_TEAMS; i++) {
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.id = `teamName${i}`;
-                input.placeholder = `Team ${i + 1} Name`;
-                input.classList.add('p-3', 'border', 'border-gray-300', 'rounded-lg', 'focus:outline-none', 'focus:ring-2', 'focus:ring-indigo-500');
-                teamInputsDiv.appendChild(input);
+                const teamGroupDiv = document.createElement('div');
+                teamGroupDiv.classList.add('team-group', 'p-4', 'border', 'border-gray-200', 'rounded-lg', 'bg-white', 'shadow-sm');
+
+                const teamNameLabel = document.createElement('label');
+                teamNameLabel.htmlFor = `teamName${i}`;
+                teamNameLabel.classList.add('block', 'text-lg', 'font-semibold', 'mb-2', 'text-indigo-700');
+                teamNameLabel.textContent = `Team ${i + 1} Name:`;
+                teamGroupDiv.appendChild(teamNameLabel);
+
+                const teamNameInput = document.createElement('input');
+                teamNameInput.type = 'text';
+                teamNameInput.id = `teamName${i}`;
+                teamNameInput.placeholder = `Team ${i + 1} Name`;
+                teamNameInput.classList.add('mb-3', 'p-3', 'border', 'border-gray-300', 'rounded-lg', 'w-full', 'focus:outline-none', 'focus:ring-2', 'focus:ring-indigo-500');
+                teamGroupDiv.appendChild(teamNameInput);
+
+                const playersHeader = document.createElement('h4');
+                playersHeader.classList.add('text-md', 'font-medium', 'mb-2', 'text-gray-600');
+                playersHeader.textContent = `Players (up to ${TOTAL_PLAYERS_PER_TEAM}):`;
+                teamGroupDiv.appendChild(playersHeader);
+
+                for (let j = 0; j < TOTAL_PLAYERS_PER_TEAM; j++) { // TOTAL_PLAYERS_PER_TEAM is 8
+                    const playerInput = document.createElement('input');
+                    playerInput.type = 'text';
+                    playerInput.id = `team${i}Player${j}`;
+                    playerInput.placeholder = `Player ${j + 1}`;
+                    playerInput.classList.add('mb-2', 'p-2', 'border', 'border-gray-300', 'rounded-md', 'w-full', 'text-sm', 'focus:outline-none', 'focus:ring-2', 'focus:ring-indigo-500');
+                    teamGroupDiv.appendChild(playerInput);
+                }
+                teamInputsDiv.appendChild(teamGroupDiv);
             }
         }
 
@@ -358,16 +380,27 @@
                     matches = JSON.parse(savedMatches);
                     standings = JSON.parse(savedStandings);
 
-                    // Populate team input fields
-                    teams.forEach((teamName, index) => {
-                        const input = document.getElementById(`teamName${index}`);
-                        if (input) {
-                            input.value = teamName;
+                    // Populate team input fields and player input fields
+                    teams.forEach((teamData, teamIndex) => {
+                        const teamNameInput = document.getElementById(`teamName${teamIndex}`);
+                        if (teamNameInput) {
+                            teamNameInput.value = teamData.name;
+                        }
+                        // Ensure teamData.players exists before trying to iterate
+                        if (teamData.players) {
+                            for (let j = 0; j < TOTAL_PLAYERS_PER_TEAM; j++) {
+                                const playerInput = document.getElementById(`team${teamIndex}Player${j}`);
+                                if (playerInput && teamData.players[j]) { // Check if player exists in loaded data
+                                    playerInput.value = teamData.players[j];
+                                } else if (playerInput) {
+                                    playerInput.value = ''; // Clear if no player exists for this slot
+                                }
+                            }
                         }
                     });
 
                     renderSchedule();
-                    renderStandings();
+                    calculateAndRenderStandings(); // Recalculate standings on load to ensure consistency
                     showMessageBox('Tournament data loaded successfully!');
                 } catch (e) {
                     console.error("Failed to parse stored data:", e);
@@ -381,7 +414,7 @@
 
         /**
          * Generates the round-robin schedule using the circle method.
-         * @param {Array<string>} teamNames - An array of team names.
+         * @param {Array<string>} teamNames - An array of team names (just names, as the schedule doesn't need players yet).
          * @returns {Array<Object>} An array of match objects.
          */
         function generateRoundRobinSchedule(teamNames) {
@@ -400,10 +433,12 @@
                 schedule.push({
                     team1: fixedTeam,
                     team2: rotatingTeams[0],
-                    score1: null,
-                    score2: null,
+                    score1: null, // Total points for team1 from 4 games
+                    score2: null, // Total points for team2 from 4 games
                     played: false,
-                    round: round + 1
+                    round: round + 1,
+                    // Store individual game results for 4v4 chess: { player1: "P1A", player2: "P1B", result: "win1" }
+                    gameResults: Array(GAMES_PER_MATCH).fill(null)
                 });
 
                 // Match remaining rotating teams
@@ -414,7 +449,8 @@
                         score1: null,
                         score2: null,
                         played: false,
-                        round: round + 1
+                        round: round + 1,
+                        gameResults: Array(GAMES_PER_MATCH).fill(null)
                     });
                 }
 
@@ -445,6 +481,7 @@
                 }
 
                 const row = document.createElement('tr');
+                // Display total points from the 4 individual games for the match
                 const scoreDisplay = match.played ? `${match.score1} - ${match.score2}` : 'N/A';
                 const actionButtonText = match.played ? 'Edit Score' : 'Enter Score';
                 const actionButtonClass = match.played ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-indigo-500 hover:bg-indigo-600';
@@ -474,16 +511,17 @@
         function calculateAndRenderStandings() {
             // Initialize standings for all teams
             standings = {};
-            teams.forEach(teamName => {
-                standings[teamName] = {
+            teams.forEach(teamData => { // Iterate over team objects
+                standings[teamData.name] = { // Use teamData.name as key
+                    teamName: teamData.name,
                     played: 0,
-                    wins: 0,
-                    draws: 0,
-                    losses: 0,
-                    goalsFor: 0,
-                    goalsAgainst: 0,
+                    wins: 0, // Team match wins
+                    draws: 0, // Team match draws
+                    losses: 0, // Team match losses
+                    goalsFor: 0, // Total individual game points for the team
+                    goalsAgainst: 0, // Total individual game points against the team
                     goalDifference: 0,
-                    points: 0
+                    points: 0 // Tournament points (2 for win, 1 for draw, 0 for loss)
                 };
             });
 
@@ -495,24 +533,25 @@
 
                     team1Stats.played++;
                     team2Stats.played++;
-                    team1Stats.goalsFor += match.score1;
+                    team1Stats.goalsFor += match.score1; // match.score1 is sum of individual game points
                     team1Stats.goalsAgainst += match.score2;
                     team2Stats.goalsFor += match.score2;
                     team2Stats.goalsAgainst += match.score1;
 
+                    // Apply tournament points (2 for win, 1 for draw, 0 for loss) based on overall match outcome
                     if (match.score1 > match.score2) {
                         team1Stats.wins++;
-                        team1Stats.points += 3;
+                        team1Stats.points += 2; // Chess tournament: Win = 2 points
                         team2Stats.losses++;
                     } else if (match.score1 < match.score2) {
                         team2Stats.wins++;
-                        team2Stats.points += 3;
+                        team2Stats.points += 0; // Chess tournament: Loss = 0 points
                         team1Stats.losses++;
                     } else {
                         team1Stats.draws++;
-                        team1Stats.points += 1;
+                        team1Stats.points += 1; // Chess tournament: Draw = 1 point
                         team2Stats.draws++;
-                        team2Stats.points += 1;
+                        team2Stats.points += 1; // Chess tournament: Draw = 1 point
                     }
                     team1Stats.goalDifference = team1Stats.goalsFor - team1Stats.goalsAgainst;
                     team2Stats.goalDifference = team2Stats.goalsFor - team2Stats.goalsAgainst;
@@ -535,7 +574,7 @@
                 if (b.goalDifference !== a.goalDifference) {
                     return b.goalDifference - a.goalDifference;
                 }
-                return b.goalsFor - a.goalsFor; // More goals scored as tie-breaker
+                return b.goalsFor - a.goalsFor; // More individual game points scored as tie-breaker
             });
 
             if (sortedStandings.length === 0 || sortedStandings.every(s => s.played === 0)) {
@@ -569,12 +608,79 @@
             currentMatchIndex = parseInt(event.target.dataset.index);
             const match = matches[currentMatchIndex];
 
-            modalMatchInfo.textContent = `${match.team1} vs ${match.team2}`;
-            labelTeam1.textContent = `${match.team1} Score:`;
-            labelTeam2.textContent = `${match.team2} Score:`;
+            // Find the full team objects to get player names
+            const team1Full = teams.find(t => t.name === match.team1);
+            const team2Full = teams.find(t => t.name === match.team2);
 
-            scoreTeam1Input.value = match.score1 !== null ? match.score1 : 0;
-            scoreTeam2Input.value = match.score2 !== null ? match.score2 : 0;
+            modalMatchInfo.innerHTML = `
+                <span class="font-bold">${match.team1}</span>
+                <span class="text-sm text-gray-500 block">(${team1Full ? team1Full.players.filter(p => p).join(', ') : 'Players not found'})</span>
+                vs
+                <span class="font-bold">${match.team2}</span>
+                <span class="text-sm text-gray-500 block">(${team2Full ? team2Full.players.filter(p => p).join(', ') : 'Players not found'})</span>
+            `;
+
+            const team1Players = team1Full ? team1Full.players.filter(p => p.trim() !== '') : []; // Filter out empty player names
+            const team2Players = team2Full ? team2Full.players.filter(p => p.trim() !== '') : [];
+
+            individualGamesContainer.innerHTML = ''; // Clear previous games
+
+            for (let i = 0; i < GAMES_PER_MATCH; i++) {
+                const gameDiv = document.createElement('div');
+                gameDiv.classList.add('form-group', 'mb-4', 'p-3', 'bg-gray-50', 'rounded-md');
+                gameDiv.innerHTML = `
+                    <label class="block mb-2 font-semibold text-gray-700">Game ${i + 1}:</label>
+                    <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-2">
+                        <select id="game${i}Team1Player" class="flex-1 p-2 border rounded-md focus:ring focus:ring-indigo-200"></select>
+                        <span class="font-bold text-gray-800">vs</span>
+                        <select id="game${i}Team2Player" class="flex-1 p-2 border rounded-md focus:ring focus:ring-indigo-200"></select>
+                    </div>
+                    <select id="game${i}Result" class="w-full p-2 border rounded-md focus:ring focus:ring-indigo-200">
+                        <option value="">Select Result</option>
+                        <option value="win1">${match.team1} Wins</option>
+                        <option value="draw">Draw</option>
+                        <option value="win2">${match.team2} Wins</option>
+                    </select>
+                `;
+                individualGamesContainer.appendChild(gameDiv);
+
+                const team1PlayerSelect = document.getElementById(`game${i}Team1Player`);
+                const team2PlayerSelect = document.getElementById(`game${i}Team2Player`);
+                const gameResultSelect = document.getElementById(`game${i}Result`);
+
+                // Add default empty option
+                const defaultOption1 = document.createElement('option');
+                defaultOption1.value = '';
+                defaultOption1.textContent = 'Select Player';
+                team1PlayerSelect.appendChild(defaultOption1);
+
+                const defaultOption2 = document.createElement('option');
+                defaultOption2.value = '';
+                defaultOption2.textContent = 'Select Player';
+                team2PlayerSelect.appendChild(defaultOption2);
+
+
+                // Populate player dropdowns
+                team1Players.forEach(player => {
+                    const option = document.createElement('option');
+                    option.value = player;
+                    option.textContent = player;
+                    team1PlayerSelect.appendChild(option);
+                });
+                team2Players.forEach(player => {
+                    const option = document.createElement('option');
+                    option.value = player;
+                    option.textContent = player;
+                    team2PlayerSelect.appendChild(option);
+                });
+
+                // Pre-populate if data exists
+                if (match.gameResults[i]) {
+                    team1PlayerSelect.value = match.gameResults[i].player1 || '';
+                    team2PlayerSelect.value = match.gameResults[i].player2 || '';
+                    gameResultSelect.value = match.gameResults[i].result || '';
+                }
+            }
 
             scoreModal.style.display = 'flex'; // Use flex to center
         }
@@ -588,28 +694,100 @@
 
         /**
          * Handles the score form submission.
+         * Calculates total team scores from individual game results.
          * @param {Event} event - The form submit event.
          */
         function handleScoreSubmit(event) {
             event.preventDefault();
 
-            const score1 = parseInt(scoreTeam1Input.value);
-            const score2 = parseInt(scoreTeam2Input.value);
+            let team1MatchScore = 0; // Total points for Team 1 in this match from 4 games
+            let team2MatchScore = 0; // Total points for Team 2 in this match from 4 games
+            const currentMatch = matches[currentMatchIndex];
+            const newGameResults = [];
 
-            if (isNaN(score1) || isNaN(score2) || score1 < 0 || score2 < 0) {
-                showMessageBox('Please enter valid non-negative numbers for scores.');
-                return;
+            let allInputsFilled = true;
+            let duplicatePlayersInGame = false;
+            const selectedPlayersTeam1 = new Set();
+            const selectedPlayersTeam2 = new Set();
+            let playerUsedMultipleTimesInMatch = false;
+
+            for (let i = 0; i < GAMES_PER_MATCH; i++) {
+                const team1PlayerSelect = document.getElementById(`game${i}Team1Player`);
+                const team2PlayerSelect = document.getElementById(`game${i}Team2Player`);
+                const gameResultSelect = document.getElementById(`game${i}Result`);
+
+                const player1 = team1PlayerSelect.value.trim();
+                const player2 = team2PlayerSelect.value.trim();
+                const result = gameResultSelect.value;
+
+                if (player1 === '' || player2 === '' || result === '') {
+                    allInputsFilled = false;
+                    break;
+                }
+
+                if (player1 === player2) {
+                    duplicatePlayersInGame = true;
+                    break;
+                }
+
+                // Check for duplicate players across games within the same match
+                if (selectedPlayersTeam1.has(player1)) {
+                    playerUsedMultipleTimesInMatch = true;
+                    break;
+                }
+                selectedPlayersTeam1.add(player1);
+
+                if (selectedPlayersTeam2.has(player2)) {
+                    playerUsedMultipleTimesInMatch = true;
+                    break;
+                }
+                selectedPlayersTeam2.add(player2);
+
+                newGameResults.push({ player1, player2, result });
+
+                switch (result) {
+                    case 'win1':
+                        team1MatchScore += 2; // Team 1 wins individual game, gets 2 points
+                        break;
+                    case 'win2':
+                        team2MatchScore += 2; // Team 2 wins individual game, gets 2 points
+                        break;
+                    case 'draw':
+                        team1MatchScore += 1; // Draw, both get 1 point
+                        team2MatchScore += 1;
+                        break;
+                }
             }
 
-            matches[currentMatchIndex].score1 = score1;
-            matches[currentMatchIndex].score2 = score2;
-            matches[currentMatchIndex].played = true;
+            if (!allInputsFilled) {
+                showMessageBox('Please select players and a result for all 4 individual games.');
+                return;
+            }
+            if (duplicatePlayersInGame) {
+                showMessageBox('A player cannot play against themselves in an individual game. Please select different players.');
+                return;
+            }
+            if (playerUsedMultipleTimesInMatch) {
+                showMessageBox(`Each player can only participate in one individual game per team match. Please ensure ${GAMES_PER_MATCH} unique players are selected from each team.`);
+                return;
+            }
+            // Ensure exactly 4 unique players from each team are selected for the match
+            if (selectedPlayersTeam1.size !== GAMES_PER_MATCH || selectedPlayersTeam2.size !== GAMES_PER_MATCH) {
+                 showMessageBox(`Please ensure exactly ${GAMES_PER_MATCH} unique players are selected from each team for this match.`);
+                 return;
+            }
+
+
+            currentMatch.score1 = team1MatchScore;
+            currentMatch.score2 = team2MatchScore;
+            currentMatch.played = true;
+            currentMatch.gameResults = newGameResults; // Save the individual game results
 
             closeScoreModal();
             renderSchedule(); // Re-render schedule to show updated score
             calculateAndRenderStandings(); // Re-calculate and render standings
             saveData(); // Save updated data
-            showMessageBox('Score saved successfully!');
+            showMessageBox('Match scores saved successfully!');
         }
 
         /**
@@ -630,30 +808,65 @@
         // --- Event Listeners ---
         generateScheduleBtn.addEventListener('click', () => {
             teams = [];
-            let allTeamsValid = true;
+            let allInputsValid = true; // Check both team names and player names
             for (let i = 0; i < NUM_TEAMS; i++) {
-                const input = document.getElementById(`teamName${i}`);
-                const teamName = input.value.trim();
+                const teamNameInput = document.getElementById(`teamName${i}`);
+                const teamName = teamNameInput.value.trim();
+
                 if (teamName === '') {
-                    allTeamsValid = false;
-                    break;
+                    allInputsValid = false;
+                    showMessageBox(`Please enter a name for Team ${i + 1}.`);
+                    return; // Exit early if team name is missing
                 }
-                teams.push(teamName);
+
+                const players = [];
+                for (let j = 0; j < TOTAL_PLAYERS_PER_TEAM; j++) {
+                    const playerInput = document.getElementById(`team${i}Player${j}`);
+                    const playerName = playerInput.value.trim();
+                    if (playerName === '') {
+                        // Allow empty player names for reserve slots, but ensure at least 4 are filled if needed
+                        // For now, let's enforce all 8 for simplicity, or adjust logic if reserves are truly optional
+                        // For this version, let's assume all 8 slots are meant to be filled for the roster.
+                        // If a user leaves it blank, it will be an empty string in the players array.
+                        // The validation for *playing* players happens in handleScoreSubmit.
+                    }
+                    players.push(playerName);
+                }
+
+                // Basic validation: Ensure at least GAMES_PER_MATCH (4) players are provided for each team
+                const filledPlayerSlots = players.filter(p => p !== '').length;
+                if (filledPlayerSlots < GAMES_PER_MATCH) {
+                    allInputsValid = false;
+                    showMessageBox(`Team "${teamName}" must have at least ${GAMES_PER_MATCH} players entered.`);
+                    return;
+                }
+
+                teams.push({ name: teamName, players: players });
             }
 
-            if (!allTeamsValid) {
-                showMessageBox(`Please enter names for all ${NUM_TEAMS} teams.`);
+            if (!allInputsValid) {
+                // Message already shown in the loop
                 return;
             }
 
             // Check for duplicate team names
-            const uniqueTeams = new Set(teams);
-            if (uniqueTeams.size !== NUM_TEAMS) {
+            const uniqueTeamNames = new Set(teams.map(team => team.name));
+            if (uniqueTeamNames.size !== NUM_TEAMS) {
                 showMessageBox('Team names must be unique. Please check for duplicates.');
                 return;
             }
 
-            matches = generateRoundRobinSchedule(teams);
+            // Check for duplicate player names within each team (important for selection)
+            for (let i = 0; i < NUM_TEAMS; i++) {
+                const teamPlayers = teams[i].players.filter(p => p.trim() !== ''); // Only check non-empty names
+                const uniquePlayers = new Set(teamPlayers);
+                if (uniquePlayers.size !== teamPlayers.length) {
+                    showMessageBox(`Duplicate player names found in Team "${teams[i].name}". All players within a team must have unique names.`);
+                    return;
+                }
+            }
+
+            matches = generateRoundRobinSchedule(teams.map(team => team.name)); // Schedule generation still uses just names
             renderSchedule();
             calculateAndRenderStandings(); // Initialize standings after schedule generation
             saveData();
