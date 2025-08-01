@@ -178,6 +178,26 @@
         .message-box button:hover {
             background-color: #4f46e5;
         }
+        /* New styles for drag and drop */
+        #standingsBody tr {
+            cursor: grab;
+            transition: background-color 0.2s;
+        }
+        #standingsBody tr:hover {
+            background-color: #eef2ff;
+        }
+        .dragging {
+            opacity: 0.5;
+            background-color: #c7d2fe;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .drag-over {
+            border-bottom: 2px solid #4338ca;
+        }
+        .drag-over-top {
+            border-top: 2px solid #4338ca;
+            border-bottom: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4 sm:p-6 md:p-8">
@@ -210,7 +230,7 @@
                         <tr>
                             <th class="py-3 px-4 bg-blue-200 text-blue-800">Round</th>
                             <th class="py-3 px-4 bg-blue-200 text-blue-800">Match</th>
-                            <th class="py-3 px-4 bg-blue-200 text-blue-800">Score</th>
+                            <th class="py-3 px-4 bg-blue-200 text-blue-800">Match Score (Board Points)</th>
                             <th class="py-3 px-4 bg-blue-200 text-blue-800">Action</th>
                         </tr>
                     </thead>
@@ -225,6 +245,7 @@
         <!-- Standings Section -->
         <div class="p-6 bg-green-50 rounded-lg shadow-inner">
             <h2 class="text-2xl font-semibold mb-4 text-green-700">3. Tournament Standings</h2>
+            <p class="text-sm text-gray-600 mb-4">Drag and drop rows to manually adjust the team rankings.</p>
             <div id="standingsContainer" class="overflow-x-auto">
                 <table id="standingsTable" class="min-w-full bg-white rounded-lg overflow-hidden">
                     <thead>
@@ -235,15 +256,13 @@
                             <th class="py-3 px-4 bg-green-200 text-green-800">W</th>
                             <th class="py-3 px-4 bg-green-200 text-green-800">D</th>
                             <th class="py-3 px-4 bg-green-200 text-green-800">L</th>
-                            <th class="py-3 px-4 bg-green-200 text-green-800">GF</th>
-                            <th class="py-3 px-4 bg-green-200 text-green-800">GA</th>
-                            <th class="py-3 px-4 bg-green-200 text-green-800">GD</th>
+                            <th class="py-3 px-4 bg-green-200 text-green-800">BP</th>
                             <th class="py-3 px-4 bg-green-200 text-green-800">Pts</th>
                         </tr>
                     </thead>
                     <tbody id="standingsBody">
                         <!-- Standings will be rendered here by JS -->
-                        <tr><td colspan="10" class="text-center py-4 text-gray-500">Enter scores to see standings.</td></tr>
+                        <tr><td colspan="8" class="text-center py-4 text-gray-500">Enter scores to see standings.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -274,17 +293,21 @@
     </div>
 
     <script>
-        // Global variables for tournament data
+        // Global constants for tournament setup
         const NUM_TEAMS = 8;
-        // Number of individual games played per team match (i.e., 4v4)
         const GAMES_PER_MATCH = 4;
-        // Total number of players allowed per team (4 main + 4 reserve)
         const TOTAL_PLAYERS_PER_TEAM = 8;
+        const POINTS_PER_BOARD_WIN = 2;
+        const POINTS_PER_BOARD_DRAW = 1;
+        const POINTS_PER_MATCH_WIN = 2;
+        const POINTS_PER_MATCH_DRAW = 1;
 
-        let teams = []; // Will now store objects: { name: "Team Name", players: ["Player1", "Player2", ..., "Player8"] }
+        // Global variables for tournament data
+        let teams = [];
         let matches = [];
         let standings = {};
-        let currentMatchIndex = -1; // To keep track of which match is being edited
+        let currentMatchIndex = -1;
+        let draggedItem = null;
 
         // DOM Elements
         const teamInputsDiv = document.getElementById('teamInputs');
@@ -296,7 +319,6 @@
         const closeModalBtn = document.getElementById('closeModalBtn');
         const modalMatchInfo = document.getElementById('modalMatchInfo');
         const individualGamesContainer = document.getElementById('individualGamesContainer');
-
         const scoreForm = document.getElementById('scoreForm');
         const messageBox = document.getElementById('messageBox');
         const messageText = document.getElementById('messageText');
@@ -345,7 +367,7 @@
                 playersHeader.textContent = `Players (up to ${TOTAL_PLAYERS_PER_TEAM}):`;
                 teamGroupDiv.appendChild(playersHeader);
 
-                for (let j = 0; j < TOTAL_PLAYERS_PER_TEAM; j++) { // TOTAL_PLAYERS_PER_TEAM is 8
+                for (let j = 0; j < TOTAL_PLAYERS_PER_TEAM; j++) {
                     const playerInput = document.createElement('input');
                     playerInput.type = 'text';
                     playerInput.id = `team${i}Player${j}`;
@@ -380,32 +402,31 @@
                     matches = JSON.parse(savedMatches);
                     standings = JSON.parse(savedStandings);
 
-                    // Populate team input fields and player input fields
                     teams.forEach((teamData, teamIndex) => {
                         const teamNameInput = document.getElementById(`teamName${teamIndex}`);
                         if (teamNameInput) {
                             teamNameInput.value = teamData.name;
                         }
-                        // Ensure teamData.players exists before trying to iterate
                         if (teamData.players) {
                             for (let j = 0; j < TOTAL_PLAYERS_PER_TEAM; j++) {
                                 const playerInput = document.getElementById(`team${teamIndex}Player${j}`);
-                                if (playerInput && teamData.players[j]) { // Check if player exists in loaded data
+                                if (playerInput && teamData.players[j]) {
                                     playerInput.value = teamData.players[j];
                                 } else if (playerInput) {
-                                    playerInput.value = ''; // Clear if no player exists for this slot
+                                    playerInput.value = '';
                                 }
                             }
                         }
                     });
 
                     renderSchedule();
-                    calculateAndRenderStandings(); // Recalculate standings on load to ensure consistency
+                    // When loading, render standings directly from saved data without re-sorting
+                    renderStandings(Object.values(standings));
                     showMessageBox('Tournament data loaded successfully!');
                 } catch (e) {
                     console.error("Failed to parse stored data:", e);
                     showMessageBox('Error loading saved data. Starting fresh.');
-                    resetTournament(); // Reset if data is corrupted
+                    resetTournament();
                 }
             } else {
                 showMessageBox('No saved tournament data found. Please enter team names and generate a schedule.');
@@ -414,14 +435,14 @@
 
         /**
          * Generates the round-robin schedule using the circle method.
-         * @param {Array<string>} teamNames - An array of team names (just names, as the schedule doesn't need players yet).
+         * @param {Array<string>} teamNames - An array of team names.
          * @returns {Array<Object>} An array of match objects.
          */
         function generateRoundRobinSchedule(teamNames) {
             const n = teamNames.length;
             if (n % 2 !== 0) {
                 console.error("Number of teams must be even for this scheduling method.");
-                return []; // Or handle odd number of teams (add a dummy team)
+                return [];
             }
 
             const schedule = [];
@@ -429,19 +450,16 @@
             const rotatingTeams = teamNames.slice(1);
 
             for (let round = 0; round < n - 1; round++) {
-                // Match fixed team with the first rotating team
                 schedule.push({
                     team1: fixedTeam,
                     team2: rotatingTeams[0],
-                    score1: null, // Total points for team1 from 4 games
-                    score2: null, // Total points for team2 from 4 games
+                    score1: null,
+                    score2: null,
                     played: false,
                     round: round + 1,
-                    // Store individual game results for 4v4 chess: { player1: "P1A", player2: "P1B", result: "win1" }
                     gameResults: Array(GAMES_PER_MATCH).fill(null)
                 });
 
-                // Match remaining rotating teams
                 for (let i = 1; i < n / 2; i++) {
                     schedule.push({
                         team1: rotatingTeams[i],
@@ -454,7 +472,6 @@
                     });
                 }
 
-                // Rotate teams: last team moves to second position, others shift
                 const lastTeam = rotatingTeams.pop();
                 rotatingTeams.unshift(lastTeam);
             }
@@ -480,15 +497,36 @@
                     scheduleBody.appendChild(roundHeaderRow);
                 }
 
-                const row = document.createElement('tr');
-                // Display total points from the 4 individual games for the match
-                const scoreDisplay = match.played ? `${match.score1} - ${match.score2}` : 'N/A';
+                const team1Data = teams.find(team => team.name === match.team1);
+                const team2Data = teams.find(team => team.name === match.team2);
+
+                let matchPlayersHtml = `
+                    <div class="font-bold mb-2">${match.team1} vs ${match.team2}</div>
+                    <div class="text-sm">
+                `;
+
+                for (let i = 0; i < GAMES_PER_MATCH; i++) {
+                    const player1Name = (team1Data && team1Data.players[i]) ? team1Data.players[i] : `Player ${i+1}`;
+                    const player2Name = (team2Data && team2Data.players[i]) ? team2Data.players[i] : `Player ${i+1}`;
+                    matchPlayersHtml += `
+                        <div>Board ${i + 1}: ${player1Name} vs ${player2Name}</div>
+                    `;
+                }
+
+                matchPlayersHtml += `</div>`;
+
+                let scoreDisplay = 'N/A';
+                if (match.played) {
+                    scoreDisplay = `${match.score1} - ${match.score2}`;
+                }
+
                 const actionButtonText = match.played ? 'Edit Score' : 'Enter Score';
                 const actionButtonClass = match.played ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-indigo-500 hover:bg-indigo-600';
 
+                const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="py-3 px-4">${match.round}</td>
-                    <td class="py-3 px-4">${match.team1} vs ${match.team2}</td>
+                    <td class="py-3 px-4">${matchPlayersHtml}</td>
                     <td class="py-3 px-4 font-medium">${scoreDisplay}</td>
                     <td class="py-3 px-4">
                         <button data-index="${index}" class="enter-score-btn ${actionButtonClass} text-white text-sm py-2 px-4 rounded-md shadow-sm">
@@ -499,7 +537,6 @@
                 scheduleBody.appendChild(row);
             });
 
-            // Add event listeners to new buttons
             document.querySelectorAll('.enter-score-btn').forEach(button => {
                 button.addEventListener('click', openScoreModal);
             });
@@ -509,81 +546,84 @@
          * Calculates and renders the tournament standings.
          */
         function calculateAndRenderStandings() {
-            // Initialize standings for all teams
-            standings = {};
-            teams.forEach(teamData => { // Iterate over team objects
-                standings[teamData.name] = { // Use teamData.name as key
+            // Step 1: Initialize standings and process matches to get raw data
+            const newStandings = {};
+            teams.forEach(teamData => {
+                newStandings[teamData.name] = {
                     teamName: teamData.name,
                     played: 0,
-                    wins: 0, // Team match wins
-                    draws: 0, // Team match draws
-                    losses: 0, // Team match losses
-                    goalsFor: 0, // Total individual game points for the team
-                    goalsAgainst: 0, // Total individual game points against the team
-                    goalDifference: 0,
-                    points: 0 // Tournament points (2 for win, 1 for draw, 0 for loss)
+                    wins: 0,
+                    draws: 0,
+                    losses: 0,
+                    boardPointsWon: 0,
+                    points: 0,
+                    opponents: []
                 };
             });
 
-            // Process each played match
             matches.forEach(match => {
                 if (match.played) {
-                    const team1Stats = standings[match.team1];
-                    const team2Stats = standings[match.team2];
+                    const team1Stats = newStandings[match.team1];
+                    const team2Stats = newStandings[match.team2];
+
+                    if (!team1Stats || !team2Stats) return;
 
                     team1Stats.played++;
                     team2Stats.played++;
-                    team1Stats.goalsFor += match.score1; // match.score1 is sum of individual game points
-                    team1Stats.goalsAgainst += match.score2;
-                    team2Stats.goalsFor += match.score2;
-                    team2Stats.goalsAgainst += match.score1;
 
-                    // Apply tournament points (2 for win, 1 for draw, 0 for loss) based on overall match outcome
+                    team1Stats.opponents.push(match.team2);
+                    team2Stats.opponents.push(match.team1);
+
+                    // Calculate match outcome and assign match points (Pts)
+                    let team1MatchPoints = 0;
+                    let team2MatchPoints = 0;
                     if (match.score1 > match.score2) {
+                        // Team 1 wins the match
                         team1Stats.wins++;
-                        team1Stats.points += 2; // Chess tournament: Win = 2 points
                         team2Stats.losses++;
+                        team1MatchPoints = POINTS_PER_MATCH_WIN;
+                        team2MatchPoints = 0;
                     } else if (match.score1 < match.score2) {
+                        // Team 2 wins the match
                         team2Stats.wins++;
-                        team2Stats.points += 0; // Chess tournament: Loss = 0 points
                         team1Stats.losses++;
+                        team1MatchPoints = 0;
+                        team2MatchPoints = POINTS_PER_MATCH_WIN;
                     } else {
+                        // The match is a draw
                         team1Stats.draws++;
-                        team1Stats.points += 1; // Chess tournament: Draw = 1 point
                         team2Stats.draws++;
-                        team2Stats.points += 1; // Chess tournament: Draw = 1 point
+                        team1MatchPoints = POINTS_PER_MATCH_DRAW;
+                        team2MatchPoints = POINTS_PER_MATCH_DRAW;
                     }
-                    team1Stats.goalDifference = team1Stats.goalsFor - team1Stats.goalsAgainst;
-                    team2Stats.goalDifference = team2Stats.goalsFor - team2Stats.goalsAgainst;
+                    
+                    team1Stats.points += team1MatchPoints;
+                    team2Stats.points += team2MatchPoints;
+
+                    // `boardPointsWon` is the sum of board points from all matches.
+                    team1Stats.boardPointsWon += match.score1;
+                    team2Stats.boardPointsWon += match.score2;
                 }
             });
 
-            renderStandings();
-            saveData(); // Save standings after calculation
-        }
-
-        /**
-         * Renders the standings table.
-         */
-        function renderStandings() {
-            standingsBody.innerHTML = '';
+            // Update the global standings object and sort
+            standings = newStandings;
             const sortedStandings = Object.values(standings).sort((a, b) => {
-                // Primary tie-breaker: Points
+                // 1. Primary Tie-breaker: Total Match Points (Pts)
                 if (b.points !== a.points) {
                     return b.points - a.points;
                 }
-                // Secondary tie-breaker: Goals For (total individual game points)
-                if (b.goalsFor !== a.goalsFor) {
-                    return b.goalsFor - a.goalsFor;
+                
+                // 2. Secondary Tie-breaker: Total Board Points Won (BP)
+                if (b.boardPointsWon !== a.boardPointsWon) {
+                    return b.boardPointsWon - a.boardPointsWon;
                 }
 
-                // Tertiary tie-breaker: Head-to-head result
-                // Find the match between team 'a' and team 'b'
+                // 3. Tertiary Tie-breaker: Head-to-Head Result
                 const headToHeadMatch = matches.find(match =>
                     (match.team1 === a.teamName && match.team2 === b.teamName && match.played) ||
                     (match.team1 === b.teamName && match.team2 === a.teamName && match.played)
                 );
-
                 if (headToHeadMatch) {
                     let aScoreInH2H, bScoreInH2H;
                     if (headToHeadMatch.team1 === a.teamName) {
@@ -593,26 +633,36 @@
                         aScoreInH2H = headToHeadMatch.score2;
                         bScoreInH2H = headToHeadMatch.score1;
                     }
-
                     if (aScoreInH2H > bScoreInH2H) {
-                        return -1; // 'a' ranks higher
+                        return -1;
                     } else if (aScoreInH2H < bScoreInH2H) {
-                        return 1; // 'b' ranks higher
+                        return 1;
                     }
-                    // If head-to-head was a draw, proceed to next tie-breaker
                 }
-
-                // Fallback tie-breaker: Goal Difference (if points, GF, and head-to-head are all tied or head-to-head not played/drawn)
-                return b.goalDifference - a.goalDifference;
+                
+                return 0; // No tie-breaker found
             });
 
-            if (sortedStandings.length === 0 || sortedStandings.every(s => s.played === 0)) {
-                standingsBody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-gray-500">Enter scores to see standings.</td></tr>';
+            renderStandings(sortedStandings);
+            saveData();
+        }
+
+        /**
+         * Renders the standings table.
+         * @param {Array<Object>} standingsData - The array of standing objects to render.
+         */
+        function renderStandings(standingsData) {
+            standingsBody.innerHTML = '';
+
+            if (!standingsData || standingsData.length === 0 || standingsData.every(s => s.played === 0)) {
+                standingsBody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-gray-500">Enter scores to see standings.</td></tr>';
                 return;
             }
 
-            sortedStandings.forEach((teamStats, index) => {
+            standingsData.forEach((teamStats, index) => {
                 const row = document.createElement('tr');
+                row.draggable = true;
+                row.id = `standings-${teamStats.teamName.replace(/\s+/g, '-')}`;
                 row.innerHTML = `
                     <td class="py-3 px-4 font-bold">${index + 1}</td>
                     <td class="py-3 px-4">${teamStats.teamName}</td>
@@ -620,98 +670,149 @@
                     <td class="py-3 px-4">${teamStats.wins}</td>
                     <td class="py-3 px-4">${teamStats.draws}</td>
                     <td class="py-3 px-4">${teamStats.losses}</td>
-                    <td class="py-3 px-4">${teamStats.goalsFor}</td>
-                    <td class="py-3 px-4">${teamStats.goalsAgainst}</td>
-                    <td class="py-3 px-4">${teamStats.goalDifference}</td>
+                    <td class="py-3 px-4 font-medium">${teamStats.boardPointsWon}</td>
                     <td class="py-3 px-4 font-bold text-lg text-green-700">${teamStats.points}</td>
                 `;
                 standingsBody.appendChild(row);
             });
         }
+        
+        /**
+         * Event listener for the dragstart event.
+         * @param {Event} e - The drag event.
+         */
+        function handleDragStart(e) {
+            // Check if the target is a table row (tr)
+            const targetRow = e.target.closest('tr');
+            if (targetRow) {
+                draggedItem = targetRow;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', draggedItem.id);
+                setTimeout(() => {
+                    draggedItem.classList.add('dragging');
+                }, 0);
+            }
+        }
+
+        /**
+         * Event listener for the dragover event.
+         * @param {Event} e - The drag event.
+         */
+        function handleDragOver(e) {
+            e.preventDefault();
+            const target = e.target.closest('tr');
+            if (target && target !== draggedItem) {
+                const rect = target.getBoundingClientRect();
+                const isAbove = e.clientY < rect.top + rect.height / 2;
+                // Add a visual cue to where the item will be dropped
+                document.querySelectorAll('#standingsBody tr').forEach(row => row.classList.remove('drag-over-top', 'drag-over-bottom'));
+                if (isAbove) {
+                     target.classList.add('drag-over-top');
+                } else {
+                     target.classList.add('drag-over-bottom');
+                }
+            }
+        }
+        
+        /**
+         * Event listener for the dragleave event.
+         * @param {Event} e - The drag event.
+         */
+        function handleDragLeave(e) {
+            const target = e.target.closest('tr');
+            if (target) {
+                target.classList.remove('drag-over-top', 'drag-over-bottom');
+            }
+        }
+
+        /**
+         * Event listener for the drop event.
+         * @param {Event} e - The drag event.
+         */
+        function handleDrop(e) {
+            e.preventDefault();
+            const target = e.target.closest('tr');
+            if (target && draggedItem && target !== draggedItem) {
+                const draggedId = draggedItem.id.replace('standings-', '');
+                const targetId = target.id.replace('standings-', '');
+                
+                const standingsArray = Object.values(standings);
+                const draggedIndex = standingsArray.findIndex(s => s.teamName === draggedId);
+                const targetIndex = standingsArray.findIndex(s => s.teamName === targetId);
+
+                if (draggedIndex === -1 || targetIndex === -1) {
+                    return;
+                }
+
+                const [movedItem] = standingsArray.splice(draggedIndex, 1);
+                standingsArray.splice(targetIndex, 0, movedItem);
+
+                standings = standingsArray.reduce((acc, current) => {
+                    acc[current.teamName] = current;
+                    return acc;
+                }, {});
+
+                renderStandings(standingsArray);
+                saveData();
+                showMessageBox(`Moved "${movedItem.teamName}" to rank ${targetIndex + 1}.`);
+            }
+        }
+        
+        /**
+         * Event listener for the dragend event.
+         * @param {Event} e - The drag event.
+         */
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            document.querySelectorAll('#standingsBody tr').forEach(row => row.classList.remove('drag-over-top', 'drag-over-bottom'));
+            draggedItem = null;
+        }
 
         /**
          * Opens the score input modal for a specific match.
-         * @param {Event} event - The click event from the "Enter Score" button.
+         * @param {Event} event - The click event.
          */
         function openScoreModal(event) {
-            currentMatchIndex = parseInt(event.target.dataset.index);
+            currentMatchIndex = event.target.dataset.index;
             const match = matches[currentMatchIndex];
+            
+            const team1Data = teams.find(team => team.name === match.team1);
+            const team2Data = teams.find(team => team.name === match.team2);
 
-            // Find the full team objects to get player names
-            const team1Full = teams.find(t => t.name === match.team1);
-            const team2Full = teams.find(t => t.name === match.team2);
+            modalMatchInfo.textContent = `Match: ${match.team1} vs ${match.team2}`;
 
-            modalMatchInfo.innerHTML = `
-                <span class="font-bold">${match.team1}</span>
-                <span class="text-sm text-gray-500 block">(${team1Full ? team1Full.players.filter(p => p).join(', ') : 'Players not found'})</span>
-                vs
-                <span class="font-bold">${match.team2}</span>
-                <span class="text-sm text-gray-500 block">(${team2Full ? team2Full.players.filter(p => p).join(', ') : 'Players not found'})</span>
-            `;
-
-            const team1Players = team1Full ? team1Full.players.filter(p => p.trim() !== '') : []; // Filter out empty player names
-            const team2Players = team2Full ? team2Full.players.filter(p => p.trim() !== '') : [];
-
-            individualGamesContainer.innerHTML = ''; // Clear previous games
-
+            individualGamesContainer.innerHTML = '';
             for (let i = 0; i < GAMES_PER_MATCH; i++) {
+                const player1Name = team1Data.players[i] || `Player ${i + 1}`;
+                const player2Name = team2Data.players[i] || `Player ${i + 1}`;
+
                 const gameDiv = document.createElement('div');
-                gameDiv.classList.add('form-group', 'mb-4', 'p-3', 'bg-gray-50', 'rounded-md');
+                gameDiv.classList.add('form-group');
                 gameDiv.innerHTML = `
-                    <label class="block mb-2 font-semibold text-gray-700">Game ${i + 1}:</label>
-                    <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-2">
-                        <select id="game${i}Team1Player" class="flex-1 p-2 border rounded-md focus:ring focus:ring-indigo-200"></select>
-                        <span class="font-bold text-gray-800">vs</span>
-                        <select id="game${i}Team2Player" class="flex-1 p-2 border rounded-md focus:ring focus:ring-indigo-200"></select>
+                    <label>Game ${i + 1}: ${player1Name} vs ${player2Name}</label>
+                    <div class="flex space-x-2">
+                        <select id="game${i}Winner" class="flex-1 p-2 border border-gray-300 rounded-md">
+                            <option value="">Select Winner</option>
+                            <option value="win1">${player1Name} wins</option>
+                            <option value="win2">${player2Name} wins</option>
+                            <option value="draw">Draw</option>
+                        </select>
                     </div>
-                    <select id="game${i}Result" class="w-full p-2 border rounded-md focus:ring focus:ring-indigo-200">
-                        <option value="">Select Result</option>
-                        <option value="win1">${match.team1} Wins</option>
-                        <option value="draw">Draw</option>
-                        <option value="win2">${match.team2} Wins</option>
-                    </select>
                 `;
                 individualGamesContainer.appendChild(gameDiv);
-
-                const team1PlayerSelect = document.getElementById(`game${i}Team1Player`);
-                const team2PlayerSelect = document.getElementById(`game${i}Team2Player`);
-                const gameResultSelect = document.getElementById(`game${i}Result`);
-
-                // Add default empty option
-                const defaultOption1 = document.createElement('option');
-                defaultOption1.value = '';
-                defaultOption1.textContent = 'Select Player';
-                team1PlayerSelect.appendChild(defaultOption1);
-
-                const defaultOption2 = document.createElement('option');
-                defaultOption2.value = '';
-                defaultOption2.textContent = 'Select Player';
-                team2PlayerSelect.appendChild(defaultOption2);
-
-
-                // Populate player dropdowns
-                team1Players.forEach(player => {
-                    const option = document.createElement('option');
-                    option.value = player;
-                    option.textContent = player;
-                    team1PlayerSelect.appendChild(option);
-                });
-                team2Players.forEach(player => {
-                    const option = document.createElement('option');
-                    option.value = player;
-                    option.textContent = player;
-                    team2PlayerSelect.appendChild(option);
-                });
-
-                // Pre-populate if data exists
-                if (match.gameResults[i]) {
-                    team1PlayerSelect.value = match.gameResults[i].player1 || '';
-                    team2PlayerSelect.value = match.gameResults[i].player2 || '';
-                    gameResultSelect.value = match.gameResults[i].result || '';
-                }
             }
 
-            scoreModal.style.display = 'flex'; // Use flex to center
+            // Populate form with existing data if available
+            if (match.played) {
+                match.gameResults.forEach((game, i) => {
+                    const selectElement = document.getElementById(`game${i}Winner`);
+                    if (selectElement && game) {
+                        selectElement.value = game.result;
+                    }
+                });
+            }
+
+            scoreModal.style.display = 'flex';
         }
 
         /**
@@ -722,101 +823,48 @@
         }
 
         /**
-         * Handles the score form submission.
-         * Calculates total team scores from individual game results.
+         * Handles the submission of the score form.
          * @param {Event} event - The form submit event.
          */
         function handleScoreSubmit(event) {
             event.preventDefault();
+            const match = matches[currentMatchIndex];
 
-            let team1MatchScore = 0; // Total points for Team 1 in this match from 4 games
-            let team2MatchScore = 0; // Total points for Team 2 in this match from 4 games
-            const currentMatch = matches[currentMatchIndex];
-            const newGameResults = [];
-
-            let allInputsFilled = true;
-            let duplicatePlayersInGame = false;
-            const selectedPlayersTeam1 = new Set();
-            const selectedPlayersTeam2 = new Set();
-            let playerUsedMultipleTimesInMatch = false;
+            if (!match) return;
+            
+            let score1 = 0;
+            let score2 = 0;
+            const gameResults = [];
 
             for (let i = 0; i < GAMES_PER_MATCH; i++) {
-                const team1PlayerSelect = document.getElementById(`game${i}Team1Player`);
-                const team2PlayerSelect = document.getElementById(`game${i}Team2Player`);
-                const gameResultSelect = document.getElementById(`game${i}Result`);
-
-                const player1 = team1PlayerSelect.value.trim();
-                const player2 = team2PlayerSelect.value.trim();
-                const result = gameResultSelect.value;
-
-                if (player1 === '' || player2 === '' || result === '') {
-                    allInputsFilled = false;
-                    break;
+                const winnerSelect = document.getElementById(`game${i}Winner`);
+                if (!winnerSelect || winnerSelect.value === "") {
+                    showMessageBox(`Please select a winner for all ${GAMES_PER_MATCH} games.`);
+                    return;
                 }
+                
+                gameResults.push({ result: winnerSelect.value });
 
-                if (player1 === player2) {
-                    duplicatePlayersInGame = true;
-                    break;
-                }
-
-                // Check for duplicate players across games within the same match
-                if (selectedPlayersTeam1.has(player1)) {
-                    playerUsedMultipleTimesInMatch = true;
-                    break;
-                }
-                selectedPlayersTeam1.add(player1);
-
-                if (selectedPlayersTeam2.has(player2)) {
-                    playerUsedMultipleTimesInMatch = true;
-                    break;
-                }
-                selectedPlayersTeam2.add(player2);
-
-                newGameResults.push({ player1, player2, result });
-
-                switch (result) {
-                    case 'win1':
-                        team1MatchScore += 2; // Team 1 wins individual game, gets 2 points
-                        break;
-                    case 'win2':
-                        team2MatchScore += 2; // Team 2 wins individual game, gets 2 points
-                        break;
-                    case 'draw':
-                        team1MatchScore += 1; // Draw, both get 1 point
-                        team2MatchScore += 1;
-                        break;
+                if (winnerSelect.value === 'win1') {
+                    score1 += POINTS_PER_BOARD_WIN;
+                } else if (winnerSelect.value === 'win2') {
+                    score2 += POINTS_PER_BOARD_WIN;
+                } else if (winnerSelect.value === 'draw') {
+                    score1 += POINTS_PER_BOARD_DRAW;
+                    score2 += POINTS_PER_BOARD_DRAW;
                 }
             }
 
-            if (!allInputsFilled) {
-                showMessageBox('Please select players and a result for all 4 individual games.');
-                return;
-            }
-            if (duplicatePlayersInGame) {
-                showMessageBox('A player cannot play against themselves in an individual game. Please select different players.');
-                return;
-            }
-            if (playerUsedMultipleTimesInMatch) {
-                showMessageBox(`Each player can only participate in one individual game per team match. Please ensure ${GAMES_PER_MATCH} unique players are selected from each team.`);
-                return;
-            }
-            // Ensure exactly 4 unique players from each team are selected for the match
-            if (selectedPlayersTeam1.size !== GAMES_PER_MATCH || selectedPlayersTeam2.size !== GAMES_PER_MATCH) {
-                 showMessageBox(`Please ensure exactly ${GAMES_PER_MATCH} unique players are selected from each team for this match.`);
-                 return;
-            }
-
-
-            currentMatch.score1 = team1MatchScore;
-            currentMatch.score2 = team2MatchScore;
-            currentMatch.played = true;
-            currentMatch.gameResults = newGameResults; // Save the individual game results
+            match.score1 = score1;
+            match.score2 = score2;
+            match.played = true;
+            match.gameResults = gameResults;
 
             closeScoreModal();
-            renderSchedule(); // Re-render schedule to show updated score
-            calculateAndRenderStandings(); // Re-calculate and render standings
-            saveData(); // Save updated data
-            showMessageBox('Match scores saved successfully!');
+            renderSchedule();
+            calculateAndRenderStandings();
+            saveData();
+            showMessageBox('Score saved successfully!');
         }
 
         /**
@@ -828,16 +876,16 @@
             matches = [];
             standings = {};
             currentMatchIndex = -1;
-            initializeTeamInputs(); // Re-initialize with empty inputs
-            renderSchedule(); // Clear schedule table
-            renderStandings(); // Clear standings table
+            initializeTeamInputs();
+            renderSchedule();
+            renderStandings();
             showMessageBox('Tournament reset successfully!');
         }
 
         // --- Event Listeners ---
         generateScheduleBtn.addEventListener('click', () => {
             teams = [];
-            let allInputsValid = true; // Check both team names and player names
+            let allInputsValid = true;
             for (let i = 0; i < NUM_TEAMS; i++) {
                 const teamNameInput = document.getElementById(`teamName${i}`);
                 const teamName = teamNameInput.value.trim();
@@ -845,24 +893,16 @@
                 if (teamName === '') {
                     allInputsValid = false;
                     showMessageBox(`Please enter a name for Team ${i + 1}.`);
-                    return; // Exit early if team name is missing
+                    return;
                 }
 
                 const players = [];
                 for (let j = 0; j < TOTAL_PLAYERS_PER_TEAM; j++) {
                     const playerInput = document.getElementById(`team${i}Player${j}`);
                     const playerName = playerInput.value.trim();
-                    if (playerName === '') {
-                        // Allow empty player names for reserve slots, but ensure at least 4 are filled if needed
-                        // For now, let's enforce all 8 for simplicity, or adjust logic if reserves are truly optional
-                        // For this version, let's assume all 8 slots are meant to be filled for the roster.
-                        // If a user leaves it blank, it will be an empty string in the players array.
-                        // The validation for *playing* players happens in handleScoreSubmit.
-                    }
                     players.push(playerName);
                 }
 
-                // Basic validation: Ensure at least GAMES_PER_MATCH (4) players are provided for each team
                 const filledPlayerSlots = players.filter(p => p !== '').length;
                 if (filledPlayerSlots < GAMES_PER_MATCH) {
                     allInputsValid = false;
@@ -874,20 +914,17 @@
             }
 
             if (!allInputsValid) {
-                // Message already shown in the loop
                 return;
             }
 
-            // Check for duplicate team names
             const uniqueTeamNames = new Set(teams.map(team => team.name));
             if (uniqueTeamNames.size !== NUM_TEAMS) {
                 showMessageBox('Team names must be unique. Please check for duplicates.');
                 return;
             }
 
-            // Check for duplicate player names within each team (important for selection)
             for (let i = 0; i < NUM_TEAMS; i++) {
-                const teamPlayers = teams[i].players.filter(p => p.trim() !== ''); // Only check non-empty names
+                const teamPlayers = teams[i].players.filter(p => p.trim() !== '');
                 const uniquePlayers = new Set(teamPlayers);
                 if (uniquePlayers.size !== teamPlayers.length) {
                     showMessageBox(`Duplicate player names found in Team "${teams[i].name}". All players within a team must have unique names.`);
@@ -895,9 +932,9 @@
                 }
             }
 
-            matches = generateRoundRobinSchedule(teams.map(team => team.name)); // Schedule generation still uses just names
+            matches = generateRoundRobinSchedule(teams.map(team => team.name));
             renderSchedule();
-            calculateAndRenderStandings(); // Initialize standings after schedule generation
+            calculateAndRenderStandings();
             saveData();
             showMessageBox('Schedule generated! Now enter scores for matches.');
         });
@@ -907,10 +944,16 @@
         scoreForm.addEventListener('submit', handleScoreSubmit);
         messageBoxOkBtn.addEventListener('click', hideMessageBox);
 
-        // Initialize on page load
+        // Drag and drop event listeners for standings
+        standingsBody.addEventListener('dragstart', handleDragStart);
+        standingsBody.addEventListener('dragover', handleDragOver);
+        standingsBody.addEventListener('dragleave', handleDragLeave);
+        standingsBody.addEventListener('drop', handleDrop);
+        standingsBody.addEventListener('dragend', handleDragEnd);
+
         window.onload = function() {
             initializeTeamInputs();
-            loadData(); // Attempt to load saved data
+            loadData();
         };
 
     </script>
