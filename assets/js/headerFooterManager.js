@@ -9,6 +9,7 @@ class CommonHeader extends HTMLElement {
           </button>
           <div class="dropdown-content" id="myDropdown">
             <a href="https://xiangqi.xyz/赛事/2025/qiyoubei2025.html">棋友杯2025</a>
+            <a href="https://xiangqi.xyz/赛事/2025/qilinbang2025.html">麒麟榜2025</a>
           </div>
         </div>
         <a href="https://xiangqi.xyz/tournament.html">近期赛事</a>
