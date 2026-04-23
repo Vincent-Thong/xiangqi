@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Research | Alibaba</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <common-header></common-header>
+
+    <div class="container">
+        <div id="content" class="markdown-body">
+            Loading research...
+        </div>
+    </div>
+
+    <script src="assets/js/headerFooterManager.js"></script>
+    
+    <script>
+        // Function to fetch and render the markdown
+        async function renderMarkdown() {
+            try {
+                const response = await fetch('equities/9988-hk-alibaba.md');
+                const text = await response.text();
+                
+                // Set the innerHTML of the content div to the parsed markdown
+                document.getElementById('content').innerHTML = marked.parse(text);
+            } catch (error) {
+                document.getElementById('content').innerHTML = "Error loading research file.";
+                console.error(error);
+            }
+        }
+
+        renderMarkdown();
+    </script>
+</body>
+</html>
