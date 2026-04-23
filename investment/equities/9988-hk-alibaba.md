@@ -1,6 +1,6 @@
 # Investment Write-up: Alibaba Group Holding Ltd (9988.HK)
 **Last Updated:** April 23, 2026 | 
-**Official Website:** [Alibaba Investor Relations](https://www.alibabagroup.com/en-US/investor-relations) | **Sector:** Technology | **Rating:** Buy
+**Official Website:** [Alibaba Investor Relations](https://www.alibabagroup.com/en-US/investor-relations) | **Sector:** Technology | **Rating:** -
 
 ---
 
@@ -200,9 +200,12 @@ To ensure the "Value + Optionality" thesis remains intact, I monitor the followi
 
 ---
 
-### Resources & News
-* [HKEX News: Alibaba Filings (09988)](https://www1.hkexnews.hk/search/titlesearch.xhtml?lang=EN&market=SEHK&stockId=1000195154&category=0)
-* [Alibaba Group: Latest Qwen AI Updates](https://www.scmp.com/topics/qwen)
-* [SEC EDGAR: Alibaba Group (BABA)](https://www.sec.gov/edgar/browse/?CIK=1577552)
 
-**Disclaimer:** This write-up is for informational purposes only and does not constitute financial advice. I hold a position in 9988.HK as of the date of this post.
+### Feedback & Discussion
+Investment research is best done as a "team sport." If you have a different view on Alibaba's Cloud trajectory or the AIDC margin expansion, I would love to hear it.
+
+* **Email:** `fzkimt [at] yahoo.com`
+* **LinkedIn:** [Thong Weng Soon](https://www.linkedin.com/in/vincent-thong-sw/)
+* **GitHub:** Open a "Discussion" or "Issue" on this repo.
+
+**Disclaimer:** *This write-up is a personal investment journal and does not constitute financial advice. I am a Security Test Engineer by profession, not a licensed financial advisor. I currently hold a long position in 9988.HK.*
