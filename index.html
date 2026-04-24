@@ -1,21 +1,442 @@
 <!DOCTYPE html> 
 <html lang="en"> 
 <head>
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
   <title>麒麟象棋队</title> 
+  <style>
+    :root {
+        --wood-dark: #5a2d05;
+        --wood-light: #f7e6c4;
+        --imperial-red: #b91c1c;
+        --imperial-gold: #fbbf24;
+        --ink-black: #1a1a1a;
+    }
+
+    body {
+        font-family: 'Noto Serif SC', serif;
+        background-color: #fdfaf3;
+        background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+        color: var(--ink-black);
+        margin: 0;
+        overflow-x: hidden;
+    }
+
+    /* Calligraphy font for titles */
+    .calligraphy {
+        font-family: 'Ma Shan Zheng', cursive;
+    }
+
+    /* Wood Texture for Board and UI elements */
+    .wood-texture {
+        background-color: var(--wood-light);
+        background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
+        border: 8px solid var(--wood-dark);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3), inset 0 0 100px rgba(90, 45, 5, 0.1);
+    }
+
+    /* Traditional Pattern Borders */
+    .trad-border {
+        border: 2px solid var(--wood-dark);
+        position: relative;
+        padding: 20px;
+    }
+
+    .trad-border::before {
+        content: "";
+        position: absolute;
+        top: 5px; left: 5px; right: 5px; bottom: 5px;
+        border: 1px solid var(--wood-dark);
+        pointer-events: none;
+    }
+
+    /* The Board Styling */
+    .board-container {
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+        grid-template-rows: repeat(10, 1fr);
+        width: 100%;
+        max-width: 540px;
+        aspect-ratio: 9 / 10;
+        position: relative;
+        margin: 0 auto;
+    }
+
+    .cell {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        z-index: 10;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Board Grid Lines */
+    .grid-layer {
+        position: absolute;
+        top: 5%; left: 5.5%; right: 5.5%; bottom: 5%;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .grid-line-h, .grid-line-v {
+        position: absolute;
+        background-color: rgba(90, 45, 5, 0.6);
+    }
+
+    /* Pieces */
+    .piece {
+        width: 85%;
+        height: 85%;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.8rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 0 #888, 0 6px 10px rgba(0,0,0,0.4);
+        border: 2px solid #333;
+        background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+        z-index: 20;
+    }
+
+    .piece.red {
+        color: #d00;
+        border-color: #900;
+        background: radial-gradient(circle at 30% 30%, #fff0f0, #fcc);
+        box-shadow: 0 4px 0 #900, 0 6px 10px rgba(0,0,0,0.4);
+    }
+
+    .piece.black {
+        color: #000;
+        border-color: #222;
+        background: radial-gradient(circle at 30% 30%, #eee, #bbb);
+        box-shadow: 0 4px 0 #333, 0 6px 10px rgba(0,0,0,0.4);
+    }
+
+    .piece:active {
+        transform: translateY(4px);
+        box-shadow: 0 0 0 #888, 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .selected {
+        outline: 4px solid var(--imperial-gold);
+        outline-offset: 4px;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+
+    /* Palace X Lines */
+    .palace-x {
+        position: absolute;
+        width: 22.22%; /* 2 columns wide */
+        height: 20%;   /* 2 rows high */
+        pointer-events: none;
+    }
+
+    /* Buttons and UI */
+    .btn-imperial {
+        background: var(--imperial-red);
+        color: white;
+        border: 2px solid var(--imperial-gold);
+        padding: 10px 24px;
+        font-weight: bold;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-imperial:hover {
+        background: #991b1b;
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+    }
+
+    /* The River Styling */
+    .river {
+        position: absolute;
+        top: 45%;
+        left: 0;
+        width: 100%;
+        height: 10%;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--wood-dark);
+        opacity: 0.8;
+        pointer-events: none;
+    }
+  </style>
 </head> 
-<body> 
+<body class="p-4 md:p-8">
   <common-header></common-header>
+    <script src="assets/js/dropdown.js"></script>
+    <script src="assets/js/headerFooterManager.js"></script>
 
-  <div> 
-    <a href="tournament/2025/qiyoubei2025.html" target="_blank">棋友杯2025</a> 
-  </div> 
+    <!-- Header Section -->
+    <header class="max-w-6xl mx-auto mb-12 text-center">
+        <h1 class="calligraphy text-6xl md:text-8xl text-red-800 mb-2">中國象棋</h1>
+        <p class="text-xl tracking-widest text-gray-700 uppercase">Imperial Xiangqi</p>
+        <div class="w-32 h-1 bg-red-800 mx-auto mt-4"></div>
+    </header>
 
-  <script src="assets/js/dropdown.js"></script>
-  <script src="assets/js/headerFooterManager.js"></script>
+    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        
+        <!-- Left Sidebar: Game Info -->
+        <div class="lg:col-span-3 space-y-6 order-2 lg:order-1">
+            <div class="trad-border bg-white shadow-sm">
+                <h2 class="calligraphy text-3xl text-red-800 mb-4">游戏资讯</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <span>Current Turn:</span>
+                        <span id="turnIndicator" class="font-bold text-red-700">Red</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <span>Status:</span>
+                        <span class="text-green-600 font-semibold">Active</span>
+                    </div>
+                </div>
+            </div>
 
-</body> 
+            <div class="trad-border bg-white shadow-sm">
+                <h3 class="font-bold text-lg mb-2">Instructions</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    Capture the opponent's General to win. Use Chariots for distance, Cannons for jumps, and Horses for strategy.
+                </p>
+            </div>
+
+            <button id="resetBtn" class="btn-imperial w-full py-4 text-xl calligraphy">重新開始 (Reset)</button>
+        </div>
+
+        <!-- Center: The Board -->
+        <div class="lg:col-span-6 order-1 lg:order-2">
+            <div class="wood-texture p-4 md:p-8 rounded-sm">
+                <div id="board" class="board-container">
+                    <!-- Grid Lines Layer -->
+                    <div class="grid-layer" id="gridLines"></div>
+                    
+                    <!-- The River -->
+                    <div class="river">
+                        <span class="calligraphy">楚河</span>
+                        <span class="calligraphy">漢界</span>
+                    </div>
+
+                    <!-- Cells and Pieces will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar: Cloud & Actions -->
+        <div class="lg:col-span-3 space-y-6 order-3">
+            <div class="trad-border bg-white shadow-sm">
+                <h2 class="calligraphy text-3xl text-red-800 mb-4">存檔管理</h2>
+                <input type="text" id="gameName" placeholder="Session Name..." class="w-full p-2 border mb-4 focus:ring-2 focus:ring-red-800 outline-none">
+                <div class="grid grid-cols-1 gap-2">
+                    <button id="saveBtn" class="bg-gray-800 text-white p-2 hover:bg-black transition">Save to Cloud</button>
+                    <button id="loadBtn" class="border border-gray-800 p-2 hover:bg-gray-50 transition">Load Session</button>
+                </div>
+            </div>
+
+            <div id="msgBox" class="p-4 text-sm rounded border hidden"></div>
+
+            <div class="text-xs text-gray-400 text-center italic">
+                Player ID: <span id="uid">...</span>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Constants
+        const PIECES_MAP = {
+            'r': { char: '俥', color: 'red' }, 'h': { char: '傌', color: 'red' }, 'e': { char: '相', color: 'red' },
+            'a': { char: '仕', color: 'red' }, 'g': { char: '將', color: 'red' }, 'c': { char: '炮', color: 'red' }, 's': { char: '兵', color: 'red' },
+            'R': { char: '車', color: 'black' }, 'H': { char: '馬', color: 'black' }, 'E': { char: '象', color: 'black' },
+            'A': { char: '士', color: 'black' }, 'G': { char: '帥', color: 'black' }, 'C': { char: '砲', color: 'black' }, 'S': { char: '卒', color: 'black' }
+        };
+
+        const INITIAL_BOARD = [
+            ['R','H','E','A','G','A','E','H','R'],
+            ['','','','','','','','',''],
+            ['','C','','','','','','C',''],
+            ['S','','S','','S','','S','','S'],
+            ['','','','','','','','',''],
+            ['','','','','','','','',''],
+            ['s','','s','','s','','s','','s'],
+            ['','c','','','','','','c',''],
+            ['','','','','','','','',''],
+            ['r','h','e','a','g','a','e','h','r']
+        ];
+
+        // State
+        let boardState = JSON.parse(JSON.stringify(INITIAL_BOARD));
+        let selected = null;
+        let turn = 'red';
+        let user = null;
+
+        // Firebase Setup
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'xiangqi-pro';
+
+        // DOM
+        const boardEl = document.getElementById('board');
+        const gridLinesEl = document.getElementById('gridLines');
+        const turnIndicator = document.getElementById('turnIndicator');
+        const msgBox = document.getElementById('msgBox');
+
+        function initGrid() {
+            // Horizontal lines
+            for(let i=0; i<10; i++) {
+                const line = document.createElement('div');
+                line.className = 'grid-line-h';
+                line.style.width = '100%';
+                line.style.height = '1px';
+                line.style.top = `${(i * 11.11)}%`;
+                gridLinesEl.appendChild(line);
+            }
+            // Vertical lines
+            for(let i=0; i<9; i++) {
+                const line = document.createElement('div');
+                line.className = 'grid-line-v';
+                line.style.height = '100%';
+                line.style.width = '1px';
+                line.style.left = `${(i * 12.5)}%`;
+                
+                // Gap in river for vertical lines (except edges)
+                if (i > 0 && i < 8) {
+                    const topHalf = line.cloneNode();
+                    topHalf.style.height = '44.44%';
+                    const bottomHalf = line.cloneNode();
+                    bottomHalf.style.height = '44.44%';
+                    bottomHalf.style.top = '55.55%';
+                    gridLinesEl.appendChild(topHalf);
+                    gridLinesEl.appendChild(bottomHalf);
+                } else {
+                    gridLinesEl.appendChild(line);
+                }
+            }
+        }
+
+        function render() {
+            // Remove existing cells/pieces (keep grid and river)
+            const elementsToRemove = boardEl.querySelectorAll('.cell');
+            elementsToRemove.forEach(e => e.remove());
+
+            boardState.forEach((row, r) => {
+                row.forEach((pCode, c) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.onclick = () => handleCellClick(r, c);
+
+                    if (pCode) {
+                        const p = PIECES_MAP[pCode];
+                        const pieceDiv = document.createElement('div');
+                        pieceDiv.className = `piece ${p.color} calligraphy ${selected && selected.r === r && selected.c === c ? 'selected' : ''}`;
+                        pieceDiv.textContent = p.char;
+                        cell.appendChild(pieceDiv);
+                    }
+                    boardEl.appendChild(cell);
+                });
+            });
+
+            turnIndicator.textContent = turn.charAt(0).toUpperCase() + turn.slice(1);
+            turnIndicator.className = `font-bold ${turn === 'red' ? 'text-red-700' : 'text-gray-900'}`;
+        }
+
+        function handleCellClick(r, c) {
+            const pCode = boardState[r][c];
+            const p = pCode ? PIECES_MAP[pCode] : null;
+
+            if (selected) {
+                if (selected.r === r && selected.c === c) {
+                    selected = null;
+                } else if (p && p.color === turn) {
+                    selected = { r, c };
+                } else {
+                    // Execute move (Basic logic: move everything until you add validation)
+                    boardState[r][c] = boardState[selected.r][selected.c];
+                    boardState[selected.r][selected.c] = '';
+                    selected = null;
+                    turn = turn === 'red' ? 'black' : 'red';
+                }
+            } else if (p && p.color === turn) {
+                selected = { r, c };
+            }
+            render();
+        }
+
+        function notify(text, type='info') {
+            msgBox.textContent = text;
+            msgBox.className = `p-4 text-sm rounded border block ${type === 'error' ? 'bg-red-50 text-red-800' : 'bg-blue-50 text-blue-800'}`;
+            setTimeout(() => msgBox.classList.add('hidden'), 4000);
+        }
+
+        // Firebase Actions
+        async function start() {
+            await signInAnonymously(auth);
+            onAuthStateChanged(auth, u => {
+                user = u;
+                if(u) document.getElementById('uid').textContent = u.uid;
+            });
+            initGrid();
+            render();
+        }
+
+        document.getElementById('resetBtn').onclick = () => {
+            boardState = JSON.parse(JSON.stringify(INITIAL_BOARD));
+            turn = 'red';
+            selected = null;
+            render();
+        };
+
+        document.getElementById('saveBtn').onclick = async () => {
+            const name = document.getElementById('gameName').value || 'auto-save';
+            if (!user) return notify('Not logged in', 'error');
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'saves', name), {
+                    board: JSON.stringify(boardState),
+                    turn,
+                    updatedAt: Date.now()
+                });
+                notify('Game saved to cloud!');
+            } catch(e) { notify('Save failed', 'error'); }
+        };
+
+        document.getElementById('loadBtn').onclick = async () => {
+            const name = document.getElementById('gameName').value || 'auto-save';
+            if (!user) return notify('Not logged in', 'error');
+            try {
+                const snap = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'saves', name));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    boardState = JSON.parse(data.board);
+                    turn = data.turn;
+                    render();
+                    notify('Game loaded!');
+                } else { notify('No save found', 'error'); }
+            } catch(e) { notify('Load failed', 'error'); }
+        };
+
+        window.onload = start;
+    </script>
+</body>
 </html> 
