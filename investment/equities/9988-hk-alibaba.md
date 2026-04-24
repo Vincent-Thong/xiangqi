@@ -201,7 +201,7 @@ To ensure the "Value + Optionality" thesis remains intact, I monitor the followi
 ---
 
 
-### Feedback & Discussion
+## Feedback & Discussion
 Investment research is best done as a "team sport." If you have a different view on Alibaba's Cloud trajectory or the AIDC margin expansion, I would love to hear it.
 
 * **Email:** `fzkimt [at] yahoo.com`
