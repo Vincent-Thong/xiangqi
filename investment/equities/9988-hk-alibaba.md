@@ -206,6 +206,6 @@ Investment research is best done as a "team sport." If you have a different view
 
 * **Email:** `fzkimt [at] yahoo.com`
 * **LinkedIn:** [Thong Weng Soon](https://www.linkedin.com/in/vincent-thong-sw/)
-* **GitHub:** Open a "Discussion" or "Issue" on this repo.
+* **GitHub:** [xiangqi](https://github.com/Vincent-Thong/xiangqi/issues) Open a "Discussion" or "Issue" on this repo.
 
 **Disclaimer:** *This write-up is a personal investment journal and does not constitute financial advice. I am a Security Test Engineer by profession, not a licensed financial advisor. I currently hold a long position in 9988.HK.*
