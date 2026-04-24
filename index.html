@@ -257,11 +257,8 @@
             </div>
         </div>
     </main>
-
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // 1. ALL FIREBASE IMPORTS REMOVED
 
         // Constants
         const PIECES_MAP = {
@@ -288,22 +285,14 @@
         let boardState = JSON.parse(JSON.stringify(INITIAL_BOARD));
         let selected = null;
         let turn = 'red';
-        let user = null;
 
-        // Firebase Setup
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'xiangqi-pro';
-
-        // DOM
+        // DOM Elements
         const boardEl = document.getElementById('board');
         const gridLinesEl = document.getElementById('gridLines');
         const turnIndicator = document.getElementById('turnIndicator');
-        const msgBox = document.getElementById('msgBox');
 
         function initGrid() {
+            gridLinesEl.innerHTML = ''; // Clear any existing lines
             // Horizontal lines
             for(let i=0; i<10; i++) {
                 const line = document.createElement('div');
@@ -321,7 +310,6 @@
                 line.style.width = '1px';
                 line.style.left = `${(i * 12.5)}%`;
                 
-                // Gap in river for vertical lines (except edges)
                 if (i > 0 && i < 8) {
                     const topHalf = line.cloneNode();
                     topHalf.style.height = '44.44%';
@@ -337,7 +325,6 @@
         }
 
         function render() {
-            // Remove existing cells/pieces (keep grid and river)
             const elementsToRemove = boardEl.querySelectorAll('.cell');
             elementsToRemove.forEach(e => e.remove());
 
@@ -372,7 +359,6 @@
                 } else if (p && p.color === turn) {
                     selected = { r, c };
                 } else {
-                    // Execute move (Basic logic: move everything until you add validation)
                     boardState[r][c] = boardState[selected.r][selected.c];
                     boardState[selected.r][selected.c] = '';
                     selected = null;
@@ -384,19 +370,8 @@
             render();
         }
 
-        function notify(text, type='info') {
-            msgBox.textContent = text;
-            msgBox.className = `p-4 text-sm rounded border block ${type === 'error' ? 'bg-red-50 text-red-800' : 'bg-blue-50 text-blue-800'}`;
-            setTimeout(() => msgBox.classList.add('hidden'), 4000);
-        }
-
-        // Firebase Actions
-        async function start() {
-            await signInAnonymously(auth);
-            onAuthStateChanged(auth, u => {
-                user = u;
-                if(u) document.getElementById('uid').textContent = u.uid;
-            });
+        function start() {
+            console.log("Game Starting...");
             initGrid();
             render();
         }
@@ -408,35 +383,8 @@
             render();
         };
 
-        document.getElementById('saveBtn').onclick = async () => {
-            const name = document.getElementById('gameName').value || 'auto-save';
-            if (!user) return notify('Not logged in', 'error');
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'saves', name), {
-                    board: JSON.stringify(boardState),
-                    turn,
-                    updatedAt: Date.now()
-                });
-                notify('Game saved to cloud!');
-            } catch(e) { notify('Save failed', 'error'); }
-        };
-
-        document.getElementById('loadBtn').onclick = async () => {
-            const name = document.getElementById('gameName').value || 'auto-save';
-            if (!user) return notify('Not logged in', 'error');
-            try {
-                const snap = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'saves', name));
-                if (snap.exists()) {
-                    const data = snap.data();
-                    boardState = JSON.parse(data.board);
-                    turn = data.turn;
-                    render();
-                    notify('Game loaded!');
-                } else { notify('No save found', 'error'); }
-            } catch(e) { notify('Load failed', 'error'); }
-        };
-
-        window.onload = start;
+        // Initialize on load
+        start();
     </script>
 </body>
 </html> 
