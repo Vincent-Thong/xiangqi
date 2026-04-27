@@ -217,7 +217,10 @@
                     Capture the opponent's General to win. Use Chariots for distance, Cannons for jumps, and Horses for strategy.
                 </p>
             </div>
-
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <button id="undoBtn" class="bg-gray-200 p-2 hover:bg-gray-300 transition font-bold">← Undo</button>
+                <button id="redoBtn" class="bg-gray-200 p-2 hover:bg-gray-300 transition font-bold">Redo →</button>
+            </div>
             <button id="resetBtn" class="btn-imperial w-full py-4 text-xl calligraphy">重新開始 (Reset)</button>
         </div>
 
@@ -285,7 +288,11 @@
         let boardState = JSON.parse(JSON.stringify(INITIAL_BOARD));
         let selected = null;
         let turn = 'red';
-
+        // --- ADD THESE ---
+        let history = []; // Stores past board states
+        let redoStack = []; // Stores undone moves for "Forward"
+        // -----------------
+        
         // DOM Elements
         const boardEl = document.getElementById('board');
         const gridLinesEl = document.getElementById('gridLines');
@@ -359,6 +366,14 @@
                 } else if (p && p.color === turn) {
                     selected = { r, c };
                 } else {
+                    // --- SAVE TO HISTORY BEFORE MOVING ---
+                    history.push({
+                        board: JSON.stringify(boardState),
+                        turn: turn
+                    });
+                    redoStack = []; // Clear redo stack because a new move was made
+                    // -------------------------------------
+
                     boardState[r][c] = boardState[selected.r][selected.c];
                     boardState[selected.r][selected.c] = '';
                     selected = null;
@@ -383,6 +398,50 @@
             render();
         };
 
+        // Undo Logic (Back)
+        document.getElementById('undoBtn').onclick = () => {
+            if (history.length === 0) return; // Nothing to undo
+
+            // Push current state to redoStack before going back
+            redoStack.push({
+                board: JSON.stringify(boardState),
+                turn: turn
+            });
+
+            const prevState = history.pop();
+            boardState = JSON.parse(prevState.board);
+            turn = prevState.turn;
+            selected = null;
+            render();
+        };
+
+        // Redo Logic (Forward)
+        document.getElementById('redoBtn').onclick = () => {
+            if (redoStack.length === 0) return; // Nothing to redo
+
+            // Push current state back to history before going forward
+            history.push({
+                board: JSON.stringify(boardState),
+                turn: turn
+            });
+
+            const nextState = redoStack.pop();
+            boardState = JSON.parse(nextState.board);
+            turn = nextState.turn;
+            selected = null;
+            render();
+        };
+
+        // Reset Logic (Updated to clear history)
+        document.getElementById('resetBtn').onclick = () => {
+            boardState = JSON.parse(JSON.stringify(INITIAL_BOARD));
+            turn = 'red';
+            selected = null;
+            history = [];
+            redoStack = [];
+            render();
+        };
+        
         // Initialize on load
         start();
     </script>
