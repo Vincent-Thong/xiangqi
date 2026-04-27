@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investment Research | Alibaba</title>
+    <title>Investment Research Portal</title>
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -19,19 +19,38 @@
         </div>
     </div>
 
-    <script src="assets/js/headerFooterManager.js"></script>
+    <script src="../assets/js/headerFooterManager.js"></script>
     
     <script>
-        // Function to fetch and render the markdown
         async function renderMarkdown() {
             try {
-                const response = await fetch('equities/9988-hk-alibaba.md');
+                // 1. Get the filename from the URL (e.g., ?ticker=hst-si)
+                const urlParams = new URLSearchParams(window.location.search);
+                const ticker = urlParams.get('ticker');
+                
+                // 2. Map the ticker to your file paths
+                const fileMap = {
+                    '9988': 'equities/9988-hk-alibaba.md',
+                    'hst-si': 'equities/hst-si-hstech.md' // Ensure this matches your filename
+                };
+
+                // Default to Alibaba if no ticker is provided or if ticker is invalid
+                const filePath = fileMap[ticker] || fileMap['9988'];
+
+                const response = await fetch(filePath);
+                if (!response.ok) throw new Error("File not found");
+                
                 const text = await response.text();
                 
-                // Set the innerHTML of the content div to the parsed markdown
+                // 3. Render Markdown
                 document.getElementById('content').innerHTML = marked.parse(text);
+
+                // 4. Trigger MathJax to render LaTeX after content is loaded
+                if (window.MathJax) {
+                    MathJax.typeset();
+                }
             } catch (error) {
-                document.getElementById('content').innerHTML = "Error loading research file.";
+                document.getElementById('content').innerHTML = "<h2>Error</h2><p>Research file not found or could not be loaded.</p>";
                 console.error(error);
             }
         }
