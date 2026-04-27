@@ -18,7 +18,15 @@ class CommonHeader extends HTMLElement {
         <a href="https://xiangqi.xyz/merchant.html">商品</a>
         <a href="https://xiangqi.xyz/tournament_management.html">编排单循环比赛</a>
         <a href="https://xiangqi.xyz/contact.html">联络我们</a>
-        <a href="https://xiangqi.xyz/investment/investments.html">投资理财</a>
+        <div class="dropdown">
+          <button class="dropbtn" onclick="myInvestmentFunction()">投资理财
+            <i class="fa fa-caret-down"></i>
+          </button>
+          <div class="dropdown-content" id="myInvestmentDropdown">
+            <a href="https://xiangqi.xyz/investment/investments.html?ticker=9988">阿里巴巴 (9988.HK)</a>
+            <a href="https://xiangqi.xyz/investment/investments.html?ticker=hst-si">恒生科技 ETF (HST.SI)</a>
+          </div>
+        </div>
         <a href="https://xiangqi.xyz/about.html">关于我们</a>
       </div>
     `
