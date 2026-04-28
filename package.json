@@ -1,0 +1,27 @@
+{
+  "name": "xiangqi",
+  "version": "1.0.0",
+  "description": "Design and Architecture ``` 1. links in headerFooterManager.js use absolute file path (the url), so that regardless where the html located, links work. ```",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vincent-Thong/xiangqi.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Vincent-Thong/xiangqi/issues"
+  },
+  "homepage": "https://github.com/Vincent-Thong/xiangqi#readme",
+  "devDependencies": {
+    "tailwindcss": "^4.2.4"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.2.4"
+  }
+}
