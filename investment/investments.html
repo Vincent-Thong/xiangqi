@@ -27,7 +27,7 @@
             try {
                 // 1. Get the filename from the URL (e.g., ?ticker=hst-si)
                 const urlParams = new URLSearchParams(window.location.search);
-                const ticker = urlParams.get('ticker');
+                const ticker = urlParams.get('ticker');  // https://xiangqi.xyz/investments.html?ticker=HST.SI
                 
                 // 2. Map the ticker to your file paths
                 const fileMap = {
