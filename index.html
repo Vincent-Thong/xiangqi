@@ -1,449 +1,361 @@
-<!DOCTYPE html> 
-<html lang="en"> 
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="./dist/output.css" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
-  <title>麒麟象棋队</title> 
-  <style>
-    :root {
-        --wood-dark: #5a2d05;
-        --wood-light: #f7e6c4;
-        --imperial-red: #b91c1c;
-        --imperial-gold: #fbbf24;
-        --ink-black: #1a1a1a;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="styles.css">
+<title>麒麟象棋队</title> 
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+  :root {
+    --bg:#1a1208;--board-bg:#c8922a;--board-line:#7a4f10;
+    --red:#c0392b;--red-light:#e74c3c;
+    --gold:#d4a017;--gold-light:#f0c040;
+    --ui-bg:#12100a;--ui-border:#3a2a10;--ui-text:#e8d5a0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ui-text);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:radial-gradient(ellipse at 20% 20%,rgba(200,146,42,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(192,57,43,.06) 0%,transparent 60%)}
+  h1{font-family:'Cinzel',serif;font-size:2rem;letter-spacing:.2em;color:var(--gold);text-shadow:0 0 20px rgba(212,160,23,.4);margin-bottom:4px}
+  .subtitle{font-size:.85rem;color:#8a7050;letter-spacing:.3em;margin-bottom:20px}
+  .app{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+  .board-wrap{position:relative;background:var(--board-bg);border:3px solid var(--board-line);border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,.7),inset 0 0 60px rgba(0,0,0,.15);padding:30px}
+  canvas#boardCanvas{display:block;cursor:pointer}
+  .side{width:240px;display:flex;flex-direction:column;gap:14px}
+  .panel{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;padding:14px}
+  .panel-title{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.2em;color:var(--gold);border-bottom:1px solid var(--ui-border);padding-bottom:8px;margin-bottom:10px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border:1px solid var(--ui-border);border-radius:4px;background:#1e1808;color:var(--ui-text);font-family:'Noto Serif SC',serif;font-size:.82rem;cursor:pointer;transition:all .2s;gap:6px;width:100%;margin-bottom:6px}
+  .btn:hover{background:var(--ui-border);border-color:var(--gold);color:var(--gold)}
+  .btn:active{transform:scale(.97)}
+  .btn.danger{border-color:#5a2020;color:#c05050}
+  .btn.danger:hover{background:#2a1010;border-color:var(--red);color:var(--red-light)}
+  #moveList{max-height:220px;overflow-y:auto;font-size:.78rem;line-height:1.8;color:#b09070;scrollbar-width:thin;scrollbar-color:var(--ui-border) transparent}
+  #moveList .move-pair{display:flex;gap:6px;padding:2px 0}
+  #moveList .move-num{color:#5a4a30;min-width:22px}
+  #moveList .mv{padding:1px 5px;border-radius:3px;cursor:pointer}
+  #moveList .mv:hover{background:var(--ui-border);color:var(--ui-text)}
+  #moveList .mv.current{background:var(--gold);color:var(--bg);font-weight:bold}
+  #status{font-size:.85rem;padding:8px;border-radius:4px;background:rgba(200,146,42,.08);border:1px solid var(--ui-border);text-align:center;min-height:36px;line-height:1.4}
+  #status.red-turn{border-color:rgba(192,57,43,.4);color:#e07060}
+  #status.black-turn{border-color:rgba(100,80,40,.4);color:#b09070}
+  #status.check{border-color:var(--red);color:var(--red-light);animation:pulse .6s ease infinite alternate}
+  #status.checkmate{border-color:var(--red);color:var(--gold);background:rgba(192,57,43,.15)}
+  @keyframes pulse{from{box-shadow:none}to{box-shadow:0 0 12px rgba(192,57,43,.5)}}
+  .nav-row{display:flex;gap:8px;justify-content:center;margin-top:12px}
+  .nav-btn{flex:1;padding:10px 4px;background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:5px;color:var(--ui-text);font-size:.75rem;font-family:'Noto Serif SC',serif;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .nav-btn .icon{font-size:1.1rem}
+  .nav-btn:hover:not(:disabled){background:var(--ui-border);border-color:var(--gold);color:var(--gold)}
+  .nav-btn:disabled{opacity:.3;cursor:default}
+  #pgnArea{width:100%;height:90px;background:#0e0c08;border:1px solid var(--ui-border);border-radius:4px;color:#8a7050;font-family:monospace;font-size:.72rem;padding:8px;resize:vertical;margin-bottom:6px}
+  #pgnArea:focus{outline:none;border-color:var(--gold)}
+  .file-row{display:flex;gap:6px;margin-bottom:6px}
+  .file-row .btn{margin-bottom:0}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:#1a1208;border:1px solid var(--gold);border-radius:8px;padding:24px;max-width:340px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+  .modal h3{font-family:'Cinzel',serif;color:var(--gold);margin-bottom:14px}
+  .modal p{font-size:.85rem;color:#b09070;margin-bottom:18px;line-height:1.6}
+  .modal-btns{display:flex;gap:10px}
+  .modal-btns .btn{margin-bottom:0}
+  input[type="file"]{display:none}
+</style>
+</head>
+<body>
+<common-header></common-header>
+<script src="assets/js/dropdown.js"></script>
+<script src="assets/js/headerFooterManager.js"></script>
+<h1>象棋</h1>
+<div class="subtitle">XIANGQI · CHINESE CHESS</div>
+<div class="app">
+  <div>
+    <div class="board-wrap">
+      <canvas id="boardCanvas" width="450" height="500"></canvas>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" id="btnStart" onclick="goToMove(0)"><span class="icon">⏮</span><span>Start</span></button>
+      <button class="nav-btn" id="btnPrev" onclick="goToMove(currentMoveIndex-1)"><span class="icon">◀</span><span>Previous</span></button>
+      <button class="nav-btn" id="btnNext" onclick="goToMove(currentMoveIndex+1)"><span class="icon">▶</span><span>Next</span></button>
+      <button class="nav-btn" id="btnEnd" onclick="goToMove(moveHistory.length)"><span class="icon">⏭</span><span>End</span></button>
+    </div>
+  </div>
+  <div class="side">
+    <div class="panel">
+      <div class="panel-title">STATUS</div>
+      <div id="status" class="red-turn">Red's Turn</div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">GAME</div>
+      <button class="btn" onclick="newGame()">♟ New Game</button>
+      <button class="btn danger" onclick="confirmResign()">⚑ Resign</button>
+    </div>
+    <div class="panel">
+      <div class="panel-title">MOVE LIST</div>
+      <div id="moveList"><span style="color:#5a4a30;font-size:.75rem">No moves yet.</span></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">PGN · SAVE / LOAD</div>
+      <textarea id="pgnArea" placeholder="PGN appears here..."></textarea>
+      <div class="file-row">
+        <button class="btn" onclick="savePGN()" style="flex:1">💾 Save PGN</button>
+        <button class="btn" onclick="document.getElementById('fileInput').click()" style="flex:1">📂 Load PGN</button>
+      </div>
+      <button class="btn" onclick="loadFromTextarea()">↩ Import from above</button>
+      <input type="file" id="fileInput" accept=".pgn,.txt" onchange="loadPGNFile(event)">
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Confirm</h3>
+    <p id="modalMsg"></p>
+    <div class="modal-btns">
+      <button class="btn" id="modalOk">OK</button>
+      <button class="btn" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+<script>
+const COLS=9,ROWS=10,CELL=50,PAD=25;
+const PIECE_NAMES={K:'将',k:'将',A:'仕',a:'士',B:'相',b:'象',N:'马',n:'馬',R:'车',r:'車',C:'炮',c:'砲',P:'兵',p:'卒'};
+const COL_RED=['九','八','七','六','五','四','三','二','一'];
+const COL_BLK=['1','2','3','4','5','6','7','8','9'];
+const INIT=[
+  ['r','n','b','a','k','a','b','n','r'],
+  ['','','','','','','','',''],
+  ['','c','','','','','','c',''],
+  ['p','','p','','p','','p','','p'],
+  ['','','','','','','','',''],
+  ['','','','','','','','',''],
+  ['P','','P','','P','','P','','P'],
+  ['','C','','','','','','C',''],
+  ['','','','','','','','',''],
+  ['R','N','B','A','K','A','B','N','R']
+];
+let board=[],currentTurn='red',selectedCell=null,moveHistory=[],boardHistory=[],currentMoveIndex=0,gameOver=false;
+function clone(b){return b.map(r=>[...r])}
+function isRed(p){return p&&p===p.toUpperCase()}
+function isBlack(p){return p&&p===p.toLowerCase()}
+function sameTeam(a,b){if(!a||!b)return false;return(isRed(a)&&isRed(b))||(isBlack(a)&&isBlack(b))}
+function inB(c,r){return c>=0&&c<COLS&&r>=0&&r<ROWS}
 
-    body {
-        font-family: 'Noto Serif SC', serif;
-        background-color: #fdfaf3;
-        background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
-        color: var(--ink-black);
-        margin: 0;
-        overflow-x: hidden;
-    }
+function newGame(){
+  board=INIT.map(r=>[...r]);
+  currentTurn='red';selectedCell=null;moveHistory=[];boardHistory=[clone(board)];currentMoveIndex=0;gameOver=false;
+  updateUI();render();
+}
 
-    /* Calligraphy font for titles */
-    .calligraphy {
-        font-family: 'Ma Shan Zheng', cursive;
-    }
+function getRaw(b,col,row,piece){
+  const p=piece.toUpperCase(),moves=[],fr=isRed(piece)?isRed:isBlack,en=isRed(piece)?isBlack:isRed;
+  if(p==='R'){for(const[dc,dr]of[[1,0],[-1,0],[0,1],[0,-1]]){let c=col+dc,r=row+dr;while(inB(c,r)){if(fr(b[r][c]))break;moves.push([c,r]);if(en(b[r][c]))break;c+=dc;r+=dr;}}}
+  else if(p==='N'){const steps=[[[0,-1],[[-1,-2],[1,-2]]],[[0,1],[[-1,2],[1,2]]],[[-1,0],[[-2,-1],[-2,1]]],[[1,0],[[2,-1],[2,1]]]];for(const[leg,ends]of steps){const lc=col+leg[0],lr=row+leg[1];if(!inB(lc,lr)||b[lr][lc])continue;for(const[ec,er]of ends){const tc=col+ec,tr=row+er;if(inB(tc,tr)&&!fr(b[tr][tc]))moves.push([tc,tr]);}}}
+  else if(p==='B'){for(const[dc,dr]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const mc=col+dc,mr=row+dr,tc=col+2*dc,tr=row+2*dr;if(!inB(tc,tr))continue;if(isRed(piece)&&tr<5)continue;if(isBlack(piece)&&tr>4)continue;if(inB(mc,mr)&&b[mr][mc])continue;if(!fr(b[tr][tc]))moves.push([tc,tr]);}}
+  else if(p==='A'){const pr=isRed(piece)?[7,8,9]:[0,1,2],pc=[3,4,5];for(const[dc,dr]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const tc=col+dc,tr=row+dr;if(pc.includes(tc)&&pr.includes(tr)&&!fr(b[tr][tc]))moves.push([tc,tr]);}}
+  else if(p==='K'){const pr=isRed(piece)?[7,8,9]:[0,1,2],pc=[3,4,5];for(const[dc,dr]of[[1,0],[-1,0],[0,1],[0,-1]]){const tc=col+dc,tr=row+dr;if(pc.includes(tc)&&pr.includes(tr)&&!fr(b[tr][tc]))moves.push([tc,tr]);}}
+  else if(p==='C'){for(const[dc,dr]of[[1,0],[-1,0],[0,1],[0,-1]]){let c=col+dc,r=row+dr,jumped=false;while(inB(c,r)){if(!jumped){if(!b[r][c])moves.push([c,r]);else jumped=true;}else{if(b[r][c]){if(en(b[r][c]))moves.push([c,r]);break;}}c+=dc;r+=dr;}}}
+  else if(p==='P'){if(isRed(piece)){if(inB(col,row-1)&&!fr(b[row-1][col]))moves.push([col,row-1]);if(row<=4){if(inB(col+1,row)&&!fr(b[row][col+1]))moves.push([col+1,row]);if(inB(col-1,row)&&!fr(b[row][col-1]))moves.push([col-1,row]);}}else{if(inB(col,row+1)&&!fr(b[row+1][col]))moves.push([col,row+1]);if(row>=5){if(inB(col+1,row)&&!fr(b[row][col+1]))moves.push([col+1,row]);if(inB(col-1,row)&&!fr(b[row][col-1]))moves.push([col-1,row]);}}}
+  return moves;
+}
 
-    /* Wood Texture for Board and UI elements */
-    .wood-texture {
-        background-color: var(--wood-light);
-        background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
-        border: 8px solid var(--wood-dark);
-        box-shadow: 0 20px 50px rgba(0,0,0,0.3), inset 0 0 100px rgba(90, 45, 5, 0.1);
-    }
+function findKing(b,color){const k=color==='red'?'K':'k';for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(b[r][c]===k)return[c,r];return null;}
 
-    /* Traditional Pattern Borders */
-    .trad-border {
-        border: 2px solid var(--wood-dark);
-        position: relative;
-        padding: 20px;
-    }
+function isInCheck(b,color){
+  const kp=findKing(b,color);if(!kp)return false;
+  const[kc,kr]=kp,opp=color==='red'?'black':'red';
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=b[r][c];if(!p)continue;if((color==='red'&&isRed(p))||(color==='black'&&isBlack(p)))continue;if(getRaw(b,c,r,p).some(([tc,tr])=>tc===kc&&tr===kr))return true;}
+  const ok=findKing(b,opp);
+  if(ok&&ok[0]===kc){let bl=false;const mn=Math.min(kr,ok[1]),mx=Math.max(kr,ok[1]);for(let rr=mn+1;rr<mx;rr++)if(b[rr][kc]){bl=true;break;}if(!bl)return true;}
+  return false;
+}
 
-    .trad-border::before {
-        content: "";
-        position: absolute;
-        top: 5px; left: 5px; right: 5px; bottom: 5px;
-        border: 1px solid var(--wood-dark);
-        pointer-events: none;
-    }
+function getLegal(b,col,row){
+  const piece=b[row][col];if(!piece)return[];
+  return getRaw(b,col,row,piece).filter(([tc,tr])=>{const nb=clone(b);nb[tr][tc]=piece;nb[row][col]='';return!isInCheck(nb,isRed(piece)?'red':'black');});
+}
 
-    /* The Board Styling */
-    .board-container {
-        display: grid;
-        grid-template-columns: repeat(9, 1fr);
-        grid-template-rows: repeat(10, 1fr);
-        width: 100%;
-        max-width: 540px;
-        aspect-ratio: 9 / 10;
-        position: relative;
-        margin: 0 auto;
-    }
+function hasAnyLegal(b,color){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=b[r][c];if(!p)continue;if(color==='red'&&!isRed(p))continue;if(color==='black'&&!isBlack(p))continue;if(getLegal(b,c,r).length>0)return true;}return false;
+}
 
-    .cell {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        z-index: 10;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+function toNot(piece,fc,fr_,tc,tr){
+  const pn=PIECE_NAMES[piece]||piece,red=isRed(piece);
+  const fcn=red?COL_RED[fc]:COL_BLK[fc];
+  const dr=tr-fr_;let dir,num;
+  const diag=['N','n','B','b','A','a'].includes(piece);
+  if(dr===0){dir='平';num=red?COL_RED[tc]:COL_BLK[tc];}
+  else if((red&&dr<0)||(!red&&dr>0)){dir='进';num=diag?(red?COL_RED[tc]:COL_BLK[tc]):Math.abs(dr).toString();}
+  else{dir='退';num=diag?(red?COL_RED[tc]:COL_BLK[tc]):Math.abs(dr).toString();}
+  return`${pn}${fcn}${dir}${num}`;
+}
 
-    /* Board Grid Lines */
-    .grid-layer {
-        position: absolute;
-        top: 5%; left: 5.5%; right: 5.5%; bottom: 5%;
-        pointer-events: none;
-        z-index: 1;
-    }
+function makeMove(fc,fr_,tc,tr){
+  const piece=board[fr_][fc],captured=board[tr][tc],notation=toNot(piece,fc,fr_,tc,tr);
+  if(currentMoveIndex<moveHistory.length){moveHistory=moveHistory.slice(0,currentMoveIndex);boardHistory=boardHistory.slice(0,currentMoveIndex+1);}
+  board[tr][tc]=piece;board[fr_][fc]='';
+  moveHistory.push({fromCol:fc,fromRow:fr_,toCol:tc,toRow:tr,piece,captured,notation});
+  boardHistory.push(clone(board));currentMoveIndex=moveHistory.length;
+  currentTurn=currentTurn==='red'?'black':'red';selectedCell=null;
+  const opp=currentTurn;
+  if(!hasAnyLegal(board,opp)){gameOver=true;const w=opp==='red'?'Black':'Red';setStatus(`${w==='Red'?'🔴':'⚫'} Checkmate! ${w} wins!`,'checkmate');}
+  else if(isInCheck(board,currentTurn)){setStatus(`${currentTurn==='red'?'🔴 Red':'⚫ Black'} is in CHECK!`,'check');}
+  else{setStatus(`${currentTurn==='red'?'🔴 Red':'⚫ Black'}'s Turn`,currentTurn+'-turn');}
+  updateMoveList();updateNavButtons();document.getElementById('pgnArea').value=generatePGN();render();
+}
 
-    .grid-line-h, .grid-line-v {
-        position: absolute;
-        background-color: rgba(90, 45, 5, 0.6);
-    }
+function handleClick(col,row){
+  if(gameOver)return;
+  if(currentMoveIndex<moveHistory.length){goToMove(moveHistory.length);return;}
+  const piece=board[row][col];
+  if(selectedCell){
+    const[sc,sr]=selectedCell,legal=getLegal(board,sc,sr);
+    if(legal.some(([tc,tr])=>tc===col&&tr===row)){makeMove(sc,sr,col,row);return;}
+    selectedCell=null;
+  }
+  if(piece&&((currentTurn==='red'&&isRed(piece))||(currentTurn==='black'&&isBlack(piece)))){selectedCell=[col,row];}
+  render();
+}
 
-    /* Pieces */
-    .piece {
-        width: 85%;
-        height: 85%;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 1.8rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: 0 4px 0 #888, 0 6px 10px rgba(0,0,0,0.4);
-        border: 2px solid #333;
-        background: radial-gradient(circle at 30% 30%, #fff, #ddd);
-        z-index: 20;
-    }
+function goToMove(idx){
+  idx=Math.max(0,Math.min(idx,moveHistory.length));currentMoveIndex=idx;
+  board=clone(boardHistory[idx]);selectedCell=null;
+  if(idx<moveHistory.length){setStatus(`Viewing move ${idx} / ${moveHistory.length}`,idx%2===0?'red-turn':'black-turn');}
+  else if(!gameOver){currentTurn=moveHistory.length%2===0?'red':'black';setStatus(`${currentTurn==='red'?'🔴 Red':'⚫ Black'}'s Turn`,currentTurn+'-turn');}
+  updateMoveList();updateNavButtons();render();
+}
 
-    .piece.red {
-        color: #d00;
-        border-color: #900;
-        background: radial-gradient(circle at 30% 30%, #fff0f0, #fcc);
-        box-shadow: 0 4px 0 #900, 0 6px 10px rgba(0,0,0,0.4);
-    }
+function generatePGN(){
+  const d=new Date(),ds=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  let pgn=`[Game "Xiangqi"]\n[Date "${ds}"]\n[Result "${gameOver?(currentTurn==='red'?'0-1':'1-0'):'*'}"]\n\n`;
+  for(let i=0;i<moveHistory.length;i++){if(i%2===0)pgn+=`${Math.floor(i/2)+1}. `;pgn+=moveHistory[i].notation+' ';}
+  return pgn.trim();
+}
 
-    .piece.black {
-        color: #000;
-        border-color: #222;
-        background: radial-gradient(circle at 30% 30%, #eee, #bbb);
-        box-shadow: 0 4px 0 #333, 0 6px 10px rgba(0,0,0,0.4);
-    }
+function savePGN(){
+  const pgn=generatePGN();document.getElementById('pgnArea').value=pgn;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([pgn],{type:'text/plain'}));a.download=`xiangqi_${Date.now()}.pgn`;a.click();
+}
 
-    .piece:active {
-        transform: translateY(4px);
-        box-shadow: 0 0 0 #888, 0 2px 5px rgba(0,0,0,0.2);
-    }
+function loadFromTextarea(){parsePGN(document.getElementById('pgnArea').value.trim());}
+function loadPGNFile(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{document.getElementById('pgnArea').value=ev.target.result;parsePGN(ev.target.result);};r.readAsText(f);e.target.value='';}
 
-    .selected {
-        outline: 4px solid var(--imperial-gold);
-        outline-offset: 4px;
-        animation: pulse 1.5s infinite;
-    }
+function parsePGN(pgn){
+  newGame();
+  const lines=pgn.split('\n').filter(l=>!l.startsWith('[')&&l.trim());
+  const tokens=lines.join(' ').replace(/\d+\.\s*/g,' ').trim().split(/\s+/).filter(Boolean);
+  tokens.forEach(tok=>{if(['1-0','0-1','1/2-1/2','*'].includes(tok))return;applyNot(tok);});
+  goToMove(0);setTimeout(()=>goToMove(moveHistory.length),50);
+}
 
-    @keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.7; }
-        100% { opacity: 1; }
-    }
+function applyNot(notation){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const p=board[r][c];if(!p)continue;
+    if(currentTurn==='red'&&!isRed(p))continue;if(currentTurn==='black'&&!isBlack(p))continue;
+    const legal=getLegal(board,c,r);
+    for(const[tc,tr]of legal){if(toNot(p,c,r,tc,tr)===notation){makeMove(c,r,tc,tr);return;}}
+  }
+}
 
-    /* Palace X Lines */
-    .palace-x {
-        position: absolute;
-        width: 22.22%; /* 2 columns wide */
-        height: 20%;   /* 2 rows high */
-        pointer-events: none;
-    }
+function setStatus(msg,cls){const el=document.getElementById('status');el.textContent=msg;el.className=cls||'';}
 
-    /* Buttons and UI */
-    .btn-imperial {
-        background: var(--imperial-red);
-        color: white;
-        border: 2px solid var(--imperial-gold);
-        padding: 10px 24px;
-        font-weight: bold;
-        transition: all 0.3s;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
+function updateMoveList(){
+  const el=document.getElementById('moveList');
+  if(!moveHistory.length){el.innerHTML='<span style="color:#5a4a30;font-size:.75rem">No moves yet.</span>';return;}
+  let html='';
+  for(let i=0;i<moveHistory.length;i+=2){
+    const num=Math.floor(i/2)+1,m1=moveHistory[i],m2=moveHistory[i+1];
+    const c1=currentMoveIndex===i+1,c2=currentMoveIndex===i+2;
+    html+=`<div class="move-pair"><span class="move-num">${num}.</span><span class="mv${c1?' current':''}" onclick="goToMove(${i+1})" style="color:#e07060">${m1.notation}</span>${m2?`<span class="mv${c2?' current':''}" onclick="goToMove(${i+2})" style="color:#9090a0">${m2.notation}</span>`:''}</div>`;
+  }
+  el.innerHTML=html;const cur=el.querySelector('.current');if(cur)cur.scrollIntoView({block:'nearest'});
+}
 
-    .btn-imperial:hover {
-        background: #991b1b;
-        transform: scale(1.05);
-        box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
-    }
+function updateNavButtons(){
+  document.getElementById('btnStart').disabled=currentMoveIndex===0;
+  document.getElementById('btnPrev').disabled=currentMoveIndex===0;
+  document.getElementById('btnNext').disabled=currentMoveIndex>=moveHistory.length;
+  document.getElementById('btnEnd').disabled=currentMoveIndex>=moveHistory.length;
+}
 
-    /* The River Styling */
-    .river {
-        position: absolute;
-        top: 45%;
-        left: 0;
-        width: 100%;
-        height: 10%;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: var(--wood-dark);
-        opacity: 0.8;
-        pointer-events: none;
-    }
-  </style>
-</head> 
-<body class="p-4 md:p-8">
-  <common-header></common-header>
-    <script src="assets/js/dropdown.js"></script>
-    <script src="assets/js/headerFooterManager.js"></script>
+function updateUI(){
+  if(!gameOver)setStatus(`${currentTurn==='red'?'🔴 Red':'⚫ Black'}'s Turn`,currentTurn+'-turn');
+  updateMoveList();updateNavButtons();document.getElementById('pgnArea').value=generatePGN();
+}
 
-    <!-- Header Section -->
-    <header class="max-w-6xl mx-auto mb-12 text-center">
-        <h1 class="calligraphy text-6xl md:text-8xl text-red-800 mb-2">中國象棋</h1>
-        <p class="text-xl tracking-widest text-gray-700 uppercase">Imperial Xiangqi</p>
-        <div class="w-32 h-1 bg-red-800 mx-auto mt-4"></div>
-    </header>
+function confirmResign(){showModal('Resign?',`${currentTurn==='red'?'Red':'Black'} resigns. The opponent wins.`,()=>{gameOver=true;const w=currentTurn==='red'?'Black':'Red';setStatus(`${w} wins by resignation!`,'checkmate');updateMoveList();});}
+function showModal(title,msg,onOk){document.getElementById('modalTitle').textContent=title;document.getElementById('modalMsg').textContent=msg;document.getElementById('modalOk').onclick=()=>{closeModal();onOk();};document.getElementById('modalOverlay').classList.add('open');}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
 
-    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-        
-        <!-- Left Sidebar: Game Info -->
-        <div class="lg:col-span-3 space-y-6 order-2 lg:order-1">
-            <div class="trad-border bg-white shadow-sm">
-                <h2 class="calligraphy text-3xl text-red-800 mb-4">游戏资讯</h2>
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center border-b pb-2">
-                        <span>Current Turn:</span>
-                        <span id="turnIndicator" class="font-bold text-red-700">Red</span>
-                    </div>
-                    <div class="flex justify-between items-center border-b pb-2">
-                        <span>Status:</span>
-                        <span class="text-green-600 font-semibold">Active</span>
-                    </div>
-                </div>
-            </div>
+// ── CANVAS RENDERING ──
+const canvas=document.getElementById('boardCanvas'),ctx=canvas.getContext('2d');
+function xy(col,row){return[PAD+col*CELL,PAD+row*CELL];}
 
-            <div class="trad-border bg-white shadow-sm">
-                <h3 class="font-bold text-lg mb-2">Instructions</h3>
-                <p class="text-sm text-gray-600 leading-relaxed">
-                    Capture the opponent's General to win. Use Chariots for distance, Cannons for jumps, and Horses for strategy.
-                </p>
-            </div>
-            <div class="grid grid-cols-2 gap-2 mb-4">
-                <button id="undoBtn" class="bg-gray-200 p-2 hover:bg-gray-300 transition font-bold">← Undo</button>
-                <button id="redoBtn" class="bg-gray-200 p-2 hover:bg-gray-300 transition font-bold">Redo →</button>
-            </div>
-            <button id="resetBtn" class="btn-imperial w-full py-4 text-xl calligraphy">重新開始 (Reset)</button>
-        </div>
+function render(){
+  const W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#c8922a';ctx.fillRect(0,0,W,H);
+  // wood grain
+  for(let i=0;i<H;i+=3){ctx.strokeStyle=`rgba(100,60,10,${.03+.02*Math.sin(i*.1)})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke();}
+  // grid
+  ctx.strokeStyle='#7a4f10';ctx.lineWidth=1;
+  for(let c=0;c<COLS;c++){const x=PAD+c*CELL;if(c===0||c===COLS-1){ctx.beginPath();ctx.moveTo(x,PAD);ctx.lineTo(x,PAD+9*CELL);ctx.stroke();}else{ctx.beginPath();ctx.moveTo(x,PAD);ctx.lineTo(x,PAD+4*CELL);ctx.stroke();ctx.beginPath();ctx.moveTo(x,PAD+5*CELL);ctx.lineTo(x,PAD+9*CELL);ctx.stroke();}}
+  for(let r=0;r<ROWS;r++){const y=PAD+r*CELL;ctx.beginPath();ctx.moveTo(PAD,y);ctx.lineTo(PAD+8*CELL,y);ctx.stroke();}
+  // river
+  ctx.fillStyle='rgba(100,60,10,.4)';ctx.font='bold 14px "Noto Serif SC",serif';ctx.textAlign='center';
+  ctx.fillText('楚  河',PAD+1.7*CELL,PAD+4.65*CELL);ctx.fillText('汉  界',PAD+6.3*CELL,PAD+4.65*CELL);
+  // palace diagonals
+  ctx.strokeStyle='#7a4f10';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(PAD+3*CELL,PAD);ctx.lineTo(PAD+5*CELL,PAD+2*CELL);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(PAD+5*CELL,PAD);ctx.lineTo(PAD+3*CELL,PAD+2*CELL);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(PAD+3*CELL,PAD+7*CELL);ctx.lineTo(PAD+5*CELL,PAD+9*CELL);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(PAD+5*CELL,PAD+7*CELL);ctx.lineTo(PAD+3*CELL,PAD+9*CELL);ctx.stroke();
+  // crosshairs
+  drawX([[1,2],[7,2],[1,7],[7,7]]);
+  drawX([[0,3],[2,3],[4,3],[6,3],[8,3],[0,6],[2,6],[4,6],[6,6],[8,6]]);
+  // last move
+  if(currentMoveIndex>0){const lm=moveHistory[currentMoveIndex-1];for(const[c,r]of[[lm.fromCol,lm.fromRow],[lm.toCol,lm.toRow]]){const[x,y]=xy(c,r);ctx.fillStyle='rgba(200,180,60,.2)';ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fill();}}
+  // selection + legal
+  let legal=[];
+  if(selectedCell&&currentMoveIndex>=moveHistory.length){
+    const[sc,sr]=selectedCell;legal=getLegal(board,sc,sr);
+    const[sx,sy]=xy(sc,sr);ctx.fillStyle='rgba(255,220,80,.35)';ctx.beginPath();ctx.arc(sx,sy,22,0,Math.PI*2);ctx.fill();
+  }
+  for(const[tc,tr]of legal){const[x,y]=xy(tc,tr);if(board[tr][tc]){ctx.strokeStyle='rgba(255,200,50,.7)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.stroke();}else{ctx.fillStyle='rgba(255,210,60,.55)';ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fill();}}
+  // pieces
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=board[r][c];if(p)drawPiece(p,c,r);}
+}
 
-        <!-- Center: The Board -->
-        <div class="lg:col-span-6 order-1 lg:order-2">
-            <div class="wood-texture p-4 md:p-8 rounded-sm">
-                <div id="board" class="board-container">
-                    <!-- Grid Lines Layer -->
-                    <div class="grid-layer" id="gridLines"></div>
-                    
-                    <!-- The River -->
-                    <div class="river">
-                        <span class="calligraphy">楚河</span>
-                        <span class="calligraphy">漢界</span>
-                    </div>
+function drawX(positions){
+  const arm=6,gap=3;ctx.strokeStyle='#7a4f10';ctx.lineWidth=1;
+  for(const[c,r]of positions){
+    const[x,y]=xy(c,r),L=c>0,R=c<COLS-1,T=r>0,Bo=r<ROWS-1;
+    if(L&&T){ctx.beginPath();ctx.moveTo(x-gap,y-arm);ctx.lineTo(x-gap,y);ctx.moveTo(x-arm,y-gap);ctx.lineTo(x,y-gap);ctx.stroke();}
+    if(R&&T){ctx.beginPath();ctx.moveTo(x+gap,y-arm);ctx.lineTo(x+gap,y);ctx.moveTo(x+arm,y-gap);ctx.lineTo(x,y-gap);ctx.stroke();}
+    if(L&&Bo){ctx.beginPath();ctx.moveTo(x-gap,y+arm);ctx.lineTo(x-gap,y);ctx.moveTo(x-arm,y+gap);ctx.lineTo(x,y+gap);ctx.stroke();}
+    if(R&&Bo){ctx.beginPath();ctx.moveTo(x+gap,y+arm);ctx.lineTo(x+gap,y);ctx.moveTo(x+arm,y+gap);ctx.lineTo(x,y+gap);ctx.stroke();}
+  }
+}
 
-                    <!-- Cells and Pieces will be injected here -->
-                </div>
-            </div>
-        </div>
+function drawPiece(piece,col,row){
+  const[x,y]=xy(col,row),red=isRed(piece),R=20;
+  ctx.save();ctx.shadowColor='rgba(0,0,0,.45)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;
+  const og=ctx.createRadialGradient(x-4,y-4,2,x,y,R+2);
+  if(red){og.addColorStop(0,'#d06050');og.addColorStop(1,'#7a1510');}else{og.addColorStop(0,'#505050');og.addColorStop(1,'#101010');}
+  ctx.fillStyle=og;ctx.beginPath();ctx.arc(x,y,R+2,0,Math.PI*2);ctx.fill();ctx.restore();
+  const fg=ctx.createRadialGradient(x-5,y-5,2,x,y,R);
+  if(red){fg.addColorStop(0,'#f08070');fg.addColorStop(.5,'#c03020');fg.addColorStop(1,'#801010');}
+  else{fg.addColorStop(0,'#706050');fg.addColorStop(.5,'#201a10');fg.addColorStop(1,'#0a0808');}
+  ctx.fillStyle=fg;ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=red?'rgba(255,180,150,.5)':'rgba(200,160,80,.4)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,y,R-4,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle=red?'#ffe0c0':'#d4a060';ctx.font='bold 16px "Noto Serif SC",serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(PIECE_NAMES[piece]||piece,x,y+1);
+}
 
-        <!-- Right Sidebar: Cloud & Actions -->
-        <div class="lg:col-span-3 space-y-6 order-3">
-            <div class="trad-border bg-white shadow-sm">
-                <h2 class="calligraphy text-3xl text-red-800 mb-4">存檔管理</h2>
-                <input type="text" id="gameName" placeholder="Session Name..." class="w-full p-2 border mb-4 focus:ring-2 focus:ring-red-800 outline-none">
-                <div class="grid grid-cols-1 gap-2">
-                    <button id="saveBtn" class="bg-gray-800 text-white p-2 hover:bg-black transition">Save to Cloud</button>
-                    <button id="loadBtn" class="border border-gray-800 p-2 hover:bg-gray-50 transition">Load Session</button>
-                </div>
-            </div>
+canvas.addEventListener('click',e=>{
+  const rect=canvas.getBoundingClientRect(),sx=canvas.width/rect.width,sy=canvas.height/rect.height;
+  const mx=(e.clientX-rect.left)*sx,my=(e.clientY-rect.top)*sy;
+  const col=Math.round((mx-PAD)/CELL),row=Math.round((my-PAD)/CELL);
+  if(col<0||col>=COLS||row<0||row>=ROWS)return;
+  handleClick(col,row);
+});
 
-            <div id="msgBox" class="p-4 text-sm rounded border hidden"></div>
-
-            <div class="text-xs text-gray-400 text-center italic">
-                Player ID: <span id="uid">...</span>
-            </div>
-        </div>
-    </main>
-    <script type="module">
-        // 1. ALL FIREBASE IMPORTS REMOVED
-
-        // Constants
-        const PIECES_MAP = {
-            'r': { char: '俥', color: 'red' }, 'h': { char: '傌', color: 'red' }, 'e': { char: '相', color: 'red' },
-            'a': { char: '仕', color: 'red' }, 'g': { char: '將', color: 'red' }, 'c': { char: '炮', color: 'red' }, 's': { char: '兵', color: 'red' },
-            'R': { char: '車', color: 'black' }, 'H': { char: '馬', color: 'black' }, 'E': { char: '象', color: 'black' },
-            'A': { char: '士', color: 'black' }, 'G': { char: '帥', color: 'black' }, 'C': { char: '砲', color: 'black' }, 'S': { char: '卒', color: 'black' }
-        };
-
-        const INITIAL_BOARD = [
-            ['R','H','E','A','G','A','E','H','R'],
-            ['','','','','','','','',''],
-            ['','C','','','','','','C',''],
-            ['S','','S','','S','','S','','S'],
-            ['','','','','','','','',''],
-            ['','','','','','','','',''],
-            ['s','','s','','s','','s','','s'],
-            ['','c','','','','','','c',''],
-            ['','','','','','','','',''],
-            ['r','h','e','a','g','a','e','h','r']
-        ];
-
-        // State
-        let boardState = JSON.parse(JSON.stringify(INITIAL_BOARD));
-        let selected = null;
-        let turn = 'red';
-        // --- ADD THESE ---
-        let history = []; // Stores past board states
-        let redoStack = []; // Stores undone moves for "Forward"
-        // -----------------
-        
-        // DOM Elements
-        const boardEl = document.getElementById('board');
-        const gridLinesEl = document.getElementById('gridLines');
-        const turnIndicator = document.getElementById('turnIndicator');
-
-        function initGrid() {
-            gridLinesEl.innerHTML = ''; // Clear any existing lines
-            // Horizontal lines
-            for(let i=0; i<10; i++) {
-                const line = document.createElement('div');
-                line.className = 'grid-line-h';
-                line.style.width = '100%';
-                line.style.height = '1px';
-                line.style.top = `${(i * 11.11)}%`;
-                gridLinesEl.appendChild(line);
-            }
-            // Vertical lines
-            for(let i=0; i<9; i++) {
-                const line = document.createElement('div');
-                line.className = 'grid-line-v';
-                line.style.height = '100%';
-                line.style.width = '1px';
-                line.style.left = `${(i * 12.5)}%`;
-                
-                if (i > 0 && i < 8) {
-                    const topHalf = line.cloneNode();
-                    topHalf.style.height = '44.44%';
-                    const bottomHalf = line.cloneNode();
-                    bottomHalf.style.height = '44.44%';
-                    bottomHalf.style.top = '55.55%';
-                    gridLinesEl.appendChild(topHalf);
-                    gridLinesEl.appendChild(bottomHalf);
-                } else {
-                    gridLinesEl.appendChild(line);
-                }
-            }
-        }
-
-        function render() {
-            const elementsToRemove = boardEl.querySelectorAll('.cell');
-            elementsToRemove.forEach(e => e.remove());
-
-            boardState.forEach((row, r) => {
-                row.forEach((pCode, c) => {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.onclick = () => handleCellClick(r, c);
-
-                    if (pCode) {
-                        const p = PIECES_MAP[pCode];
-                        const pieceDiv = document.createElement('div');
-                        pieceDiv.className = `piece ${p.color} calligraphy ${selected && selected.r === r && selected.c === c ? 'selected' : ''}`;
-                        pieceDiv.textContent = p.char;
-                        cell.appendChild(pieceDiv);
-                    }
-                    boardEl.appendChild(cell);
-                });
-            });
-
-            turnIndicator.textContent = turn.charAt(0).toUpperCase() + turn.slice(1);
-            turnIndicator.className = `font-bold ${turn === 'red' ? 'text-red-700' : 'text-gray-900'}`;
-        }
-
-        function handleCellClick(r, c) {
-            const pCode = boardState[r][c];
-            const p = pCode ? PIECES_MAP[pCode] : null;
-
-            if (selected) {
-                if (selected.r === r && selected.c === c) {
-                    selected = null;
-                } else if (p && p.color === turn) {
-                    selected = { r, c };
-                } else {
-                    // --- SAVE TO HISTORY BEFORE MOVING ---
-                    history.push({
-                        board: JSON.stringify(boardState),
-                        turn: turn
-                    });
-                    redoStack = []; // Clear redo stack because a new move was made
-                    // -------------------------------------
-
-                    boardState[r][c] = boardState[selected.r][selected.c];
-                    boardState[selected.r][selected.c] = '';
-                    selected = null;
-                    turn = turn === 'red' ? 'black' : 'red';
-                }
-            } else if (p && p.color === turn) {
-                selected = { r, c };
-            }
-            render();
-        }
-
-        function start() {
-            console.log("Game Starting...");
-            initGrid();
-            render();
-        }
-
-        document.getElementById('resetBtn').onclick = () => {
-            boardState = JSON.parse(JSON.stringify(INITIAL_BOARD));
-            turn = 'red';
-            selected = null;
-            render();
-        };
-
-        // Undo Logic (Back)
-        document.getElementById('undoBtn').onclick = () => {
-            if (history.length === 0) return; // Nothing to undo
-
-            // Push current state to redoStack before going back
-            redoStack.push({
-                board: JSON.stringify(boardState),
-                turn: turn
-            });
-
-            const prevState = history.pop();
-            boardState = JSON.parse(prevState.board);
-            turn = prevState.turn;
-            selected = null;
-            render();
-        };
-
-        // Redo Logic (Forward)
-        document.getElementById('redoBtn').onclick = () => {
-            if (redoStack.length === 0) return; // Nothing to redo
-
-            // Push current state back to history before going forward
-            history.push({
-                board: JSON.stringify(boardState),
-                turn: turn
-            });
-
-            const nextState = redoStack.pop();
-            boardState = JSON.parse(nextState.board);
-            turn = nextState.turn;
-            selected = null;
-            render();
-        };
-
-        // Reset Logic (Updated to clear history)
-        document.getElementById('resetBtn').onclick = () => {
-            boardState = JSON.parse(JSON.stringify(INITIAL_BOARD));
-            turn = 'red';
-            selected = null;
-            history = [];
-            redoStack = [];
-            render();
-        };
-        
-        // Initialize on load
-        start();
-    </script>
+newGame();
+</script>
 </body>
-</html> 
+</html>
