@@ -1,22 +1,388 @@
-<!DOCTYPE html> 
-<html lang="en"> 
+<!DOCTYPE html>
+<html lang="zh">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>麒麟象棋队</title> 
-</head> 
-<body> 
+  <title>联络我们 · 麒麟象棋队</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+
+    :root {
+      --bg: #1a1208;
+      --red: #c0392b; --red-light: #e74c3c;
+      --gold: #d4a017; --gold-light: #f0c040;
+      --ui-bg: #12100a; --ui-border: #3a2a10; --ui-text: #e8d5a0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--ui-text);
+      font-family: 'Noto Serif SC', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(200,146,42,.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(192,57,43,.06) 0%, transparent 60%);
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      text-align: center;
+      margin: 30px 0 40px;
+    }
+    .page-header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 2rem;
+      letter-spacing: .2em;
+      color: var(--gold);
+      text-shadow: 0 0 20px rgba(212,160,23,.4);
+      margin-bottom: 4px;
+    }
+    .page-header .subtitle {
+      font-size: .85rem;
+      color: #8a7050;
+      letter-spacing: .3em;
+    }
+    .gold-divider {
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      margin: 16px auto 0;
+    }
+
+    /* ── Layout ── */
+    .content {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    /* ── Panels ── */
+    .panel {
+      background: var(--ui-bg);
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      padding: 24px 28px;
+    }
+    .panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: .75rem;
+      letter-spacing: .2em;
+      color: var(--gold);
+      border-bottom: 1px solid var(--ui-border);
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Contact info items ── */
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid #1e1a10;
+    }
+    .contact-item:last-child { border-bottom: none; }
+    .contact-icon {
+      font-size: 1.4rem;
+      min-width: 32px;
+      text-align: center;
+      margin-top: 2px;
+    }
+    .contact-label {
+      font-family: 'Cinzel', serif;
+      font-size: .65rem;
+      letter-spacing: .12em;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .contact-value {
+      font-size: .88rem;
+      color: var(--ui-text);
+      line-height: 1.5;
+    }
+    .contact-value a {
+      color: var(--ui-text);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .contact-value a:hover { color: var(--gold); }
+
+    /* ── Schedule table ── */
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+    }
+    .schedule-table th {
+      font-family: 'Cinzel', serif;
+      font-size: .65rem;
+      letter-spacing: .1em;
+      color: var(--gold);
+      text-align: left;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--ui-border);
+    }
+    .schedule-table td {
+      padding: 10px 10px;
+      border-bottom: 1px solid #1e1a10;
+      color: #c8b880;
+      vertical-align: middle;
+    }
+    .schedule-table tr:last-child td { border-bottom: none; }
+    .schedule-table tr:hover td { background: rgba(212,160,23,.04); }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: .7rem;
+      border: 1px solid var(--ui-border);
+      color: #9a8060;
+    }
+
+    /* ── Contact form ── */
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-family: 'Cinzel', serif;
+      font-size: .65rem;
+      letter-spacing: .12em;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%;
+      background: #0e0c08;
+      border: 1px solid var(--ui-border);
+      border-radius: 4px;
+      color: var(--ui-text);
+      font-family: 'Noto Serif SC', serif;
+      font-size: .85rem;
+      padding: 10px 12px;
+      transition: border-color .2s;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+    select.form-control option { background: #1a1208; }
+    textarea.form-control {
+      height: 110px;
+      resize: vertical;
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: #1e1808;
+      border: 1px solid var(--gold);
+      border-radius: 4px;
+      color: var(--gold);
+      font-family: 'Noto Serif SC', serif;
+      font-size: .9rem;
+      cursor: pointer;
+      transition: all .2s;
+      letter-spacing: .1em;
+    }
+    .btn-submit:hover {
+      background: rgba(212,160,23,.15);
+      box-shadow: 0 0 16px rgba(212,160,23,.2);
+    }
+    .btn-submit:active { transform: scale(.98); }
+
+    /* ── Success toast ── */
+    #toast {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: rgba(212,160,23,.12);
+      border: 1px solid var(--gold);
+      border-radius: 4px;
+      font-size: .82rem;
+      color: var(--gold-light);
+      text-align: center;
+    }
+
+    @media (max-width: 650px) {
+      .two-col { grid-template-columns: 1fr; }
+      .page-header h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
   <common-header></common-header>
-
-  <div> 
-    <p>xiangqi.xyz</p>
-    <p>象棋的点点滴滴</p>
-  </div> 
-
   <script src="assets/js/dropdown.js"></script>
   <script src="assets/js/headerFooterManager.js"></script>
 
-</body> 
-</html> 
+  <div class="page-header">
+    <h1>CONTACT US</h1>
+    <p class="subtitle">联 络 我 们</p>
+    <div class="gold-divider"></div>
+  </div>
+
+  <div class="content">
+
+    <div class="two-col">
+
+      <!-- Contact details -->
+      <div class="panel">
+        <div class="panel-title">GET IN TOUCH · 联络方式</div>
+
+        <div class="contact-item">
+          <div class="contact-icon">📧</div>
+          <div>
+            <div class="contact-label">Email</div>
+            <div class="contact-value">
+              <!-- Replace with actual club email -->
+              <a href="mailto:fzkimt@yahoo.com">fzkimt[at]yahoo[dot]com</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">💬</div>
+          <div>
+            <div class="contact-label">WhatsApp</div>
+            <div class="contact-value">
+              <!-- Replace with actual group link or number -->
+              <a href="https://chat.whatsapp.com/DB3RpCobKnsJweOMNgFb7k">Join our WhatsApp Group → </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">📍</div>
+          <div>
+            <div class="contact-label">Meeting Venue</div>
+            <div class="contact-value">
+              <!-- Replace with actual venue -->
+              Singapore (West)<br>
+              <small style="color:#6a5a30;">请联络我们获取最新地点</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">🌐</div>
+          <div>
+            <div class="contact-label">Website</div>
+            <div class="contact-value">
+              <a href="https://xiangqi.xyz" target="_blank">xiangqi.xyz</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sessions schedule -->
+      <div class="panel">
+        <div class="panel-title">SESSIONS (by appointment)· 活动时间</div>
+        <table class="schedule-table">
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Time</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Replace rows with actual schedule -->
+            <tr>
+              <td>Weekday after office hour<br><small style="color:#6a5a30">周日</small></td>
+              <td>7:30 PM onwards</td>
+              <td><span class="tag">麒麟榜</span></td>
+            </tr>
+            <tr>
+              <td>Weekend<br><small style="color:#6a5a30">周末</small></td>
+              <td>Anytime</td>
+              <td><span class="tag">Friendly Match</span></td>
+            </tr>
+            <tr>
+              <td colspan="3" style="color:#5a4a30;font-size:.78rem;padding-top:14px;">
+                ※ Schedule may vary. Contact us to confirm.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- Contact form -->
+    <div class="panel">
+      <div class="panel-title">SEND A MESSAGE · 发送留言</div>
+
+      <!-- Success message (hidden until form submits) -->
+      <div data-fs-success style="display:none;padding:12px 14px;background:rgba(212,160,23,.12);border:1px solid var(--gold);border-radius:4px;color:var(--gold-light);font-size:.85rem;text-align:center;margin-bottom:16px;">
+        ✔ Thank you! We will get back to you soon.<br>谢谢，我们将尽快回复您。
+      </div>
+
+      <!-- Form-level error (e.g. network failure) -->
+      <div data-fs-error style="display:none;padding:10px 14px;background:rgba(192,57,43,.12);border:1px solid var(--red);border-radius:4px;color:#e07060;font-size:.82rem;margin-bottom:16px;"></div>
+
+      <form id="contact-form">
+        <div class="two-col">
+          <div class="form-group">
+            <label class="form-label" for="fname">Name · 姓名</label>
+            <input class="form-control" type="text" id="fname" name="name"
+                   placeholder="Your name" data-fs-field required>
+            <span data-fs-error="name" style="color:#e07060;font-size:.75rem;"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="femail">Email · 电邮</label>
+            <input class="form-control" type="email" id="femail" name="email"
+                   placeholder="your@email.com" data-fs-field required>
+            <span data-fs-error="email" style="color:#e07060;font-size:.75rem;"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="freason">Enquiry Type · 询问类型</label>
+          <select class="form-control" id="freason" name="enquiry_type" data-fs-field required>
+            <option value="">— Please select —</option>
+            <option value="join">Join the Club · 加入棋会</option>
+            <option value="tournament">Tournament · 比赛询问</option>
+            <option value="training">Training · 培训安排</option>
+            <option value="general">General Enquiry · 一般询问</option>
+          </select>
+          <span data-fs-error="enquiry_type" style="color:#e07060;font-size:.75rem;"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="fmsg">Message · 留言</label>
+          <textarea class="form-control" id="fmsg" name="message"
+                    placeholder="Write your message here...&#10;请在此留言…"
+                    data-fs-field required></textarea>
+          <span data-fs-error="message" style="color:#e07060;font-size:.75rem;"></span>
+        </div>
+
+        <button class="btn-submit" type="submit" data-fs-submit-btn>
+          ✉ Send Message · 发送
+        </button>
+      </form>
+    </div>
+
+  </div><!-- /content -->
+
+  <script>
+    window.formspree = window.formspree || function () {
+      (formspree.q = formspree.q || []).push(arguments);
+    };
+    formspree('initForm', { formElement: '#contact-form', formId: 'xojrarrj' });
+  </script>
+  <script src="https://unpkg.com/@formspree/ajax@1" defer></script>
+
+</body>
+</html>
