@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="styles.css">
-<title>麒麟象棋队</title> 
+<title>麒麟象棋队</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
   :root {
@@ -26,6 +26,7 @@
   .btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border:1px solid var(--ui-border);border-radius:4px;background:#1e1808;color:var(--ui-text);font-family:'Noto Serif SC',serif;font-size:.82rem;cursor:pointer;transition:all .2s;gap:6px;width:100%;margin-bottom:6px}
   .btn:hover{background:var(--ui-border);border-color:var(--gold);color:var(--gold)}
   .btn:active{transform:scale(.97)}
+  .btn:disabled{opacity:.35;cursor:default;pointer-events:none}
   .btn.danger{border-color:#5a2020;color:#c05050}
   .btn.danger:hover{background:#2a1010;border-color:var(--red);color:var(--red-light)}
   #moveList{max-height:220px;overflow-y:auto;font-size:.78rem;line-height:1.8;color:#b09070;scrollbar-width:thin;scrollbar-color:var(--ui-border) transparent}
@@ -57,6 +58,21 @@
   .modal-btns{display:flex;gap:10px}
   .modal-btns .btn{margin-bottom:0}
   input[type="file"]{display:none}
+  /* ── Clock ── */
+  .clock-display{display:flex;flex-direction:column;gap:8px}
+  .clock-side{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:4px;border:1px solid var(--ui-border);transition:background .3s,border-color .3s}
+  .clock-side.active{border-color:var(--gold);background:rgba(212,160,23,.08)}
+  .clock-side.low{border-color:var(--red)!important;background:rgba(192,57,43,.12)!important;animation:pulse .6s ease infinite alternate}
+  .clock-side.flagged{border-color:var(--red)!important;background:rgba(192,57,43,.2)!important}
+  .clock-label{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.12em;color:#6a5a30}
+  .clock-label.active{color:var(--gold)}
+  .clock-time{font-family:'Cinzel',serif;font-size:1.3rem;letter-spacing:.05em;color:var(--ui-text);font-variant-numeric:tabular-nums}
+  .clock-time.low{color:var(--red-light)}
+  .clock-controls{display:flex;gap:6px;margin-top:4px}
+  .clock-controls .btn{margin-bottom:0;font-size:.75rem;padding:6px 8px}
+  .clock-setting{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:.75rem;color:#6a5a30}
+  .clock-setting input{width:44px;background:#0e0c08;border:1px solid var(--ui-border);border-radius:3px;color:var(--ui-text);font-family:'Noto Serif SC',serif;font-size:.75rem;padding:3px 6px;text-align:center}
+  .clock-setting input:focus{outline:none;border-color:var(--gold)}
 </style>
 </head>
 <body>
@@ -78,19 +94,59 @@
     </div>
   </div>
   <div class="side">
+
+    <!-- STATUS -->
     <div class="panel">
       <div class="panel-title">STATUS</div>
       <div id="status" class="red-turn">Red's Turn</div>
     </div>
+
+    <!-- CLOCK -->
+    <div class="panel">
+      <div class="panel-title">CLOCK · 时钟</div>
+      <div class="clock-display">
+        <div class="clock-side" id="clockBlack">
+          <div>
+            <div class="clock-label" id="lblBlack">BLACK</div>
+            <div class="clock-time" id="timeBlack">20:00</div>
+          </div>
+          <span style="font-size:1.2rem;opacity:.4;">⚫</span>
+        </div>
+        <div class="clock-side active" id="clockRed">
+          <div>
+            <div class="clock-label active" id="lblRed">RED</div>
+            <div class="clock-time" id="timeRed">20:00</div>
+          </div>
+          <span style="font-size:1.2rem;opacity:.6;">🔴</span>
+        </div>
+      </div>
+      <div class="clock-controls">
+        <button class="btn" onclick="clockStart()" id="btnClockStart">▶ Start</button>
+        <button class="btn" onclick="clockPause()" id="btnClockPause" disabled>⏸ Pause</button>
+        <button class="btn" onclick="clockReset()">↺ Reset</button>
+      </div>
+      <div class="clock-setting">
+        <span>Time</span>
+        <input type="number" id="settingMin" value="20" min="1" max="60"> min
+        <span>+</span>
+        <input type="number" id="settingInc" value="5" min="0" max="60"> sec
+      </div>
+    </div>
+
+    <!-- GAME -->
     <div class="panel">
       <div class="panel-title">GAME</div>
       <button class="btn" onclick="newGame()">♟ New Game</button>
       <button class="btn danger" onclick="confirmResign()">⚑ Resign</button>
     </div>
+
+    <!-- MOVE LIST -->
     <div class="panel">
       <div class="panel-title">MOVE LIST</div>
       <div id="moveList"><span style="color:#5a4a30;font-size:.75rem">No moves yet.</span></div>
     </div>
+
+    <!-- PGN -->
     <div class="panel">
       <div class="panel-title">PGN · SAVE / LOAD</div>
       <textarea id="pgnArea" placeholder="PGN appears here..."></textarea>
@@ -101,8 +157,11 @@
       <button class="btn" onclick="loadFromTextarea()">↩ Import from above</button>
       <input type="file" id="fileInput" accept=".pgn,.txt" onchange="loadPGNFile(event)">
     </div>
+
   </div>
 </div>
+
+<!-- Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h3 id="modalTitle">Confirm</h3>
@@ -113,6 +172,7 @@
     </div>
   </div>
 </div>
+
 <script>
 const COLS=9,ROWS=10,CELL=50,PAD=25;
 const PIECE_NAMES={K:'将',k:'将',A:'仕',a:'士',B:'相',b:'象',N:'马',n:'馬',R:'车',r:'車',C:'炮',c:'砲',P:'兵',p:'卒'};
@@ -141,6 +201,7 @@ function newGame(){
   board=INIT.map(r=>[...r]);
   currentTurn='red';selectedCell=null;moveHistory=[];boardHistory=[clone(board)];currentMoveIndex=0;gameOver=false;
   updateUI();render();
+  clockReset();
 }
 
 function getRaw(b,col,row,piece){
@@ -197,7 +258,9 @@ function makeMove(fc,fr_,tc,tr){
   if(!hasAnyLegal(board,opp)){gameOver=true;const w=opp==='red'?'Black':'Red';setStatus(`${w==='Red'?'🔴':'⚫'} Checkmate! ${w} wins!`,'checkmate');}
   else if(isInCheck(board,currentTurn)){setStatus(`${currentTurn==='red'?'🔴 Red':'⚫ Black'} is in CHECK!`,'check');}
   else{setStatus(`${currentTurn==='red'?'🔴 Red':'⚫ Black'}'s Turn`,currentTurn+'-turn');}
-  updateMoveList();updateNavButtons();document.getElementById('pgnArea').value=generatePGN();render();
+  updateMoveList();updateNavButtons();document.getElementById('pgnArea').value=generatePGN();
+  clockSwitch();
+  render();
 }
 
 function handleClick(col,row){
@@ -264,7 +327,8 @@ function updateMoveList(){
     const c1=currentMoveIndex===i+1,c2=currentMoveIndex===i+2;
     html+=`<div class="move-pair"><span class="move-num">${num}.</span><span class="mv${c1?' current':''}" onclick="goToMove(${i+1})" style="color:#e07060">${m1.notation}</span>${m2?`<span class="mv${c2?' current':''}" onclick="goToMove(${i+2})" style="color:#9090a0">${m2.notation}</span>`:''}</div>`;
   }
-  el.innerHTML=html;const cur=el.querySelector('.current');if(cur)el.scrollTop=cur.offsetTop-el.clientHeight/2;
+  el.innerHTML=html;
+  const cur=el.querySelector('.current');if(cur)el.scrollTop=cur.offsetTop-el.clientHeight/2;
 }
 
 function updateNavButtons(){
@@ -290,34 +354,26 @@ function xy(col,row){return[PAD+col*CELL,PAD+row*CELL];}
 function render(){
   const W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);
   ctx.fillStyle='#c8922a';ctx.fillRect(0,0,W,H);
-  // wood grain
   for(let i=0;i<H;i+=3){ctx.strokeStyle=`rgba(100,60,10,${.03+.02*Math.sin(i*.1)})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke();}
-  // grid
   ctx.strokeStyle='#7a4f10';ctx.lineWidth=1;
   for(let c=0;c<COLS;c++){const x=PAD+c*CELL;if(c===0||c===COLS-1){ctx.beginPath();ctx.moveTo(x,PAD);ctx.lineTo(x,PAD+9*CELL);ctx.stroke();}else{ctx.beginPath();ctx.moveTo(x,PAD);ctx.lineTo(x,PAD+4*CELL);ctx.stroke();ctx.beginPath();ctx.moveTo(x,PAD+5*CELL);ctx.lineTo(x,PAD+9*CELL);ctx.stroke();}}
   for(let r=0;r<ROWS;r++){const y=PAD+r*CELL;ctx.beginPath();ctx.moveTo(PAD,y);ctx.lineTo(PAD+8*CELL,y);ctx.stroke();}
-  // river
   ctx.fillStyle='rgba(100,60,10,.4)';ctx.font='bold 14px "Noto Serif SC",serif';ctx.textAlign='center';
   ctx.fillText('楚  河',PAD+1.7*CELL,PAD+4.65*CELL);ctx.fillText('汉  界',PAD+6.3*CELL,PAD+4.65*CELL);
-  // palace diagonals
   ctx.strokeStyle='#7a4f10';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(PAD+3*CELL,PAD);ctx.lineTo(PAD+5*CELL,PAD+2*CELL);ctx.stroke();
   ctx.beginPath();ctx.moveTo(PAD+5*CELL,PAD);ctx.lineTo(PAD+3*CELL,PAD+2*CELL);ctx.stroke();
   ctx.beginPath();ctx.moveTo(PAD+3*CELL,PAD+7*CELL);ctx.lineTo(PAD+5*CELL,PAD+9*CELL);ctx.stroke();
   ctx.beginPath();ctx.moveTo(PAD+5*CELL,PAD+7*CELL);ctx.lineTo(PAD+3*CELL,PAD+9*CELL);ctx.stroke();
-  // crosshairs
   drawX([[1,2],[7,2],[1,7],[7,7]]);
   drawX([[0,3],[2,3],[4,3],[6,3],[8,3],[0,6],[2,6],[4,6],[6,6],[8,6]]);
-  // last move
   if(currentMoveIndex>0){const lm=moveHistory[currentMoveIndex-1];for(const[c,r]of[[lm.fromCol,lm.fromRow],[lm.toCol,lm.toRow]]){const[x,y]=xy(c,r);ctx.fillStyle='rgba(200,180,60,.2)';ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fill();}}
-  // selection + legal
   let legal=[];
   if(selectedCell&&currentMoveIndex>=moveHistory.length){
     const[sc,sr]=selectedCell;legal=getLegal(board,sc,sr);
     const[sx,sy]=xy(sc,sr);ctx.fillStyle='rgba(255,220,80,.35)';ctx.beginPath();ctx.arc(sx,sy,22,0,Math.PI*2);ctx.fill();
   }
   for(const[tc,tr]of legal){const[x,y]=xy(tc,tr);if(board[tr][tc]){ctx.strokeStyle='rgba(255,200,50,.7)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.stroke();}else{ctx.fillStyle='rgba(255,210,60,.55)';ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fill();}}
-  // pieces
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=board[r][c];if(p)drawPiece(p,c,r);}
 }
 
@@ -354,6 +410,88 @@ canvas.addEventListener('click',e=>{
   if(col<0||col>=COLS||row<0||row>=ROWS)return;
   handleClick(col,row);
 });
+
+// ── CLOCK ──
+let clkRed=0,clkBlack=0,clkInc=5,clkActive=null,clkTimer=null,clkRunning=false;
+
+function clkMins(){return parseInt(document.getElementById('settingMin').value)||20;}
+function clkIncSec(){return parseInt(document.getElementById('settingInc').value)||0;}
+
+function clkFmt(ms){
+  const tot=Math.max(0,Math.ceil(ms/1000));
+  const m=Math.floor(tot/60),s=tot%60;
+  return`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function clockReset(){
+  clearInterval(clkTimer);clkTimer=null;clkRunning=false;
+  clkInc=clkIncSec();
+  clkRed=clkBlack=clkMins()*60*1000;
+  clkActive=null;
+  renderClock();
+  document.getElementById('btnClockStart').disabled=false;
+  document.getElementById('btnClockPause').disabled=true;
+}
+
+function clockStart(){
+  if(clkRunning)return;
+  if(clkActive===null)clkActive=currentTurn;
+  clkRunning=true;
+  document.getElementById('btnClockStart').disabled=true;
+  document.getElementById('btnClockPause').disabled=false;
+  let last=Date.now();
+  clkTimer=setInterval(()=>{
+    const now=Date.now(),dt=now-last;last=now;
+    if(clkActive==='red'){
+      clkRed=Math.max(0,clkRed-dt);
+      if(clkRed===0){flagged('red');return;}
+    }else{
+      clkBlack=Math.max(0,clkBlack-dt);
+      if(clkBlack===0){flagged('black');return;}
+    }
+    renderClock();
+  },100);
+  renderClock();
+}
+
+function clockPause(){
+  if(!clkRunning)return;
+  clearInterval(clkTimer);clkTimer=null;clkRunning=false;
+  document.getElementById('btnClockStart').disabled=false;
+  document.getElementById('btnClockPause').disabled=true;
+}
+
+function clockSwitch(){
+  if(!clkRunning||clkActive===null)return;
+  if(clkActive==='red')clkRed+=clkInc*1000;
+  else clkBlack+=clkInc*1000;
+  clkActive=clkActive==='red'?'black':'red';
+  renderClock();
+}
+
+function flagged(color){
+  clearInterval(clkTimer);clkTimer=null;clkRunning=false;
+  gameOver=true;
+  const winner=color==='red'?'Black':'Red';
+  setStatus(`⏰ Time! ${winner} wins on time!`,'checkmate');
+  document.getElementById(color==='red'?'clockRed':'clockBlack').classList.add('flagged');
+  document.getElementById(color==='red'?'timeRed':'timeBlack').textContent='00:00';
+  document.getElementById('btnClockStart').disabled=true;
+  document.getElementById('btnClockPause').disabled=true;
+}
+
+function renderClock(){
+  const tr=document.getElementById('timeRed'),tb=document.getElementById('timeBlack');
+  const cr=document.getElementById('clockRed'),cb=document.getElementById('clockBlack');
+  const lr=document.getElementById('lblRed'),lb=document.getElementById('lblBlack');
+  tr.textContent=clkFmt(clkRed);tb.textContent=clkFmt(clkBlack);
+  cr.className='clock-side'+(clkActive==='red'?' active':'')+(clkRed>0&&clkRed<=10000?' low':'');
+  cb.className='clock-side'+(clkActive==='black'?' active':'')+(clkBlack>0&&clkBlack<=10000?' low':'');
+  tr.className='clock-time'+(clkRed>0&&clkRed<=10000?' low':'');
+  tb.className='clock-time'+(clkBlack>0&&clkBlack<=10000?' low':'');
+  lr.className='clock-label'+(clkActive==='red'?' active':'');
+  lb.className='clock-label'+(clkActive==='black'?' active':'');
+}
 
 newGame();
 </script>
