@@ -1,22 +1,333 @@
-<!DOCTYPE html> 
-<html lang="en"> 
+<!DOCTYPE html>
+<html lang="zh">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>麒麟象棋队</title> 
-</head> 
-<body> 
+  <title>关于我们 · 麒麟象棋</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+
+    :root {
+      --bg: #1a1208;
+      --red: #c0392b; --red-light: #e74c3c;
+      --gold: #d4a017; --gold-light: #f0c040;
+      --ui-bg: #12100a; --ui-border: #3a2a10; --ui-text: #e8d5a0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--ui-text);
+      font-family: 'Noto Serif SC', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(200,146,42,.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(192,57,43,.06) 0%, transparent 60%);
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      text-align: center;
+      margin: 30px 0 40px;
+    }
+    .page-header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 2rem;
+      letter-spacing: .2em;
+      color: var(--gold);
+      text-shadow: 0 0 20px rgba(212,160,23,.4);
+      margin-bottom: 4px;
+    }
+    .page-header .subtitle {
+      font-size: .85rem;
+      color: #8a7050;
+      letter-spacing: .3em;
+    }
+    .gold-divider {
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      margin: 16px auto 0;
+    }
+
+    /* ── Layout ── */
+    .content {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ── Panels ── */
+    .panel {
+      background: var(--ui-bg);
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      padding: 24px 28px;
+    }
+    .panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: .75rem;
+      letter-spacing: .2em;
+      color: var(--gold);
+      border-bottom: 1px solid var(--ui-border);
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+    }
+    .panel p {
+      font-size: .9rem;
+      line-height: 1.9;
+      color: #c8b880;
+      margin-bottom: 12px;
+    }
+    .panel p:last-child { margin-bottom: 0; }
+
+    /* ── Hero banner ── */
+    .hero {
+      background: var(--ui-bg);
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      padding: 40px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '♞';
+      position: absolute;
+      font-size: 160px;
+      color: rgba(212,160,23,.04);
+      top: -20px; left: -20px;
+      line-height: 1;
+    }
+    .hero::after {
+      content: '♞';
+      position: absolute;
+      font-size: 160px;
+      color: rgba(192,57,43,.04);
+      bottom: -30px; right: -10px;
+      line-height: 1;
+      transform: scaleX(-1);
+    }
+    .hero h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8rem;
+      color: var(--gold);
+      letter-spacing: .15em;
+      margin-bottom: 8px;
+    }
+    .hero .cn-name {
+      font-size: 1.2rem;
+      color: var(--red-light);
+      letter-spacing: .3em;
+      margin-bottom: 16px;
+    }
+    .hero .tagline {
+      font-size: .9rem;
+      color: #9a8060;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 18px;
+      padding: 6px 18px;
+      border: 1px solid var(--gold);
+      border-radius: 20px;
+      font-size: .75rem;
+      color: var(--gold);
+      letter-spacing: .15em;
+    }
+
+    /* ── Committee grid ── */
+    .committee-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+    }
+    .member-card {
+      background: #1a1510;
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      padding: 16px 12px;
+      text-align: center;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .member-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 0 12px rgba(212,160,23,.12);
+    }
+    .member-icon {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    .member-role {
+      font-family: 'Cinzel', serif;
+      font-size: .62rem;
+      color: var(--gold);
+      letter-spacing: .12em;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .member-name {
+      font-size: .85rem;
+      color: var(--ui-text);
+      line-height: 1.4;
+    }
+
+    /* ── History section ── */
+    .history-text {
+      font-size: .88rem;
+      line-height: 2;
+      color: #b09870;
+      border-left: 3px solid var(--red);
+      padding-left: 18px;
+      margin-top: 4px;
+    }
+    .history-highlight {
+      color: var(--gold-light);
+      font-weight: bold;
+    }
+
+    /* ── Five districts ── */
+    .districts {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .district-badge {
+      background: #1a1510;
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      padding: 12px 6px;
+      text-align: center;
+      font-size: .8rem;
+      color: #c8b880;
+      transition: border-color .2s;
+    }
+    .district-badge:hover { border-color: var(--gold); }
+    .district-badge .district-icon { font-size: 1.3rem; margin-bottom: 6px; }
+    .district-badge .district-name { color: var(--gold); font-size: .72rem; letter-spacing: .05em; }
+
+    @media (max-width: 600px) {
+      .districts { grid-template-columns: repeat(3, 1fr); }
+      .committee-grid { grid-template-columns: repeat(2, 1fr); }
+      .page-header h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
   <common-header></common-header>
-
-  <div> 
-    <p>xiangqi.xyz</p>
-    <p>象棋的点点滴滴</p>
-  </div> 
-
   <script src="assets/js/dropdown.js"></script>
   <script src="assets/js/headerFooterManager.js"></script>
 
-</body> 
-</html> 
+  <div class="page-header">
+    <h1>ABOUT US</h1>
+    <p class="subtitle">关 于 我 们</p>
+    <div class="gold-divider"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="cn-name">麒麟象棋</div>
+      <h2>Kirin Xiangqi</h2>
+      <p class="tagline">
+        Promoting the art and tradition of Chinese Chess in Singapore —
+        welcoming players of all levels to compete, learn, and grow together.
+      </p>
+      <div class="badge">Unique Entity Number (UEN) T25SS0047J· Singapore</div>
+    </div>
+
+    <!-- Mission -->
+    <div class="panel">
+      <div class="panel-title">OUR MISSION · 我们的使命</div>
+      <p>
+        麒麟象棋队致力于在新加坡推广和传承中华象棋文化，汇聚棋友，以棋会友，弘扬中华传统文化。
+      </p>
+      <p>
+        Kirin Xiangqi Club is dedicated to promoting the rich heritage of Chinese Chess (象棋)
+        in Singapore. We bring together enthusiasts of all skill levels — from beginners to
+        seasoned players — to share in the joy of this ancient strategic art form.
+      </p>
+      <p>
+        We organise regular training sessions, friendly competitions, and inter-district tournaments,
+        fostering camaraderie and sporting excellence within our community.
+      </p>
+    </div>
+
+    <!-- Committee -->
+    <div class="panel">
+      <div class="panel-title">COMMITTEE · 委员会</div>
+      <div class="committee-grid">
+        <div class="member-card">
+          <div class="member-icon">♔</div>
+          <div class="member-role">President</div>
+          <div class="member-name">Thong Weng Soon<br><small style="color:#6a5a30;font-size:.75rem">唐永顺</small></div>
+        </div>
+        <div class="member-card">
+          <div class="member-icon">✍</div>
+          <div class="member-role">Secretary</div>
+          <div class="member-name">Lee Weng Yew<br><small style="color:#6a5a30;font-size:.75rem">李永耀</small></div>
+        </div>
+        <div class="member-card">
+          <div class="member-icon">💰</div>
+          <div class="member-role">Treasurer</div>
+          <div class="member-name">Zhang Shun<br><small style="color:#6a5a30;font-size:.75rem">张舜</small></div>
+        </div>
+        <div class="member-card">
+          <div class="member-icon">♟</div>
+          <div class="member-role">Committee</div>
+          <div class="member-name">Tan Guan Hao<br><small style="color:#6a5a30;font-size:.75rem">陈冠豪</small></div>
+        </div>
+        <div class="member-card">
+          <div class="member-icon">♟</div>
+          <div class="member-role">Committee</div>
+          <div class="member-name">Tan Kok Tong<br><small style="color:#6a5a30;font-size:.75rem">陈国栋</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="panel">
+      <div class="panel-title">HISTORY · 历史沿革</div>
+      <p class="history-text">
+        <span class="history-highlight">组成全星五区棋会计划</span><br><br>
+        新加坡体育理事会要求象总旗下至少拥有 5 个正式棋会会员。在会长林关浩多次宣布此目标后，
+        本会积极响应，于 <span class="history-highlight">2024年10月7日</span> 正式发出成立东、南、西、北、中五区棋会的倡议，
+        涵盖各区区长、秘书、财政及委员名单。<br><br>
+        此后，本会与会长林关浩密切联系，先后举行 <span class="history-highlight">两次全国五区联席会议</span>，
+        第2次联席会议于 <span class="history-highlight">2025年11月1日</span> 晚上7时半假象总召开，
+        共商新春棋友杯团体赛及五区棋友杯邀请赛事宜。<br><br>
+        各棋会赛后相继向注册局注册：南区（弈林轩）于 <span class="history-highlight">2025年2月28日</span> 率先完成注册，
+        西区于3月、北区于 <span class="history-highlight">2025年4月1日</span>、中区与东区于5月相继完成注册。
+        <span class="history-highlight">西区于2025年4月4日</span> 正式宣告成立。<br><br>
+        <span class="history-highlight">2025年12月19日</span>，全星五区棋会全部注册成功，
+        新加坡东、南、西、北、中五区棋会正式合法成立，
+        为新加坡象棋文化发展注入新动力，勇至光辉创辉煌。
+      </p>
+
+      <div class="districts" style="margin-top:20px;">
+        <div class="district-badge"><div class="district-icon">🧭</div><div class="district-name">东区</div><div>East</div></div>
+        <div class="district-badge"><div class="district-icon">🧭</div><div class="district-name">南区</div><div>South</div></div>
+        <div class="district-badge"><div class="district-icon">🧭</div><div class="district-name">西区</div><div>West</div></div>
+        <div class="district-badge"><div class="district-icon">🧭</div><div class="district-name">北区</div><div>North</div></div>
+        <div class="district-badge"><div class="district-icon">🧭</div><div class="district-name">中区</div><div>Central</div></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+</body>
+</html>
