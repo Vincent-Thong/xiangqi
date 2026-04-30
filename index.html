@@ -264,7 +264,7 @@ function updateMoveList(){
     const c1=currentMoveIndex===i+1,c2=currentMoveIndex===i+2;
     html+=`<div class="move-pair"><span class="move-num">${num}.</span><span class="mv${c1?' current':''}" onclick="goToMove(${i+1})" style="color:#e07060">${m1.notation}</span>${m2?`<span class="mv${c2?' current':''}" onclick="goToMove(${i+2})" style="color:#9090a0">${m2.notation}</span>`:''}</div>`;
   }
-  el.innerHTML=html;const cur=el.querySelector('.current');if(cur)cur.scrollIntoView({block:'nearest'});
+  el.innerHTML=html;const cur=el.querySelector('.current');if(cur)el.scrollTop=cur.offsetTop-el.clientHeight/2;
 }
 
 function updateNavButtons(){
