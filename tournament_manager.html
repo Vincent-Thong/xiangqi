@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="styles.css">
+<title>赛事管理 · 麒麟象棋队</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+  :root{--bg:#1a1208;--red:#c0392b;--red-light:#e74c3c;--gold:#d4a017;--gold-light:#f0c040;--ui-bg:#12100a;--ui-border:#3a2a10;--ui-text:#e8d5a0;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ui-text);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:radial-gradient(ellipse at 20% 20%,rgba(200,146,42,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(192,57,43,.06) 0%,transparent 60%);}
+  .page-header{text-align:center;margin:30px 0 30px;}
+  .page-header h1{font-family:'Cinzel',serif;font-size:2rem;letter-spacing:.2em;color:var(--gold);text-shadow:0 0 20px rgba(212,160,23,.4);margin-bottom:4px;}
+  .page-header .subtitle{font-size:.85rem;color:#8a7050;letter-spacing:.3em;}
+  .gold-divider{width:120px;height:2px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:16px auto 0;}
+  .content{width:100%;max-width:980px;display:flex;flex-direction:column;gap:20px;}
+  .panel{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;padding:18px 22px;}
+  .panel-title{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.2em;color:var(--gold);border-bottom:1px solid var(--ui-border);padding-bottom:8px;margin-bottom:14px;}
+  /* Tabs */
+  .tabs{display:flex;gap:0;border-bottom:1px solid var(--ui-border);margin-bottom:20px;}
+  .tab{padding:10px 20px;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.15em;color:#6a5a30;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
+  .tab:hover{color:var(--ui-text);}
+  .tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+  /* Buttons */
+  .btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 16px;border:1px solid var(--ui-border);border-radius:4px;background:#1e1808;color:var(--ui-text);font-family:'Noto Serif SC',serif;font-size:.82rem;cursor:pointer;transition:all .2s;gap:6px;text-decoration:none;}
+  .btn:hover{background:var(--ui-border);border-color:var(--gold);color:var(--gold);}
+  .btn:active{transform:scale(.97);}
+  .btn:disabled{opacity:.35;cursor:default;pointer-events:none;}
+  .btn-gold{padding:9px 20px;background:#1e1808;border:1px solid var(--gold);border-radius:4px;color:var(--gold);font-family:'Noto Serif SC',serif;font-size:.85rem;cursor:pointer;transition:all .2s;}
+  .btn-gold:hover{background:rgba(212,160,23,.15);}
+  .btn-red{border-color:#5a2020;color:#c05050;}
+  .btn-red:hover{background:#2a1010;border-color:var(--red);color:var(--red-light);}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  /* Forms */
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+  .form-group{display:flex;flex-direction:column;gap:5px;}
+  .form-label{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.1em;color:var(--gold);}
+  .form-control{background:#0e0c08;border:1px solid var(--ui-border);border-radius:4px;color:var(--ui-text);font-family:'Noto Serif SC',serif;font-size:.83rem;padding:8px 10px;transition:border-color .2s;width:100%;}
+  .form-control:focus{outline:none;border-color:var(--gold);}
+  select.form-control option{background:#1a1208;}
+  /* Player list */
+  .player-list{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--ui-border) transparent;}
+  .player-row{display:grid;grid-template-columns:32px 1fr auto auto auto;align-items:center;gap:10px;padding:8px 10px;background:#0e0c08;border:1px solid var(--ui-border);border-radius:4px;font-size:.83rem;}
+  .player-num{color:#5a4a30;font-family:'Cinzel',serif;font-size:.7rem;text-align:center;}
+  .player-name{color:var(--ui-text);}
+  .player-rating{color:#8a7050;font-size:.78rem;}
+  .player-status{font-size:.7rem;padding:2px 8px;border-radius:10px;border:1px solid;text-align:center;}
+  .status-active{border-color:#2a6a30;color:#60c070;}
+  .status-bye{border-color:#5a4a10;color:#a09040;}
+  .status-withdrawn{border-color:#5a2020;color:#c05050;}
+  /* Standings table */
+  .standings-table{width:100%;border-collapse:collapse;font-size:.83rem;}
+  .standings-table th{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.1em;color:var(--gold);text-align:left;padding:7px 10px;border-bottom:1px solid var(--ui-border);background:var(--ui-bg);}
+  .standings-table td{padding:8px 10px;border-bottom:1px solid #1e1a10;color:#c8b880;background:var(--ui-bg);vertical-align:middle;}
+  .standings-table tr:hover td{background:rgba(212,160,23,.04);}
+  .standings-table .rank-1{color:var(--gold-light);font-weight:bold;}
+  .standings-table .rank-2{color:#b0b0c0;}
+  .standings-table .rank-3{color:#c87040;}
+  /* Pairings */
+  .pairing-card{background:#0e0c08;border:1px solid var(--ui-border);border-radius:4px;padding:12px 14px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:10px;}
+  .pairing-red{color:#e07060;font-size:.85rem;}
+  .pairing-black{color:#9090a0;font-size:.85rem;}
+  .pairing-vs{color:#5a4a30;font-family:'Cinzel',serif;font-size:.7rem;text-align:center;}
+  .result-btns{display:flex;gap:4px;}
+  .result-btn{padding:4px 10px;font-size:.72rem;border:1px solid var(--ui-border);border-radius:3px;background:#1a1208;color:#8a7050;cursor:pointer;transition:all .15s;font-family:'Noto Serif SC',serif;}
+  .result-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .result-btn.selected-red{background:rgba(192,57,43,.2);border-color:var(--red);color:var(--red-light);}
+  .result-btn.selected-draw{background:rgba(100,80,40,.2);border-color:#8a7050;color:#c8b880;}
+  .result-btn.selected-black{background:rgba(60,60,80,.2);border-color:#6a6a90;color:#a0a0c0;}
+  /* Info badge */
+  .info-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:.72rem;border:1px solid var(--ui-border);color:#8a7050;background:#1a1208;}
+  .info-badge.gold{border-color:var(--gold);color:var(--gold);}
+  .info-badge.red{border-color:var(--red);color:var(--red-light);}
+  /* Modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:#1a1208;border:1px solid var(--gold);border-radius:8px;padding:24px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.8);}
+  .modal h3{font-family:'Cinzel',serif;color:var(--gold);margin-bottom:14px;font-size:.9rem;letter-spacing:.15em;}
+  .modal-btns{display:flex;gap:10px;margin-top:16px;}
+  .alert{padding:10px 14px;border-radius:4px;font-size:.82rem;margin-bottom:12px;line-height:1.6;}
+  .alert-gold{background:rgba(212,160,23,.08);border:1px solid var(--gold);color:var(--gold-light);}
+  .alert-red{background:rgba(192,57,43,.08);border:1px solid var(--red);color:#e07060;}
+  /* Stats row */
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+  .stat-card{background:#0e0c08;border:1px solid var(--ui-border);border-radius:4px;padding:12px;text-align:center;}
+  .stat-num{font-family:'Cinzel',serif;font-size:1.4rem;color:var(--gold);}
+  .stat-lbl{font-size:.68rem;color:#6a5a30;letter-spacing:.1em;margin-top:4px;}
+  input[type=file]{display:none;}
+  .bye-indicator{font-size:.72rem;color:#8a7050;font-style:italic;}
+  @media(max-width:650px){
+    .form-row{grid-template-columns:1fr;}
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    .pairing-card{grid-template-columns:1fr;gap:6px;}
+  }
+</style>
+</head>
+<body>
+<common-header></common-header>
+<script src="assets/js/dropdown.js"></script>
+<script src="assets/js/headerFooterManager.js"></script>
+
+<div class="page-header">
+  <h1>TOURNAMENT</h1>
+  <p class="subtitle">象 棋 赛 事 管 理</p>
+  <div class="gold-divider"></div>
+</div>
+
+<div class="content">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('players')">棋手 Players</div>
+    <div class="tab" onclick="switchTab('pairings')">对阵 Pairings</div>
+    <div class="tab" onclick="switchTab('standings')">积分 Standings</div>
+    <div class="tab" onclick="switchTab('settings')">设置 Settings</div>
+  </div>
+
+  <!-- ── PLAYERS TAB ── -->
+  <div id="tab-players" class="tab-content active">
+    <div class="panel">
+      <div class="panel-title">添加棋手 · ADD PLAYER</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">姓名 Name</label>
+          <input class="form-control" type="text" id="inp-name" placeholder="棋手姓名">
+        </div>
+        <div class="form-group">
+          <label class="form-label">等级分 Rating (optional)</label>
+          <input class="form-control" type="number" id="inp-rating" placeholder="0" min="0">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-gold" onclick="addPlayer()">+ 添加棋手</button>
+        <button class="btn" onclick="document.getElementById('import-file').click()">📂 导入名单</button>
+        <input type="file" id="import-file" accept=".json,.txt,.csv" onchange="importPlayers(event)">
+        <span id="player-count-badge" class="info-badge gold">0 棋手</span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">棋手名单 · PLAYER LIST</div>
+      <div class="player-list" id="player-list">
+        <div style="color:#5a4a30;font-size:.78rem;padding:10px;">尚未添加棋手。请在上方输入棋手信息。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PAIRINGS TAB ── -->
+  <div id="tab-pairings" class="tab-content">
+    <div class="panel">
+      <div class="panel-title">轮次控制 · ROUND CONTROL</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num" id="stat-round">0</div><div class="stat-lbl">当前轮次</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-players">0</div><div class="stat-lbl">参赛人数</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-rounds">0</div><div class="stat-lbl">总轮数</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-games">0</div><div class="stat-lbl">已完成局数</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-gold" id="btn-gen-pairings" onclick="generatePairings()">⚔ 生成本轮对阵</button>
+        <button class="btn" id="btn-next-round" onclick="finaliseRound()" disabled>→ 确认本轮结果</button>
+        <button class="btn btn-red" onclick="confirmReset()">↺ 重置赛事</button>
+      </div>
+      <div id="round-alert" style="margin-top:12px;display:none;"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title" id="pairings-title">对阵表 · PAIRINGS</div>
+      <div id="pairings-list">
+        <div style="color:#5a4a30;font-size:.78rem;padding:10px;">请先在"棋手"页面添加至少2名棋手，然后点击"生成本轮对阵"。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STANDINGS TAB ── -->
+  <div id="tab-standings" class="tab-content">
+    <div class="panel">
+      <div class="panel-title">积分榜 · STANDINGS</div>
+      <div class="btn-row" style="margin-bottom:14px;">
+        <button class="btn" onclick="exportStandings()">💾 导出积分榜</button>
+        <button class="btn" onclick="exportJSON()">💾 保存赛事数据</button>
+        <button class="btn" onclick="document.getElementById('load-file').click()">📂 载入赛事数据</button>
+        <input type="file" id="load-file" accept=".json" onchange="loadJSON(event)">
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="standings-table" id="standings-table">
+          <thead>
+            <tr>
+              <th>名次</th><th>姓名</th><th>积分</th><th>胜</th><th>负</th><th>和</th><th>轮空</th><th>布赫霍兹</th><th>直接对局</th>
+            </tr>
+          </thead>
+          <tbody id="standings-body">
+            <tr><td colspan="9" style="color:#5a4a30;font-size:.78rem;">尚无数据。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel" id="history-panel">
+      <div class="panel-title">对局历史 · GAME HISTORY</div>
+      <div id="history-body" style="color:#5a4a30;font-size:.78rem;">尚无对局记录。</div>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS TAB ── -->
+  <div id="tab-settings" class="tab-content">
+    <div class="panel">
+      <div class="panel-title">赛事设置 · TOURNAMENT SETTINGS</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">赛事名称 Tournament Name</label>
+          <input class="form-control" type="text" id="set-name" placeholder="麒麟杯象棋邀请赛">
+        </div>
+        <div class="form-group">
+          <label class="form-label">赛事日期 Date</label>
+          <input class="form-control" type="date" id="set-date">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">总轮数 Total Rounds</label>
+          <input class="form-control" type="number" id="set-rounds" value="5" min="1" max="20">
+        </div>
+        <div class="form-group">
+          <label class="form-label">积分制 Scoring System</label>
+          <select class="form-control" id="set-scoring">
+            <option value="1-0-0.5">胜1分·负0分·和0.5分</option>
+            <option value="2-0-1">胜2分·负0分·和1分</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">轮空积分 Bye Score</label>
+          <select class="form-control" id="set-bye">
+            <option value="1">1分 (full point)</option>
+            <option value="0.5" selected>0.5分 (half point)</option>
+            <option value="0">0分</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">排名优先顺序 Tiebreak Order</label>
+          <select class="form-control" id="set-tiebreak">
+            <option value="buchholz-wins-direct">布赫霍兹 → 胜局数 → 直接对局</option>
+            <option value="wins-buchholz-direct">胜局数 → 布赫霍兹 → 直接对局</option>
+            <option value="direct-buchholz-wins">直接对局 → 布赫霍兹 → 胜局数</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-gold" onclick="saveSettings()">✔ 保存设置</button>
+      <div id="settings-alert" style="margin-top:12px;display:none;"></div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">确认</h3>
+    <p id="modal-msg" style="font-size:.83rem;color:#b09070;line-height:1.7;"></p>
+    <div class="modal-btns">
+      <button class="btn-gold" id="modal-ok">确认</button>
+      <button class="btn" onclick="closeModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────
+let state = {
+  settings: { name:'麒麟杯象棋邀请赛', date:'', totalRounds:5, scoring:'1-0-0.5', bye:0.5, tiebreak:'buchholz-wins-direct' },
+  players: [],   // {id, name, rating, status:'active'|'bye'|'withdrawn'}
+  rounds: [],    // [{pairings:[{red,black,result}]}]  result: 'red'|'draw'|'black'|'bye'|null
+  currentRound: 0,
+  pairingsGenerated: false
+};
+
+function getScores(){ const s=state.settings.scoring.split('-'); return {win:+s[0],loss:+s[1],draw:+s[2]}; }
+
+// ── Persistence ────────────────────────────────────────────────
+function saveLocal(){ try{ localStorage.setItem('xiangqi_tournament', JSON.stringify(state)); }catch(e){} }
+function loadLocal(){ try{ const d=localStorage.getItem('xiangqi_tournament'); if(d){ state=JSON.parse(d); renderAll(); } }catch(e){} }
+
+// ── Tabs ───────────────────────────────────────────────────────
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    const ids=['players','pairings','standings','settings'];
+    el.classList.toggle('active', ids[i]===t);
+  });
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='standings') renderStandings();
+}
+
+// ── Modal ──────────────────────────────────────────────────────
+function showModal(title,msg,onOk){ document.getElementById('modal-title').textContent=title; document.getElementById('modal-msg').textContent=msg; document.getElementById('modal-ok').onclick=()=>{closeModal();onOk();}; document.getElementById('modal').classList.add('open'); }
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+// ── Settings ───────────────────────────────────────────────────
+function saveSettings(){
+  state.settings.name = document.getElementById('set-name').value || state.settings.name;
+  state.settings.date = document.getElementById('set-date').value;
+  state.settings.totalRounds = parseInt(document.getElementById('set-rounds').value)||5;
+  state.settings.scoring = document.getElementById('set-scoring').value;
+  state.settings.bye = parseFloat(document.getElementById('set-bye').value);
+  state.settings.tiebreak = document.getElementById('set-tiebreak').value;
+  saveLocal(); showAlert('settings-alert','✔ 设置已保存','alert alert-gold');
+  renderStats();
+}
+function loadSettingsUI(){
+  document.getElementById('set-name').value = state.settings.name;
+  document.getElementById('set-date').value = state.settings.date;
+  document.getElementById('set-rounds').value = state.settings.totalRounds;
+  document.getElementById('set-scoring').value = state.settings.scoring;
+  document.getElementById('set-bye').value = state.settings.bye;
+  document.getElementById('set-tiebreak').value = state.settings.tiebreak;
+}
+
+// ── Players ────────────────────────────────────────────────────
+let nextId = 1;
+function addPlayer(){
+  const name=document.getElementById('inp-name').value.trim();
+  if(!name){ document.getElementById('inp-name').focus(); return; }
+  if(state.currentRound>0){ showAlert('round-alert','⚠ 赛事进行中，请先完成本届赛事再修改棋手名单。','alert alert-red'); return; }
+  const rating=parseInt(document.getElementById('inp-rating').value)||0;
+  state.players.push({id:nextId++, name, rating, status:'active'});
+  document.getElementById('inp-name').value='';
+  document.getElementById('inp-rating').value='';
+  document.getElementById('inp-name').focus();
+  saveLocal(); renderPlayers();
+}
+function removePlayer(id){
+  if(state.currentRound>0) return;
+  state.players=state.players.filter(p=>p.id!==id);
+  saveLocal(); renderPlayers();
+}
+function toggleWithdrawn(id){
+  const p=state.players.find(p=>p.id===id);
+  if(!p)return;
+  p.status = p.status==='withdrawn'?'active':'withdrawn';
+  saveLocal(); renderPlayers();
+}
+function renderPlayers(){
+  const el=document.getElementById('player-list');
+  if(!state.players.length){ el.innerHTML='<div style="color:#5a4a30;font-size:.78rem;padding:10px;">尚未添加棋手。</div>'; document.getElementById('player-count-badge').textContent='0 棋手'; return; }
+  // Sort by rating desc
+  const sorted=[...state.players].sort((a,b)=>b.rating-a.rating);
+  el.innerHTML=sorted.map((p,i)=>`
+    <div class="player-row">
+      <div class="player-num">${i+1}</div>
+      <div class="player-name">${esc(p.name)}</div>
+      <div class="player-rating">${p.rating||'—'}</div>
+      <div><span class="player-status ${p.status==='active'?'status-active':p.status==='bye'?'status-bye':'status-withdrawn'}">${p.status==='active'?'参赛':p.status==='bye'?'轮空':'退赛'}</span></div>
+      <div style="display:flex;gap:4px;">
+        <button class="btn btn-red" style="padding:3px 8px;font-size:.7rem;" onclick="toggleWithdrawn(${p.id})" ${state.currentRound>0?'disabled':''}>${p.status==='withdrawn'?'恢复':'退赛'}</button>
+        <button class="btn" style="padding:3px 8px;font-size:.7rem;" onclick="removePlayer(${p.id})" ${state.currentRound>0?'disabled':''}>✕</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('player-count-badge').textContent=state.players.length+' 棋手';
+}
+
+// ── Swiss Pairing Algorithm ────────────────────────────────────
+function computePoints(){
+  const pts={}, wins={}, games={};
+  state.players.forEach(p=>{ pts[p.id]=0; wins[p.id]=0; games[p.id]={}; });
+  const sc=getScores();
+  state.rounds.forEach(rnd=>{
+    rnd.pairings.forEach(pair=>{
+      if(pair.result===null) return;
+      if(pair.result==='bye'){ pts[pair.red]=(pts[pair.red]||0)+state.settings.bye; return; }
+      const {red,black,result}=pair;
+      games[red][black]=(games[red][black]||0)+1;
+      games[black][red]=(games[black][red]||0)+1;
+      if(result==='red'){ pts[red]+=sc.win; pts[black]+=sc.loss; wins[red]++; }
+      else if(result==='black'){ pts[black]+=sc.win; pts[red]+=sc.loss; wins[black]++; }
+      else{ pts[red]+=sc.draw; pts[black]+=sc.draw; }
+    });
+  });
+  return {pts,wins,games};
+}
+
+function computeBuchholz(pts,games){
+  const bh={};
+  state.players.forEach(p=>{
+    let sum=0;
+    Object.keys(games[p.id]||{}).forEach(oppId=>{ sum+=(pts[parseInt(oppId)]||0); });
+    bh[p.id]=sum;
+  });
+  return bh;
+}
+
+function directEncounter(pid1, pid2){
+  // returns score of pid1 against pid2
+  let sc=0; const s=getScores();
+  state.rounds.forEach(rnd=>{
+    rnd.pairings.forEach(pair=>{
+      if(pair.result===null||pair.result==='bye') return;
+      if(pair.red===pid1&&pair.black===pid2){
+        if(pair.result==='red') sc+=s.win;
+        else if(pair.result==='draw') sc+=s.draw;
+      } else if(pair.red===pid2&&pair.black===pid1){
+        if(pair.result==='black') sc+=s.win;
+        else if(pair.result==='draw') sc+=s.draw;
+      }
+    });
+  });
+  return sc;
+}
+
+function havePlayed(id1,id2){
+  return state.rounds.some(rnd=>rnd.pairings.some(p=>(p.red===id1&&p.black===id2)||(p.red===id2&&p.black===id1)));
+}
+
+function generatePairings(){
+  const active=state.players.filter(p=>p.status!=='withdrawn');
+  if(active.length<2){ showAlert('round-alert','⚠ 需要至少2名有效棋手才能生成对阵。','alert alert-red'); return; }
+  if(state.currentRound>=state.settings.totalRounds){ showAlert('round-alert','✔ 所有轮次已完成！请查看积分榜。','alert alert-gold'); return; }
+  // Check if previous round is complete
+  if(state.rounds.length>0 && state.pairingsGenerated){
+    const last=state.rounds[state.rounds.length-1];
+    const incomplete=last.pairings.filter(p=>p.result===null&&p.result!=='bye');
+    if(incomplete.length>0){ showAlert('round-alert','⚠ 请先录入本轮所有对局结果。','alert alert-red'); return; }
+  }
+  if(state.pairingsGenerated){ showAlert('round-alert','⚠ 本轮对阵已生成，请先录入结果后再生成下一轮。','alert alert-red'); return; }
+
+  const {pts}=computePoints();
+  // Sort by points desc, then rating desc
+  const sorted=[...active].sort((a,b)=> (pts[b.id]||0)-(pts[a.id]||0) || b.rating-a.rating);
+
+  // Determine bye
+  let byePlayer=null;
+  if(sorted.length%2!==0){
+    // Give bye to lowest-ranked player who hasn't had one yet
+    for(let i=sorted.length-1;i>=0;i--){
+      const had=state.rounds.some(r=>r.pairings.some(p=>p.result==='bye'&&p.red===sorted[i].id));
+      if(!had){ byePlayer=sorted[i]; sorted.splice(i,1); break; }
+    }
+    if(!byePlayer){ byePlayer=sorted.pop(); }
+  }
+
+  // Pair within score groups, avoid rematches
+  const pairings=[];
+  const paired=new Set();
+  // Simple Dutch-ish: pair top vs next available who they haven't played
+  for(let i=0;i<sorted.length;i++){
+    if(paired.has(sorted[i].id)) continue;
+    for(let j=i+1;j<sorted.length;j++){
+      if(paired.has(sorted[j].id)) continue;
+      if(!havePlayed(sorted[i].id,sorted[j].id)||sorted.length<=2){
+        // Assign colours based on history
+        const redCnt=colourCount(sorted[i].id,'red');
+        const blkCnt=colourCount(sorted[i].id,'black');
+        let red,black;
+        if(redCnt>blkCnt){ red=sorted[j]; black=sorted[i]; }
+        else { red=sorted[i]; black=sorted[j]; }
+        pairings.push({red:red.id,black:black.id,result:null});
+        paired.add(sorted[i].id); paired.add(sorted[j].id);
+        break;
+      }
+    }
+    // If no opponent found (all played), pair with next unpaired
+    if(!paired.has(sorted[i].id)){
+      for(let j=i+1;j<sorted.length;j++){
+        if(!paired.has(sorted[j].id)){
+          pairings.push({red:sorted[i].id,black:sorted[j].id,result:null});
+          paired.add(sorted[i].id); paired.add(sorted[j].id);
+          break;
+        }
+      }
+    }
+  }
+  if(byePlayer) pairings.push({red:byePlayer.id,black:null,result:'bye'});
+
+  state.currentRound++;
+  state.rounds.push({pairings});
+  state.pairingsGenerated=true;
+  document.getElementById('btn-next-round').disabled=false;
+  saveLocal(); renderPairings(); renderStats();
+  hideAlert('round-alert');
+}
+
+function colourCount(id,colour){
+  let n=0;
+  state.rounds.forEach(r=>r.pairings.forEach(p=>{
+    if(colour==='red'&&p.red===id&&p.result!=='bye') n++;
+    if(colour==='black'&&p.black===id&&p.result!=='bye') n++;
+  }));
+  return n;
+}
+
+function setResult(roundIdx,pairingIdx,result){
+  state.rounds[roundIdx].pairings[pairingIdx].result=result;
+  saveLocal(); renderPairings();
+}
+
+function finaliseRound(){
+  const last=state.rounds[state.rounds.length-1];
+  const incomplete=last.pairings.filter(p=>p.result===null);
+  if(incomplete.length>0){ showAlert('round-alert','⚠ 请先录入所有对局结果（包括轮空）。','alert alert-red'); return; }
+  state.pairingsGenerated=false;
+  if(state.currentRound>=state.settings.totalRounds){
+    showAlert('round-alert','✔ 全部 '+state.settings.totalRounds+' 轮已完成！请查看积分榜。','alert alert-gold');
+    document.getElementById('btn-gen-pairings').disabled=true;
+    document.getElementById('btn-next-round').disabled=true;
+  } else {
+    document.getElementById('btn-next-round').disabled=true;
+    hideAlert('round-alert');
+  }
+  saveLocal(); renderStats();
+}
+
+// ── Standings ──────────────────────────────────────────────────
+function renderStandings(){
+  const {pts,wins,games}=computePoints();
+  const bh=computeBuchholz(pts,games);
+  const tb=state.settings.tiebreak;
+
+  const rows=state.players.filter(p=>p.status!=='withdrawn').map(p=>{
+    let draws=0,losses=0,byes=0;
+    state.rounds.forEach(r=>r.pairings.forEach(pair=>{
+      if(pair.result==='bye'&&pair.red===p.id){byes++; return;}
+      if((pair.red===p.id||pair.black===p.id)&&pair.result!==null&&pair.result!=='bye'){
+        if(pair.result==='draw') draws++;
+        else if((pair.result==='red'&&pair.black===p.id)||(pair.result==='black'&&pair.red===p.id)) losses++;
+      }
+    }));
+    return {id:p.id,name:p.name,pts:pts[p.id]||0,wins:wins[p.id]||0,draws,losses,byes,bh:bh[p.id]||0};
+  });
+
+  rows.sort((a,b)=>{
+    if(a.pts!==b.pts) return b.pts-a.pts;
+    const order=tb.split('-');
+    for(const t of order){
+      if(t==='buchholz'&&a.bh!==b.bh) return b.bh-a.bh;
+      if(t==='wins'&&a.wins!==b.wins) return b.wins-a.wins;
+      if(t==='direct'){
+        const de=directEncounter(b.id,a.id)-directEncounter(a.id,b.id);
+        if(de!==0) return de;
+      }
+    }
+    return 0;
+  });
+
+  const tbody=document.getElementById('standings-body');
+  if(!rows.length){ tbody.innerHTML='<tr><td colspan="9" style="color:#5a4a30;font-size:.78rem;">尚无数据。</td></tr>'; return; }
+  tbody.innerHTML=rows.map((r,i)=>{
+    const cls=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'';
+    return `<tr><td class="${cls}">${i+1}</td><td class="${cls}">${esc(r.name)}</td><td><b>${fmt(r.pts)}</b></td><td>${r.wins}</td><td>${r.losses}</td><td>${r.draws}</td><td>${r.byes}</td><td>${fmt(r.bh)}</td><td>${fmt(directEncounter(r.id,rows[0]?.id||0))}</td></tr>`;
+  }).join('');
+
+  // History
+  const hel=document.getElementById('history-body');
+  if(!state.rounds.length){ hel.innerHTML='<div style="color:#5a4a30;font-size:.78rem;">尚无对局记录。</div>'; return; }
+  hel.innerHTML=state.rounds.map((rnd,ri)=>`
+    <div style="margin-bottom:12px;">
+      <div style="font-family:'Cinzel',serif;font-size:.68rem;color:var(--gold);letter-spacing:.1em;margin-bottom:6px;">第 ${ri+1} 轮</div>
+      ${rnd.pairings.map(p=>{
+        const red=state.players.find(x=>x.id===p.red);
+        const black=state.players.find(x=>x.id===p.black);
+        if(p.result==='bye') return `<div style="font-size:.78rem;color:#6a5a30;padding:3px 0;">${esc(red?.name||'?')} — 轮空</div>`;
+        const res=p.result==='red'?`<span style="color:#e07060">红胜</span>`:p.result==='black'?`<span style="color:#9090a0">黑胜</span>`:p.result==='draw'?`<span style="color:#a09040">和棋</span>`:`<span style="color:#5a4a30">未录入</span>`;
+        return `<div style="font-size:.78rem;color:#c8b880;padding:3px 0;display:flex;gap:8px;"><span style="color:#e07060">${esc(red?.name||'?')}</span><span style="color:#5a4a30">vs</span><span style="color:#9090a0">${esc(black?.name||'?')}</span><span>—</span>${res}</div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+// ── Pairings render ────────────────────────────────────────────
+function renderPairings(){
+  if(!state.rounds.length){ document.getElementById('pairings-list').innerHTML='<div style="color:#5a4a30;font-size:.78rem;padding:10px;">尚未生成对阵。</div>'; return; }
+  const roundIdx=state.rounds.length-1;
+  const rnd=state.rounds[roundIdx];
+  document.getElementById('pairings-title').textContent=`第 ${roundIdx+1} 轮对阵 · ROUND ${roundIdx+1} PAIRINGS`;
+  document.getElementById('pairings-list').innerHTML=rnd.pairings.map((p,pi)=>{
+    const red=state.players.find(x=>x.id===p.red);
+    const black=p.black?state.players.find(x=>x.id===p.black):null;
+    if(p.result==='bye') return `<div class="pairing-card" style="grid-template-columns:1fr auto;"><span class="pairing-red">${esc(red?.name||'?')}</span><span class="bye-indicator">轮空 BYE（+${state.settings.bye}分）</span></div>`;
+    const rs=p.result, ri=roundIdx, pii=pi;
+    return `<div class="pairing-card">
+      <span class="pairing-red">🔴 ${esc(red?.name||'?')} <small style="color:#6a5a30">(${state.players.find(x=>x.id===p.red)?.rating||'—'})</small></span>
+      <span class="pairing-vs">VS</span>
+      <span class="pairing-black">⚫ ${esc(black?.name||'?')} <small style="color:#6a5a30">(${state.players.find(x=>x.id===p.black)?.rating||'—'})</small></span>
+      <div class="result-btns">
+        <button class="result-btn ${rs==='red'?'selected-red':''}" onclick="setResult(${ri},${pii},'red')">红胜</button>
+        <button class="result-btn ${rs==='draw'?'selected-draw':''}" onclick="setResult(${ri},${pii},'draw')">和棋</button>
+        <button class="result-btn ${rs==='black'?'selected-black':''}" onclick="setResult(${ri},${pii},'black')">黑胜</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Stats bar ──────────────────────────────────────────────────
+function renderStats(){
+  document.getElementById('stat-round').textContent=state.currentRound;
+  document.getElementById('stat-players').textContent=state.players.filter(p=>p.status!=='withdrawn').length;
+  document.getElementById('stat-rounds').textContent=state.settings.totalRounds;
+  let completed=0;
+  state.rounds.forEach(r=>r.pairings.forEach(p=>{ if(p.result!==null) completed++; }));
+  document.getElementById('stat-games').textContent=completed;
+}
+
+// ── Export ─────────────────────────────────────────────────────
+function exportStandings(){
+  const {pts,wins,games}=computePoints();
+  const bh=computeBuchholz(pts,games);
+  const rows=state.players.filter(p=>p.status!=='withdrawn').map(p=>({id:p.id,name:p.name,pts:pts[p.id]||0,wins:wins[p.id]||0,bh:bh[p.id]||0}));
+  rows.sort((a,b)=>b.pts-a.pts||b.bh-a.bh||b.wins-a.wins);
+  const lines=[`${state.settings.name} — 积分榜`,`日期: ${state.settings.date||'—'}`,``,`名次\t姓名\t积分\t胜局\t布赫霍兹`,...rows.map((r,i)=>`${i+1}\t${r.name}\t${r.pts}\t${r.wins}\t${r.bh}`)];
+  dl(lines.join('\n'),'standings.txt','text/plain');
+}
+function exportJSON(){ dl(JSON.stringify(state,null,2),'tournament_data.json','application/json'); }
+function loadJSON(e){
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{ try{ state=JSON.parse(ev.target.result); nextId=Math.max(...state.players.map(p=>p.id),0)+1; renderAll(); saveLocal(); }catch(err){ alert('文件格式错误'); } };
+  r.readAsText(f); e.target.value='';
+}
+function importPlayers(e){
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const lines=ev.target.result.split('\n').map(l=>l.trim()).filter(Boolean);
+    lines.forEach(line=>{
+      const parts=line.split(/[,\t]/);
+      const name=parts[0]?.trim(); const rating=parseInt(parts[1])||0;
+      if(name) state.players.push({id:nextId++,name,rating,status:'active'});
+    });
+    saveLocal(); renderPlayers();
+  };
+  r.readAsText(f); e.target.value='';
+}
+function dl(content,filename,type){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type}));
+  a.download=filename; a.click();
+}
+
+// ── Reset ──────────────────────────────────────────────────────
+function confirmReset(){
+  showModal('重置赛事','确定要重置所有对局数据吗？棋手名单将保留，但所有轮次记录将清除。此操作无法撤销。',()=>{
+    state.rounds=[]; state.currentRound=0; state.pairingsGenerated=false;
+    document.getElementById('btn-gen-pairings').disabled=false;
+    document.getElementById('btn-next-round').disabled=true;
+    saveLocal(); renderAll();
+  });
+}
+
+// ── Helpers ────────────────────────────────────────────────────
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmt(n){ return Number.isInteger(n)?n:parseFloat(n.toFixed(1)); }
+function showAlert(id,msg,cls){ const el=document.getElementById(id); el.className=cls; el.textContent=msg; el.style.display='block'; }
+function hideAlert(id){ document.getElementById(id).style.display='none'; }
+
+function renderAll(){
+  loadSettingsUI(); renderPlayers(); renderPairings(); renderStats();
+  document.getElementById('btn-next-round').disabled=!state.pairingsGenerated;
+  if(state.currentRound>=state.settings.totalRounds&&state.currentRound>0){
+    document.getElementById('btn-gen-pairings').disabled=true;
+  }
+}
+
+// ── Init ───────────────────────────────────────────────────────
+loadLocal();
+if(!state.players.length) renderAll();
+</script>
+</body>
+</html>
