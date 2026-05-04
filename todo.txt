@@ -1,0 +1,13 @@
+
+[merchant.html]
+
+Things to update before going live
+Field Where
+Product names, descriptions, prices|Each .product-card in the HTML
+Actual product photos|Replace the emoji in .product-img with <img> tags
+Payment details|The purchasing notes panel at the bottom
+Formspree ID|Already uses xojrarrj — same as contact.html
+
+
+To add a real product photo, replace e.g. ♟ with:
+html<img src="assets/img/rosewood-pieces.jpg" style="width:100%;height:100%;object-fit:cover;">
