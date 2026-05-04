@@ -6,13 +6,6 @@
 <link rel="stylesheet" href="styles.css">
 <title>麒麟象棋队</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
-  :root {
-    --bg:#1a1208;--board-bg:#c8922a;--board-line:#7a4f10;
-    --red:#c0392b;--red-light:#e74c3c;
-    --gold:#d4a017;--gold-light:#f0c040;
-    --ui-bg:#12100a;--ui-border:#3a2a10;--ui-text:#e8d5a0;
-  }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--ui-text);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:radial-gradient(ellipse at 20% 20%,rgba(200,146,42,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(192,57,43,.06) 0%,transparent 60%)}
   h1{font-family:'Cinzel',serif;font-size:2rem;letter-spacing:.2em;color:var(--gold);text-shadow:0 0 20px rgba(212,160,23,.4);margin-bottom:4px}
@@ -21,14 +14,6 @@
   .board-wrap{position:relative;background:var(--board-bg);border:3px solid var(--board-line);border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,.7),inset 0 0 60px rgba(0,0,0,.15);padding:30px}
   canvas#boardCanvas{display:block;cursor:pointer}
   .side{width:240px;display:flex;flex-direction:column;gap:14px}
-  .panel{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;padding:14px}
-  .panel-title{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.2em;color:var(--gold);border-bottom:1px solid var(--ui-border);padding-bottom:8px;margin-bottom:10px}
-  .btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border:1px solid var(--ui-border);border-radius:4px;background:#1e1808;color:var(--ui-text);font-family:'Noto Serif SC',serif;font-size:.82rem;cursor:pointer;transition:all .2s;gap:6px;width:100%;margin-bottom:6px}
-  .btn:hover{background:var(--ui-border);border-color:var(--gold);color:var(--gold)}
-  .btn:active{transform:scale(.97)}
-  .btn:disabled{opacity:.35;cursor:default;pointer-events:none}
-  .btn.danger{border-color:#5a2020;color:#c05050}
-  .btn.danger:hover{background:#2a1010;border-color:var(--red);color:var(--red-light)}
   #moveList{max-height:220px;overflow-y:auto;font-size:.78rem;line-height:1.8;color:#b09070;scrollbar-width:thin;scrollbar-color:var(--ui-border) transparent}
   #moveList .move-pair{display:flex;gap:6px;padding:2px 0}
   #moveList .move-num{color:#5a4a30;min-width:22px}
@@ -50,13 +35,6 @@
   #pgnArea:focus{outline:none;border-color:var(--gold)}
   .file-row{display:flex;gap:6px;margin-bottom:6px}
   .file-row .btn{margin-bottom:0}
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center}
-  .modal-overlay.open{display:flex}
-  .modal{background:#1a1208;border:1px solid var(--gold);border-radius:8px;padding:24px;max-width:340px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.8)}
-  .modal h3{font-family:'Cinzel',serif;color:var(--gold);margin-bottom:14px}
-  .modal p{font-size:.85rem;color:#b09070;margin-bottom:18px;line-height:1.6}
-  .modal-btns{display:flex;gap:10px}
-  .modal-btns .btn{margin-bottom:0}
   input[type="file"]{display:none}
   /* ── Clock ── */
   .clock-display{display:flex;flex-direction:column;gap:8px}
