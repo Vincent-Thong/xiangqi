@@ -1,126 +1,466 @@
-/* embed youtube videos */
-.video-container {
-    position: relative;
-    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-    height: 0;
-    overflow: hidden;
-    max-width: 100%;
-    background: #000;
-    margin: 20px 0;
+/* ============================================================
+   XIANGQI.XYZ — COMPLETE STYLES
+   Merged: original styles + shared design system
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+
+/* ── Variables ─────────────────────────────────────────────── */
+:root {
+  --bg:         #1a1208;
+  --board-bg:   #c8922a;
+  --board-line: #7a4f10;
+  --red:        #c0392b;
+  --red-light:  #e74c3c;
+  --gold:       #d4a017;
+  --gold-light: #f0c040;
+  --ui-bg:      #12100a;
+  --ui-border:  #3a2a10;
+  --ui-text:    #e8d5a0;
 }
 
-.video-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* table style */
+/* ── Base body ─────────────────────────────────────────────── */
+body {
+  background: var(--bg);
+  color: var(--ui-text);
+  font-family: 'Noto Serif SC', serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(200,146,42,.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(192,57,43,.06)  0%, transparent 60%);
+}
+
+/* ── Page header ───────────────────────────────────────────── */
+.page-header {
+  text-align: center;
+  margin: 30px 0 40px;
+}
+.page-header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  letter-spacing: .2em;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(212,160,23,.4);
+  margin-bottom: 4px;
+}
+.page-header .subtitle {
+  font-size: .85rem;
+  color: #8a7050;
+  letter-spacing: .3em;
+}
+.gold-divider {
+  width: 120px;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+  margin: 16px auto 0;
+}
+
+/* ── h1 shorthand (used on index.html) ─────────────────────── */
+h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  letter-spacing: .2em;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(212,160,23,.4);
+  margin-bottom: 4px;
+}
+.subtitle {
+  font-size: .85rem;
+  color: #8a7050;
+  letter-spacing: .3em;
+  margin-bottom: 20px;
+}
+
+/* ── Content wrapper ───────────────────────────────────────── */
+.content {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ── Grid helpers ──────────────────────────────────────────── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ── Panel (card) ──────────────────────────────────────────── */
+.panel {
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  padding: 24px 28px;
+}
+.panel-title {
+  font-family: 'Cinzel', serif;
+  font-size: .75rem;
+  letter-spacing: .2em;
+  color: var(--gold);
+  border-bottom: 1px solid var(--ui-border);
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+}
+.panel p {
+  font-size: .9rem;
+  line-height: 1.9;
+  color: #c8b880;
+  margin-bottom: 12px;
+}
+.panel p:last-child { margin-bottom: 0; }
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border: 1px solid var(--ui-border);
+  border-radius: 4px;
+  background: #1e1808;
+  color: var(--ui-text);
+  font-family: 'Noto Serif SC', serif;
+  font-size: .82rem;
+  cursor: pointer;
+  transition: all .2s;
+  gap: 6px;
+  width: 100%;
+  margin-bottom: 6px;
+  text-decoration: none;
+}
+.btn:hover {
+  background: var(--ui-border);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.btn:active  { transform: scale(.97); }
+.btn:disabled {
+  opacity: .35;
+  cursor: default;
+  pointer-events: none;
+}
+.btn.danger  { border-color: #5a2020; color: #c05050; }
+.btn.danger:hover {
+  background: #2a1010;
+  border-color: var(--red);
+  color: var(--red-light);
+}
+/* Gold outlined button — used for primary actions like form submit */
+.btn-gold {
+  width: 100%;
+  padding: 12px;
+  background: #1e1808;
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  color: var(--gold);
+  font-family: 'Noto Serif SC', serif;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .1em;
+}
+.btn-gold:hover {
+  background: rgba(212,160,23,.15);
+  box-shadow: 0 0 16px rgba(212,160,23,.2);
+}
+.btn-gold:active { transform: scale(.98); }
+
+/* ── Form controls ─────────────────────────────────────────── */
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: .65rem;
+  letter-spacing: .12em;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.form-control {
+  width: 100%;
+  background: #0e0c08;
+  border: 1px solid var(--ui-border);
+  border-radius: 4px;
+  color: var(--ui-text);
+  font-family: 'Noto Serif SC', serif;
+  font-size: .85rem;
+  padding: 10px 12px;
+  transition: border-color .2s;
+}
+.form-control:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+select.form-control option { background: #1a1208; }
+textarea.form-control {
+  height: 110px;
+  resize: vertical;
+}
+
+/* ── Tables ────────────────────────────────────────────────── */
+/* Generic <table> — matches dark theme, replaces old light theme */
 table {
-    width: 100%;
-    border-collapse: collapse; /* This removes the double-border look */
-    margin: 20px 0;
-    font-family: 'Noto Serif SC', serif;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-family: 'Noto Serif SC', serif;
+  font-size: .85rem;
 }
-
 th, td {
-    border: 1px solid #5a2d05; /* Using your wood-dark color */
-    padding: 12px;
-    text-align: left;
+  border: 1px solid var(--ui-border);
+  padding: 10px 12px;
+  text-align: left;
 }
-
 th {
-    background-color: #b91c1c; /* Imperial Red */
-    color: white;
+  background: #1e1208;
+  color: var(--gold);
+  font-family: 'Cinzel', serif;
+  font-size: .68rem;
+  letter-spacing: .1em;
+}
+td {
+  color: #c8b880;
+  background: var(--ui-bg);
+}
+tr:nth-child(even) td { background: #151008; }
+tr:hover td { background: rgba(212,160,23,.04); }
+
+/* Utility class for panels that want a cleaner borderless table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .85rem;
+}
+.data-table th {
+  font-family: 'Cinzel', serif;
+  font-size: .65rem;
+  letter-spacing: .1em;
+  color: var(--gold);
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--ui-border);
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  background: var(--ui-bg);
+}
+.data-table td {
+  padding: 10px;
+  border: none;
+  border-bottom: 1px solid #1e1a10;
+  color: #c8b880;
+  vertical-align: middle;
+  background: var(--ui-bg);
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(212,160,23,.04); }
+
+/* ── Badge / tag ───────────────────────────────────────────── */
+.tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: .7rem;
+  border: 1px solid var(--ui-border);
+  color: #9a8060;
+  background: #1a1208;
+}
+.tag.gold  { border-color: var(--gold); color: var(--gold); }
+.tag.red   { border-color: var(--red);  color: var(--red-light); }
+.tag.green { border-color: #2a6a30;     color: #60c070; }
+
+/* ── Alert / notice boxes ──────────────────────────────────── */
+.alert {
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: .85rem;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.alert.gold {
+  background: rgba(212,160,23,.1);
+  border: 1px solid var(--gold);
+  color: var(--gold-light);
+}
+.alert.red {
+  background: rgba(192,57,43,.1);
+  border: 1px solid var(--red);
+  color: #e07060;
 }
 
-tr:nth-child(even) {
-    background-color: #f7e6c4; /* Wood Light for alternating rows */
+/* ── Modal ─────────────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
 }
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #1a1208;
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 340px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,.8);
+}
+.modal h3 {
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.modal p {
+  font-size: .85rem;
+  color: #b09070;
+  margin-bottom: 18px;
+  line-height: 1.6;
+}
+.modal-btns { display: flex; gap: 10px; }
+.modal-btns .btn { margin-bottom: 0; }
 
-/* Add a black background color to the top navigation */
-.topnav {
-  background-color: #333;
+/* ── YouTube video embed ───────────────────────────────────── */
+.video-container {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
   overflow: hidden;
+  max-width: 100%;
+  background: #000;
+  margin: 16px 0;
+  border-radius: 4px;
+  border: 1px solid var(--ui-border);
+}
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
-/* Style the links inside the navigation bar */
+/* ── Top navigation (headerFooterManager.js injects this) ──── */
+.topnav {
+  background-color: #12100a;
+  overflow: hidden;
+  width: 100%;
+  border-bottom: 1px solid var(--ui-border);
+}
 .topnav a {
   float: left;
-  color: #f2f2f2;
+  color: var(--ui-text);
   text-align: center;
   padding: 14px 16px;
   text-decoration: none;
-  font-size: 17px;
+  font-size: .85rem;
+  font-family: 'Noto Serif SC', serif;
+  transition: color .2s, background .2s;
 }
-
-/* Change the color of links on hover */
-.topnav a:hover, .dropdown:hover .dropbtn {
-  background-color: #ddd;
-  color: black;
+.topnav a:hover,
+.dropdown:hover .dropbtn {
+  background-color: var(--ui-border);
+  color: var(--gold);
 }
-
-/* Add a color to the active/current link */
 .topnav a.active {
-  background-color: #04AA6D;
-  color: white;
+  color: var(--gold);
+  border-bottom: 2px solid var(--gold);
 }
 
-/* The dropdown container */
+/* ── Dropdown navigation ───────────────────────────────────── */
 .dropdown {
   float: left;
   overflow: hidden;
 }
-
-/* Dropdown button */
 .dropdown .dropbtn {
-  font-size: 16px;
+  font-size: .85rem;
   border: none;
   outline: none;
-  color: white;
+  color: var(--ui-text);
   padding: 14px 16px;
   background-color: inherit;
-  font-family: inherit; /* Important for vertical align on mobile phones */
-  margin: 0; /* Important for vertical align on mobile phones */
+  font-family: 'Noto Serif SC', serif;
+  margin: 0;
+  cursor: pointer;
+  transition: color .2s, background .2s;
 }
-
-/* Dropdown content (hidden by default) */
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
+  background-color: #1a1208;
+  border: 1px solid var(--ui-border);
+  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.6);
+  z-index: 10;
+  border-radius: 0 0 4px 4px;
 }
-
-/* Links inside the dropdown */
 .dropdown-content a {
   float: none;
-  color: black;
+  color: var(--ui-text);
   padding: 12px 16px;
   text-decoration: none;
   display: block;
   text-align: left;
+  font-size: .82rem;
+  font-family: 'Noto Serif SC', serif;
+  transition: background .2s, color .2s;
 }
-
-/* Add a grey background color to dropdown links on hover */
 .dropdown-content a:hover {
-  background-color: #ddd;
+  background-color: var(--ui-border);
+  color: var(--gold);
 }
+.show { display: block; }
 
-.show {
-  display: block;
-}
-
+/* ── Footer ────────────────────────────────────────────────── */
 .footer {
   position: fixed;
   left: 0;
   bottom: 0;
   width: 100%;
-  background-color: #333;
-  color: yellow;
+  background-color: #12100a;
+  border-top: 1px solid var(--ui-border);
+  color: var(--gold);
   text-align: center;
+  padding: 10px;
+  font-size: .78rem;
+  font-family: 'Noto Serif SC', serif;
+  z-index: 50;
+}
+
+/* ── Keyframes ─────────────────────────────────────────────── */
+@keyframes pulse {
+  from { box-shadow: none; }
+  to   { box-shadow: 0 0 12px rgba(192,57,43,.5); }
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 650px) {
+  .two-col        { grid-template-columns: 1fr; }
+  .three-col      { grid-template-columns: 1fr; }
+  .page-header h1 { font-size: 1.5rem; }
+  .panel          { padding: 16px; }
+  .topnav a,
+  .dropdown .dropbtn { padding: 10px 12px; font-size: .78rem; }
+}
+@media (max-width: 900px) {
+  .three-col { grid-template-columns: repeat(2, 1fr); }
 }
