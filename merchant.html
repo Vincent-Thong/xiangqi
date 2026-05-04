@@ -1,22 +1,378 @@
-<!DOCTYPE html> 
-<html lang="en"> 
+<!DOCTYPE html>
+<html lang="zh">
 <head>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>麒麟象棋队</title> 
-</head> 
-<body> 
-  <common-header></common-header>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="styles.css">
+<title>棋具商店 · 麒麟象棋队</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+  :root{--bg:#1a1208;--red:#c0392b;--red-light:#e74c3c;--gold:#d4a017;--gold-light:#f0c040;--ui-bg:#12100a;--ui-border:#3a2a10;--ui-text:#e8d5a0;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ui-text);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:radial-gradient(ellipse at 20% 20%,rgba(200,146,42,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(192,57,43,.06) 0%,transparent 60%);}
 
-  <div> 
-    <p>xiangqi.xyz</p>
-    <p>象棋的点点滴滴</p>
-  </div> 
+  /* ── Page header ── */
+  .page-header{text-align:center;margin:30px 0 36px;}
+  .page-header h1{font-family:'Cinzel',serif;font-size:2rem;letter-spacing:.2em;color:var(--gold);text-shadow:0 0 20px rgba(212,160,23,.4);margin-bottom:4px;}
+  .page-header .subtitle{font-size:.85rem;color:#8a7050;letter-spacing:.3em;}
+  .gold-divider{width:120px;height:2px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:16px auto 0;}
 
-  <script src="assets/js/dropdown.js"></script>
-  <script src="assets/js/headerFooterManager.js"></script>
+  .content{width:100%;max-width:980px;display:flex;flex-direction:column;gap:28px;}
 
-</body> 
-</html> 
+  /* ── Category filter ── */
+  .filter-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:4px;}
+  .filter-btn{padding:6px 18px;border:1px solid var(--ui-border);border-radius:20px;background:transparent;color:#8a7050;font-family:'Noto Serif SC',serif;font-size:.78rem;cursor:pointer;transition:all .2s;}
+  .filter-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .filter-btn.active{border-color:var(--gold);background:rgba(212,160,23,.1);color:var(--gold);}
+
+  /* ── Product grid ── */
+  .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;}
+  .product-card{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;overflow:hidden;transition:border-color .2s,box-shadow .2s;display:flex;flex-direction:column;}
+  .product-card:hover{border-color:var(--gold);box-shadow:0 0 20px rgba(212,160,23,.1);}
+  .product-img{width:100%;aspect-ratio:4/3;background:#0e0c08;display:flex;align-items:center;justify-content:center;font-size:3.5rem;border-bottom:1px solid var(--ui-border);position:relative;}
+  .product-img .cat-badge{position:absolute;top:10px;left:10px;font-size:.65rem;padding:3px 10px;border-radius:10px;font-family:'Cinzel',serif;letter-spacing:.1em;}
+  .badge-pieces{background:rgba(192,57,43,.2);border:1px solid var(--red);color:var(--red-light);}
+  .badge-boards{background:rgba(212,160,23,.15);border:1px solid var(--gold);color:var(--gold);}
+  .badge-books{background:rgba(60,100,60,.2);border:1px solid #3a7a3a;color:#70c070;}
+  .badge-accessories{background:rgba(60,60,120,.2);border:1px solid #4a4a9a;color:#9090d0;}
+  .product-body{padding:16px;flex:1;display:flex;flex-direction:column;gap:10px;}
+  .product-name{font-size:.95rem;color:var(--ui-text);line-height:1.4;}
+  .product-name-zh{font-size:.78rem;color:#8a7050;margin-top:2px;}
+  .product-desc{font-size:.78rem;color:#6a5a30;line-height:1.7;flex:1;}
+  .product-price{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold);}
+  .product-price small{font-size:.68rem;color:#6a5a30;font-family:'Noto Serif SC',serif;}
+  .btn-enquire{width:100%;padding:10px;background:#1e1808;border:1px solid var(--gold);border-radius:4px;color:var(--gold);font-family:'Noto Serif SC',serif;font-size:.82rem;cursor:pointer;transition:all .2s;letter-spacing:.05em;}
+  .btn-enquire:hover{background:rgba(212,160,23,.15);box-shadow:0 0 12px rgba(212,160,23,.15);}
+  .product-card.hidden{display:none;}
+
+  /* ── Modal ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:#1a1208;border:1px solid var(--gold);border-radius:8px;padding:0;max-width:500px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.9);max-height:90vh;overflow-y:auto;}
+  .modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--ui-border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  .modal-header h3{font-family:'Cinzel',serif;color:var(--gold);font-size:.9rem;letter-spacing:.12em;}
+  .modal-close{background:none;border:none;color:#6a5a30;font-size:1.2rem;cursor:pointer;line-height:1;padding:0;}
+  .modal-close:hover{color:var(--gold);}
+  .modal-body{padding:20px 24px;}
+  .modal-product-info{display:flex;gap:14px;align-items:center;padding:12px;background:#0e0c08;border:1px solid var(--ui-border);border-radius:4px;margin-bottom:18px;}
+  .modal-product-icon{font-size:2rem;min-width:44px;text-align:center;}
+  .modal-product-name{font-size:.88rem;color:var(--ui-text);}
+  .modal-product-price{font-family:'Cinzel',serif;font-size:.95rem;color:var(--gold);margin-top:4px;}
+  .form-group{margin-bottom:14px;}
+  .form-label{display:block;font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.12em;color:var(--gold);margin-bottom:5px;}
+  .form-control{width:100%;background:#0e0c08;border:1px solid var(--ui-border);border-radius:4px;color:var(--ui-text);font-family:'Noto Serif SC',serif;font-size:.83rem;padding:9px 11px;transition:border-color .2s;}
+  .form-control:focus{outline:none;border-color:var(--gold);}
+  select.form-control option{background:#1a1208;}
+  textarea.form-control{height:90px;resize:vertical;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .btn-submit{width:100%;padding:12px;background:#1e1808;border:1px solid var(--gold);border-radius:4px;color:var(--gold);font-family:'Noto Serif SC',serif;font-size:.88rem;cursor:pointer;transition:all .2s;letter-spacing:.08em;margin-top:4px;}
+  .btn-submit:hover{background:rgba(212,160,23,.15);}
+  .btn-submit:active{transform:scale(.98);}
+  .success-msg{display:none;padding:14px;background:rgba(212,160,23,.1);border:1px solid var(--gold);border-radius:4px;color:var(--gold-light);font-size:.83rem;text-align:center;line-height:1.7;margin-top:12px;}
+  .error-msg{display:none;padding:10px 14px;background:rgba(192,57,43,.1);border:1px solid var(--red);border-radius:4px;color:#e07060;font-size:.78rem;margin-bottom:12px;}
+
+  /* ── Info panel ── */
+  .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .info-card{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;padding:18px;text-align:center;}
+  .info-icon{font-size:1.6rem;margin-bottom:10px;}
+  .info-title{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--gold);margin-bottom:6px;}
+  .info-text{font-size:.78rem;color:#8a7050;line-height:1.7;}
+
+  .panel{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;padding:20px 24px;}
+  .panel-title{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.2em;color:var(--gold);border-bottom:1px solid var(--ui-border);padding-bottom:8px;margin-bottom:14px;}
+
+  @media(max-width:650px){
+    .info-grid{grid-template-columns:1fr;}
+    .form-row{grid-template-columns:1fr;}
+    .filter-bar{gap:6px;}
+  }
+</style>
+</head>
+<body>
+
+<common-header></common-header>
+<script src="assets/js/dropdown.js"></script>
+<script src="assets/js/headerFooterManager.js"></script>
+
+<div class="page-header">
+  <h1>SHOP</h1>
+  <p class="subtitle">棋 具 商 店</p>
+  <div class="gold-divider"></div>
+</div>
+
+<div class="content">
+
+  <!-- Info row -->
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-icon">🚚</div>
+      <div class="info-title">DELIVERY · 配送</div>
+      <div class="info-text">本地配送或自取<br>Local delivery & self-collection available</div>
+    </div>
+    <div class="info-card">
+      <div class="info-icon">✉</div>
+      <div class="info-title">ENQUIRY · 询问</div>
+      <div class="info-text">点击商品提交询问表格<br>Click any product to enquire</div>
+    </div>
+    <div class="info-card">
+      <div class="info-icon">♟</div>
+      <div class="info-title">QUALITY · 品质</div>
+      <div class="info-text">精选优质象棋棋具<br>Curated quality Xiangqi equipment</div>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterProducts('all', this)">全部 All</button>
+    <button class="filter-btn" onclick="filterProducts('pieces', this)">棋子 Pieces</button>
+    <button class="filter-btn" onclick="filterProducts('boards', this)">棋盘 Boards</button>
+    <button class="filter-btn" onclick="filterProducts('books', this)">书籍 Books</button>
+    <button class="filter-btn" onclick="filterProducts('accessories', this)">配件 Accessories</button>
+  </div>
+
+  <!-- Product grid -->
+  <div class="product-grid" id="product-grid">
+
+    <!-- PIECES -->
+    <div class="product-card" data-cat="pieces">
+      <div class="product-img">♟<span class="cat-badge badge-pieces">棋子</span></div>
+      <div class="product-body">
+        <div><div class="product-name">Standard Plastic Pieces</div><div class="product-name-zh">标准塑料象棋</div></div>
+        <div class="product-desc">Durable ABS plastic, suitable for beginners and casual play. Red & black engraved characters.</div>
+        <div class="product-price">S$8 <small>/ set 一套</small></div>
+        <button class="btn-enquire" onclick="openModal('Standard Plastic Pieces 标准塑料象棋','pieces','S$8 / set','♟')">询问 Enquire</button>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="pieces">
+      <div class="product-img">♟<span class="cat-badge badge-pieces">棋子</span></div>
+      <div class="product-body">
+        <div><div class="product-name">Rosewood Carved Pieces</div><div class="product-name-zh">红木雕刻象棋</div></div>
+        <div class="product-desc">Premium rosewood with hand-carved characters. Rich grain and weight, ideal for serious players.</div>
+        <div class="product-price">S$45 <small>/ set 一套</small></div>
+        <button class="btn-enquire" onclick="openModal('Rosewood Carved Pieces 红木雕刻象棋','pieces','S$45 / set','♟')">询问 Enquire</button>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="pieces">
+      <div class="product-img">♟<span class="cat-badge badge-pieces">棋子</span></div>
+      <div class="product-body">
+        <div><div class="product-name">Jade-style Resin Pieces</div><div class="product-name-zh">玉石仿制象棋</div></div>
+        <div class="product-desc">Elegant jade-green and ivory resin finish. A beautiful gift option with presentation box.</div>
+        <div class="product-price">S$28 <small>/ set 一套</small></div>
+        <button class="btn-enquire" onclick="openModal('Jade-style Resin Pieces 玉石仿制象棋','pieces','S$28 / set','♟')">询问 Enquire</button>
+      </div>
+    </div>
+
+    <!-- BOARDS -->
+    <div class="product-card" data-cat="boards">
+      <div class="product-img">⬛<span class="cat-badge badge-boards">棋盘</span></div>
+      <div class="product-body">
+        <div><div class="product-name">Foldable Vinyl Board</div><div class="product-name-zh">折叠软棋盘</div></div>
+        <div class="product-desc">Lightweight and portable vinyl board. Folds flat for easy storage. 45cm × 50cm.</div>
+        <div class="product-price">S$6 <small>/ piece 一张</small></div>
+        <button class="btn-enquire" onclick="openModal('Foldable Vinyl Board 折叠软棋盘','boards','S$6 / piece','⬛')">询问 Enquire</button>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="boards">
+      <div class="product-img">⬛<span class="cat-badge badge-boards">棋盘</span></div>
+      <div class="product-body">
+        <div><div class="product-name">Solid Hardwood Board</div><div class="product-name-zh">实木棋盘</div></div>
+        <div class="product-desc">Polished solid wood board with laser-engraved grid. A centrepiece for your study or living room.</div>
+        <div class="product-price">S$65 <small>/ piece 一张</small></div>
+        <button class="btn-enquire" onclick="openModal('Solid Hardwood Board 实木棋盘','boards','S$65 / piece','⬛')">询问 Enquire</button>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="boards">
+      <div class="product-img">⬛<span class="cat-badge badge-boards">棋盘</span></div>
+      <div class="product-body">
+        <div><div class="product-name">Deluxe Combo Set</div><div class="product-name-zh">豪华套装（盘+子）</div></div>
+        <div class="product-desc">Hardwood board bundled with rosewood pieces. A complete premium set — great as a gift.</div>
+        <div class="product-price">S$98 <small>/ set 一套</small></div>
+        <button class="btn-enquire" onclick="openModal('Deluxe Combo Set 豪华套装','boards','S$98 / set','⬛')">询问 Enquire</button>
+      </div>
+    </div>
+
+    <!-- BOOKS -->
+    <div class="product-card" data-cat="books">
+      <div class="product-img">📖<span class="cat-badge badge-books">书籍</span></div>
+      <div class="product-body">
+        <div><div class="product-name">Beginner's Guide to Xiangqi</div><div class="product-name-zh">象棋入门教程</div></div>
+        <div class="product-desc">Step-by-step illustrated guide covering rules, basic tactics and opening principles. Bilingual CN/EN.</div>
+        <div class="product-price">S$12 <small>/ book 一本</small></div>
+        <button class="btn-enquire" onclick="openModal('Beginner\'s Guide to Xiangqi 象棋入门教程','books','S$12 / book','📖')">询问 Enquire</button>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="books">
+      <div class="product-img">📖<span class="cat-badge badge-books">书籍</span></div>
+      <div class="product-body">
+        <div><div class="product-name">Classical Endgame Puzzles</div><div class="product-name-zh">象棋残局精选</div></div>
+        <div class="product-desc">200 classic endgame puzzles from ancient and modern masters. Graded by difficulty.</div>
+        <div class="product-price">S$18 <small>/ book 一本</small></div>
+        <button class="btn-enquire" onclick="openModal('Classical Endgame Puzzles 象棋残局精选','books','S$18 / book','📖')">询问 Enquire</button>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="books">
+      <div class="product-img">📖<span class="cat-badge badge-books">书籍</span></div>
+      <div class="product-body">
+        <div><div class="product-name">Intermediate Tactics & Strategy</div><div class="product-name-zh">象棋中级战术</div></div>
+        <div class="product-desc">Covers mid-game combinations, cannon tactics, chariot coordination and common attack patterns.</div>
+        <div class="product-price">S$20 <small>/ book 一本</small></div>
+        <button class="btn-enquire" onclick="openModal('Intermediate Tactics 象棋中级战术','books','S$20 / book','📖')">询问 Enquire</button>
+      </div>
+    </div>
+
+    <!-- ACCESSORIES -->
+    <div class="product-card" data-cat="accessories">
+      <div class="product-img">⏱<span class="cat-badge badge-accessories">配件</span></div>
+      <div class="product-body">
+        <div><div class="product-name">Analog Chess Clock</div><div class="product-name-zh">机械对弈计时器</div></div>
+        <div class="product-desc">Classic dual-dial analog clock for timed tournament play. Reliable spring mechanism.</div>
+        <div class="product-price">S$22 <small>/ unit 一个</small></div>
+        <button class="btn-enquire" onclick="openModal('Analog Chess Clock 机械对弈计时器','accessories','S$22 / unit','⏱')">询问 Enquire</button>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="accessories">
+      <div class="product-img">🎁<span class="cat-badge badge-accessories">配件</span></div>
+      <div class="product-body">
+        <div><div class="product-name">Carrying Bag for Pieces</div><div class="product-name-zh">棋子收纳袋</div></div>
+        <div class="product-desc">Drawstring velvet pouch with foam padding. Fits one standard set. Available in red and black.</div>
+        <div class="product-price">S$5 <small>/ piece 一个</small></div>
+        <button class="btn-enquire" onclick="openModal('Carrying Bag 棋子收纳袋','accessories','S$5 / piece','🎁')">询问 Enquire</button>
+      </div>
+    </div>
+
+    <div class="product-card" data-cat="accessories">
+      <div class="product-img">🎁<span class="cat-badge badge-accessories">配件</span></div>
+      <div class="product-body">
+        <div><div class="product-name">Gift Box Set</div><div class="product-name-zh">礼盒套装</div></div>
+        <div class="product-desc">Vinyl board + plastic pieces in a decorative gift box. Perfect for Chinese New Year or birthdays.</div>
+        <div class="product-price">S$25 <small>/ set 一套</small></div>
+        <button class="btn-enquire" onclick="openModal('Gift Box Set 礼盒套装','accessories','S$25 / set','🎁')">询问 Enquire</button>
+      </div>
+    </div>
+
+  </div><!-- /product-grid -->
+
+  <!-- Contact note -->
+  <div class="panel">
+    <div class="panel-title">购买须知 · PURCHASING NOTES</div>
+    <p style="font-size:.83rem;color:#8a7050;line-height:1.9;">
+      所有商品均需提前询问确认库存。我们将在收到询问后的 1–2 个工作日内回复。<br>
+      All items are subject to stock availability. We will respond to enquiries within 1–2 working days.<br><br>
+      付款方式：PayNow · 现金<br>
+      Payment: PayNow · Cash<br><br>
+      自取地点：请联络我们确认取货地点与时间。<br>
+      Self-collection: Contact us to arrange venue and timing.
+    </p>
+  </div>
+
+</div><!-- /content -->
+
+<!-- Enquiry Modal -->
+<div class="modal-overlay" id="enquiry-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>PRODUCT ENQUIRY · 商品询问</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-product-info">
+        <div class="modal-product-icon" id="modal-icon"></div>
+        <div>
+          <div class="modal-product-name" id="modal-product-name"></div>
+          <div class="modal-product-price" id="modal-product-price"></div>
+        </div>
+      </div>
+
+      <div id="fs-error-msg" class="error-msg"></div>
+
+      <div data-fs-success class="success-msg" id="success-msg">
+        ✔ 询问已发送！我们将尽快回复您。<br>
+        Your enquiry has been sent! We will get back to you soon.
+      </div>
+
+      <form id="enquiry-form">
+        <input type="hidden" name="product" id="form-product">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">姓名 Name</label>
+            <input class="form-control" type="text" name="name" placeholder="您的姓名" data-fs-field required>
+            <span data-fs-error="name" style="color:#e07060;font-size:.72rem;"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">联络号码 Phone</label>
+            <input class="form-control" type="tel" name="phone" placeholder="+65 XXXX XXXX" data-fs-field required>
+            <span data-fs-error="phone" style="color:#e07060;font-size:.72rem;"></span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">电邮 Email</label>
+          <input class="form-control" type="email" name="email" placeholder="your@email.com" data-fs-field required>
+          <span data-fs-error="email" style="color:#e07060;font-size:.72rem;"></span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">数量 Quantity</label>
+            <input class="form-control" type="number" name="quantity" value="1" min="1" max="99" data-fs-field required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">取货方式 Collection</label>
+            <select class="form-control" name="collection" data-fs-field>
+              <option value="self-collect">自取 Self-collect</option>
+              <option value="delivery">本地配送 Local delivery</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">备注 Remarks (optional)</label>
+          <textarea class="form-control" name="remarks" placeholder="如有特别要求，请在此注明…&#10;Any special requests or questions…" data-fs-field></textarea>
+        </div>
+        <button class="btn-submit" type="submit" data-fs-submit-btn>✉ 提交询问 Submit Enquiry</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function filterProducts(cat, btn){
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.product-card').forEach(card=>{
+      card.classList.toggle('hidden', cat!=='all' && card.dataset.cat!==cat);
+    });
+  }
+
+  function openModal(name, cat, price, icon){
+    document.getElementById('modal-product-name').textContent = name;
+    document.getElementById('modal-product-price').textContent = price;
+    document.getElementById('modal-icon').textContent = icon;
+    document.getElementById('form-product').value = name;
+    document.getElementById('success-msg').style.display = 'none';
+    document.getElementById('fs-error-msg').style.display = 'none';
+    document.getElementById('enquiry-form').style.display = 'block';
+    document.getElementById('enquiry-modal').classList.add('open');
+  }
+
+  function closeModal(){
+    document.getElementById('enquiry-modal').classList.remove('open');
+  }
+
+  // Close on backdrop click
+  document.getElementById('enquiry-modal').addEventListener('click', function(e){
+    if(e.target === this) closeModal();
+  });
+
+  // Formspree integration
+  window.formspree = window.formspree || function(){ (formspree.q = formspree.q || []).push(arguments); };
+  formspree('initForm', { formElement: '#enquiry-form', formId: 'xojrarrj' });
+</script>
+<script src="https://unpkg.com/@formspree/ajax@1" defer></script>
+
+</body>
+</html>
