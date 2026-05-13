@@ -55,8 +55,10 @@
   .mv{padding:1px 5px;border-radius:3px;cursor:pointer;white-space:nowrap;}
   .mv:hover{background:var(--ui-border);color:var(--ui-text)}
   .mv.current{background:var(--gold);color:var(--bg);font-weight:bold}
-  .mv.mainline{color:#e07060}
-  .mv.variation{color:#7a9090}
+  .mv.mainline-red{color:#e07060}
+  .mv.mainline-black{color:#9090a0}
+  .mv.var-red{color:#c05848}
+  .mv.var-black{color:#6a6a8a}
   .var-block{margin-left:10px;border-left:2px solid #2a2010;padding-left:8px;margin-top:2px;margin-bottom:2px;}
   .var-label{font-size:.62rem;color:#4a3a20;font-style:italic;margin-right:3px;}
   /* Clock */
@@ -373,45 +375,89 @@ function renderMoveTree(){
   if(cur) el.scrollTop=cur.offsetTop-el.clientHeight/2;
 }
 
+function getMoveNumber(node){
+  let d=0,n=node;
+  while(n.parent){d++;n=n.parent;}
+  return Math.ceil(d/2);
+}
+
+// Colour of the piece that was just played to reach this node
+function nodeColor(node){ return node.turn==='black'?'red':'black'; }
+
+// Render a sequence of nodes as a horizontal pair-row (red left, black right)
+// then recurse into variations after each pair.
 function renderSubtree(node, depth, isMainline){
   if(node.children.length===0) return '';
   let html='';
-  const first=node.children[0];
-  const rest=node.children.slice(1);
-  const moveNum=getMoveNumber(first);
-  const isRed_=first.turn==='black'; // red just moved
-  const numLabel=isRed_?`<span class="move-num">${moveNum}.</span>`
-                        :(depth===0&&!node.parent?'':`<span class="move-num">${moveNum}…</span>`);
 
-  // Mainline move
-  const cls='mv '+(first===cursor?'current ':'')+(isMainline?'mainline':'variation');
-  html+=`<span class="tree-line">${numLabel}<span class="${cls}" onclick="jumpToNode(window._nodes[${first.id}])">${first.notation}</span>`;
+  // Collect the mainline sequence first so we can lay them out in pairs
+  // We emit one <div class="tree-line"> per move-pair (red + black on same row).
+  // Variations are emitted as indented blocks between pairs.
 
-  // Variation branches (siblings of first child)
-  if(rest.length>0){
-    html+='</span>';
-    rest.forEach((v,vi)=>{
-      const vc=v===cursor?'current ':'';
-      const vmNum=getMoveNumber(v);
-      const vmLabel=v.turn==='black'?`<span class="move-num">${vmNum}.</span>`:`<span class="move-num">${vmNum}…</span>`;
-      html+=`<div class="var-block"><span class="var-label">变招${vi+1}</span>${vmLabel}<span class="mv variation ${vc}" onclick="jumpToNode(window._nodes[${v.id}])">${v.notation}</span>`;
-      html+=renderSubtree(v, depth+1, false);
-      html+='</div>';
-    });
-    // Continue mainline
-    html+=renderSubtree(first, depth, isMainline);
-  } else {
-    // Inline continuation
-    html+=renderSubtree(first, depth, isMainline)+'</span>';
+  let cur=node;
+  while(cur.children.length>0){
+    const main=cur.children[0];
+    const vars=cur.children.slice(1);
+    const moveNum=getMoveNumber(main);
+    const color=nodeColor(main); // 'red' or 'black'
+    const isRedMove=(color==='red');
+    const isCurrent=main===cursor;
+    const mvCls='mv'+(isCurrent?' current':'')+(color==='red'?' mainline-red':' mainline-black');
+
+    if(isRedMove){
+      // Start a new row: number + red move (black move will follow inline or on same row)
+      const nextIsBlack=main.children.length>0 && main.children[0].children.length>=0
+                        && nodeColor(main.children[0])==='black' && main.children[0]===main.children[0];
+      html+=`<div class="tree-line"><span class="move-num">${moveNum}.</span>`
+           +`<span class="${mvCls}" onclick="jumpToNode(window._nodes[${main.id}])">${main.notation}</span>`;
+
+      // If no variations on this node, leave row open for black's reply
+      if(vars.length===0 && main.children.length>0 && nodeColor(main.children[0])==='black'){
+        const black=main.children[0];
+        const bvars=main.children.slice(1); // variations after black move — handled next iteration
+        const bisCurrent=black===cursor;
+        const bCls='mv'+(bisCurrent?' current':'')+(isMainline?' mainline-black':' var-black');
+        html+=`<span class="${bCls}" onclick="jumpToNode(window._nodes[${black.id}])">${black.notation}</span></div>`;
+
+        // Variations after the black move
+        main.children.slice(1).forEach((v,vi)=>{
+          html+=renderVarBlock(v, vi, depth);
+        });
+
+        cur=black; // advance by 2 (red+black consumed)
+        continue;
+      } else {
+        html+='</div>';
+      }
+    } else {
+      // Black move on its own line (e.g. after a variation rejoins)
+      html+=`<div class="tree-line"><span class="move-num">${moveNum}…</span>`
+           +`<span class="mv${isCurrent?' current':''}${isMainline?' mainline-black':' var-black'}" onclick="jumpToNode(window._nodes[${main.id}])">${main.notation}</span></div>`;
+    }
+
+    // Render variations of this node
+    vars.forEach((v,vi)=>{ html+=renderVarBlock(v, vi, depth); });
+
+    cur=main;
   }
   return html;
 }
 
-function getMoveNumber(node){
-  // count depth from root
-  let d=0, n=node;
-  while(n.parent){ d++; n=n.parent; }
-  return Math.ceil(d/2);
+function renderVarBlock(varNode, vi, depth){
+  const color=nodeColor(varNode);
+  const moveNum=getMoveNumber(varNode);
+  const isCurrent=varNode===cursor;
+  const numLabel=color==='red'
+    ?`<span class="move-num">${moveNum}.</span>`
+    :`<span class="move-num">${moveNum}…</span>`;
+  const cls='mv'+(isCurrent?' current':'')+(color==='red'?' var-red':' var-black');
+  let html=`<div class="var-block">`
+          +`<span class="var-label">变招${vi+1}</span>${numLabel}`
+          +`<span class="${cls}" onclick="jumpToNode(window._nodes[${varNode.id}])">${varNode.notation}</span>`;
+  // Continue the variation inline as pairs
+  html+=renderSubtree(varNode, depth+1, false);
+  html+='</div>';
+  return html;
 }
 
 // Global node registry for onclick
