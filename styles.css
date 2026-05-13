@@ -446,6 +446,26 @@ tr:hover td { background: rgba(212,160,23,.04); }
   z-index: 50;
 }
 
+/* ── Links ─────────────────────────────────────────────────── */
+a {
+  color: var(--gold);
+  text-decoration: none;
+  transition: color .2s;
+}
+a:hover {
+  color: var(--gold-light);
+  text-decoration: underline;
+}
+/* Links inside table cells get a subtle underline instead */
+td a, .panel a {
+  border-bottom: 1px solid rgba(212,160,23,.3);
+}
+td a:hover, .panel a:hover {
+  color: var(--gold-light);
+  border-bottom-color: var(--gold-light);
+  text-decoration: none;
+}
+
 /* ── Keyframes ─────────────────────────────────────────────── */
 @keyframes pulse {
   from { box-shadow: none; }
