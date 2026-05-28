@@ -1,50 +1,42 @@
-# Logs and temp files
-*.log
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
-.vscode/
-.idea/
-
-# Dependencies
-node_modules/
-venv/
-.venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-
-# Build artifacts
-dist/
-build/
-target/
+```gitignore
+# Compiled and build artifacts
 *.pyc
+__pycache__/
 *.o
 *.obj
+*.class
 *.exe
 *.dll
 *.so
 *.a
 *.out
 
-# System files
-.DS_Store
-Thumbs.db
+# Dependencies
+node_modules/
+venv/
+.venv/
+.env
+.env.local
+.env.*
+
+# Logs and temp files
+*.log
+*.tmp
 *.swp
 *.swo
-*.tmp
+
+# Editors
+.vscode/
+.idea/
 
 # Coverage
 coverage/
 htmlcov/
 .coverage
 
-# Gradle
-.gradle/
+# OS
+.DS_Store
+Thumbs.db
 
 # Compressed files
 *.zip
@@ -69,3 +61,90 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+
+# Build directories
+dist/
+build/
+target/
+.gradle/
+
+# Python specific
+.mypy_cache/
+.pytest_cache/
+
+# Java specific
+*.jar
+*.war
+*.ear
+
+# Go specific
+*.exe
+*.dll
+*.so
+*.dylib
+
+# C/C++ specific
+*.a
+*.lib
+*.obj
+*.o
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.ilk
+*.pdb
+*.sdf
+*.suo
+*.tlog
+*.tlg
+*.aps
+*.ncb
+*.opt
+*.plg
+*.dep
+*.cache
+*.stackdump
+*.idb
+*.pdb
+*.pgc
+*.pgd
+*.bsc
+*.ilk
+*.exp
+*.iobj
+*.ipdb
+*.tlog
+*.tlg
+*.aps
+*.ncb
+*.opt
+*.plg
+*.dep
+*.cache
+*.stackdump
+*.idb
+*.pdb
+*.pgc
+*.pgd
+*.bsc
+*.ilk
+*.exp
+*.iobj
+*.ipdb
+*.tlog
+*.tlg
+*.aps
+*.ncb
+*.opt
+*.plg
+*.dep
+*.cache
+*.stackdump
+*.idb
+*.pdb
+*.pgc
+*.pgd
+*.bsc
+```

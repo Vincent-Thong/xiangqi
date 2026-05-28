@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="在线中国象棋游戏 - 麒麟象棋队。玩象棋，分析棋局，记录棋谱。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <title>麒麟象棋队</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
@@ -76,6 +79,21 @@
   .clock-setting{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:.75rem;color:#6a5a30}
   .clock-setting input{width:44px;background:#0e0c08;border:1px solid var(--ui-border);border-radius:3px;color:var(--ui-text);font-family:'Noto Serif SC',serif;font-size:.75rem;padding:3px 6px;text-align:center}
   .clock-setting input:focus{outline:none;border-color:var(--gold)}
+  /* Responsive */
+  @media (max-width: 900px){
+    .app{flex-direction:column;align-items:center}
+    .side{width:100%;max-width:450px}
+    .nav-row{flex-wrap:wrap;max-width:450px}
+    .nav-btn{min-width:60px}
+  }
+  @media (max-width: 500px){
+    h1{font-size:1.5rem}
+    .subtitle{font-size:.7rem}
+    .board-wrap{padding:15px}
+    canvas#boardCanvas{width:100%;max-width:360px;height:auto}
+    .nav-btn{flex-direction:row;padding:6px 10px;font-size:.7rem}
+    .nav-btn .icon{font-size:.9rem}
+  }
 </style>
 </head>
 <body>
@@ -87,14 +105,14 @@
 <div class="app">
   <div>
     <div class="board-wrap">
-      <canvas id="boardCanvas" width="450" height="500"></canvas>
+      <canvas id="boardCanvas" width="450" height="500" aria-label="Chinese chess board" role="img"></canvas>
     </div>
-    <div class="nav-row">
-      <button class="nav-btn" id="btnStart"  onclick="navStart()"><span class="icon">⏮</span><span>Start</span></button>
-      <button class="nav-btn" id="btnPrev"   onclick="navPrev()"><span class="icon">◀</span><span>Prev</span></button>
-      <button class="nav-btn" id="btnNext"   onclick="navNext()"><span class="icon">▶</span><span>Next</span></button>
-      <button class="nav-btn" id="btnEnd"    onclick="navEnd()"><span class="icon">⏭</span><span>End</span></button>
-      <button class="nav-btn" id="btnUndo"   onclick="undoMove()"><span class="icon">↩</span><span>Undo</span></button>
+    <div class="nav-row" role="navigation" aria-label="Move navigation">
+      <button class="nav-btn" id="btnStart"  onclick="navStart()" aria-label="Go to start"><span class="icon">⏮</span><span>Start</span></button>
+      <button class="nav-btn" id="btnPrev"   onclick="navPrev()" aria-label="Previous move"><span class="icon">◀</span><span>Prev</span></button>
+      <button class="nav-btn" id="btnNext"   onclick="navNext()" aria-label="Next move"><span class="icon">▶</span><span>Next</span></button>
+      <button class="nav-btn" id="btnEnd"    onclick="navEnd()" aria-label="Go to end"><span class="icon">⏭</span><span>End</span></button>
+      <button class="nav-btn" id="btnUndo"   onclick="undoMove()" aria-label="Undo move"><span class="icon">↩</span><span>Undo</span></button>
     </div>
   </div>
   <div class="side">
@@ -117,49 +135,49 @@
         </div>
       </div>
       <div class="clock-controls">
-        <button class="btn" onclick="clockStart()" id="btnClockStart">▶ Start</button>
-        <button class="btn" onclick="clockPause()" id="btnClockPause" disabled>⏸ Pause</button>
-        <button class="btn" onclick="clockReset()">↺ Reset</button>
+        <button class="btn" onclick="clockStart()" id="btnClockStart" aria-label="Start clock">▶ Start</button>
+        <button class="btn" onclick="clockPause()" id="btnClockPause" disabled aria-label="Pause clock">⏸ Pause</button>
+        <button class="btn" onclick="clockReset()" aria-label="Reset clock">↺ Reset</button>
       </div>
       <div class="clock-setting">
         <span>Time</span>
-        <input type="number" id="settingMin" value="20" min="1" max="60"> min
+        <input type="number" id="settingMin" value="20" min="1" max="60" aria-label="Minutes"> min
         <span>+</span>
-        <input type="number" id="settingInc" value="5" min="0" max="60"> sec
+        <input type="number" id="settingInc" value="5" min="0" max="60" aria-label="Seconds increment"> sec
       </div>
     </div>
 
     <div class="panel">
       <div class="panel-title">GAME</div>
-      <button class="btn" onclick="newGame()">♟ New Game</button>
-      <button class="btn danger" onclick="confirmResign()">⚑ Resign</button>
+      <button class="btn" onclick="newGame()" aria-label="Start new game">♟ New Game</button>
+      <button class="btn danger" onclick="confirmResign()" aria-label="Resign game">⚑ Resign</button>
     </div>
 
     <div class="panel">
       <div class="panel-title">MOVE TREE · 棋谱树</div>
-      <div id="moveTree"><span style="color:#5a4a30;font-size:.75rem">No moves yet.</span></div>
+      <div id="moveTree" role="log" aria-live="polite"><span style="color:#5a4a30;font-size:.75rem">No moves yet.</span></div>
     </div>
 
     <div class="panel">
       <div class="panel-title">PGN · SAVE / LOAD</div>
-      <textarea id="pgnArea" placeholder="PGN appears here..."></textarea>
+      <textarea id="pgnArea" placeholder="PGN appears here..." aria-label="PGN notation"></textarea>
       <div class="file-row">
-        <button class="btn" onclick="savePGN()" style="flex:1">💾 Save PGN</button>
-        <button class="btn" onclick="document.getElementById('fileInput').click()" style="flex:1">📂 Load PGN</button>
+        <button class="btn" onclick="savePGN()" style="flex:1" aria-label="Save PGN to file">💾 Save PGN</button>
+        <button class="btn" onclick="document.getElementById('fileInput').click()" style="flex:1" aria-label="Load PGN from file">📂 Load PGN</button>
       </div>
-      <button class="btn" onclick="loadFromTextarea()">↩ Import from above</button>
+      <button class="btn" onclick="loadFromTextarea()" aria-label="Import PGN from textarea">↩ Import from above</button>
       <input type="file" id="fileInput" accept=".pgn,.txt" onchange="loadPGNFile(event)">
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="modalOverlay">
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal">
     <h3 id="modalTitle">Confirm</h3>
     <p id="modalMsg"></p>
     <div class="modal-btns">
       <button class="btn" id="modalOk">OK</button>
-      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="closeModal()" aria-label="Cancel">Cancel</button>
     </div>
   </div>
 </div>
@@ -407,7 +425,7 @@ function renderSubtree(node, depth, isMainline){
     if(isRedMove){
       // Start a new row: number + red move (black move will follow inline or on same row)
       const nextIsBlack=main.children.length>0 && main.children[0].children.length>=0
-                        && nodeColor(main.children[0])==='black' && main.children[0]===main.children[0];
+                        && nodeColor(main.children[0])==='black';
       html+=`<div class="tree-line"><span class="move-num">${moveNum}.</span>`
            +`<span class="${mvCls}" onclick="jumpToNode(window._nodes[${main.id}])">${main.notation}</span>`;
 
