@@ -791,8 +791,8 @@ canvas.addEventListener('click',e=>{
 //  SUPABASE & CLOUD SAVE/LOAD
 // ═══════════════════════════════════════════════════════════
 // ⚠️ IMPORTANT: Replace these with your actual Supabase credentials!
-const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+const SUPABASE_URL = 'https://znpyhprvhtkipdkpebhm.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpucHlocHJ2aHRraXBka3BlYmhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MDg3OTUsImV4cCI6MjA5NTQ4NDc5NX0.IWC9TKBdCYcGdgwsrz1O8C9koeaoaKgQQ6KHkUKpBVY';
 
 let supabase = null;
 let currentUser = null;
@@ -1095,8 +1095,8 @@ async function connectGoogleDrive() {
   
   try {
     await gapi.client.init({
-      apiKey: 'YOUR_GOOGLE_API_KEY',
-      clientId: 'YOUR_GOOGLE_CLIENT_ID',
+      apiKey: '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',
+      clientId: '205569092824-anmvgvf2l6puuikqad7ajotn907972pj.apps.googleusercontent.com',
       discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
       scope: 'https://www.googleapis.com/auth/drive.file'
     });
