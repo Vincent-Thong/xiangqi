@@ -673,6 +673,8 @@ function render(){
   [[3,0,5,2],[5,0,3,2],[3,7,5,9],[5,7,3,9]].forEach(([c1,r1,c2,r2])=>{ctx.beginPath();ctx.moveTo(PAD+c1*CELL,PAD+r1*CELL);ctx.lineTo(PAD+c2*CELL,PAD+r2*CELL);ctx.stroke();});
   drawX([[1,2],[7,2],[1,7],[7,7]]);
   drawX([[0,3],[2,3],[4,3],[6,3],[8,3],[0,6],[2,6],[4,6],[6,6],[8,6]]);
+  // Draw variation lines (subtle arrows for alternative moves)
+  drawVariationLines();
   // Last move highlight
   if(cursor!==root){
     for(const[c,r]of[[cursor.fromCol,cursor.fromRow],[cursor.toCol,cursor.toRow]]){
@@ -717,6 +719,58 @@ function drawPiece(piece,col,row){
   ctx.strokeStyle=red?'rgba(255,180,150,.5)':'rgba(200,160,80,.4)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,y,R-4,0,Math.PI*2);ctx.stroke();
   ctx.fillStyle=red?'#ffe0c0':'#d4a060';ctx.font='bold 16px "Noto Serif SC",serif';ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.fillText(PIECE_NAMES[piece]||piece,x,y+1);
+}
+
+// Draw subtle variation lines for alternative moves from each node up to cursor
+function drawVariationLines(){
+  // Collect all nodes from root to cursor (mainline path)
+  const path=[];
+  let n=cursor;
+  while(n){ path.unshift(n); n=n.parent; }
+  
+  // For each node in the path, draw lines for variation children (not the mainline child)
+  ctx.strokeStyle='rgba(180,140,80,0.25)';
+  ctx.lineWidth=1.5;
+  ctx.setLineDash([4,3]);
+  
+  path.forEach(node=>{
+    if(node.children.length>1){
+      // Find the mainline child (the one that leads to cursor)
+      const mainlineChild=node.children.find(c=>{
+        let tmp=cursor;
+        while(tmp&&tmp.parent!==node) tmp=tmp.parent;
+        return tmp&&tmp.parent===node&&tmp.id===c.id;
+      }) || node.children[0];
+      
+      // Draw variation arrows for non-mainline children
+      node.children.forEach(child=>{
+        if(child!==mainlineChild){
+          const sx=PAD+child.fromCol*CELL;
+          const sy=PAD+child.fromRow*CELL;
+          const ex=PAD+child.toCol*CELL;
+          const ey=PAD+child.toRow*CELL;
+          
+          // Draw arrow line
+          ctx.beginPath();
+          ctx.moveTo(sx,sy);
+          ctx.lineTo(ex,ey);
+          ctx.stroke();
+          
+          // Draw arrowhead at destination
+          const angle=Math.atan2(ey-sy,ex-sx);
+          const arrowLen=8;
+          ctx.beginPath();
+          ctx.moveTo(ex,ey);
+          ctx.lineTo(ex-arrowLen*Math.cos(angle-Math.PI/6),ey-arrowLen*Math.sin(angle-Math.PI/6));
+          ctx.moveTo(ex,ey);
+          ctx.lineTo(ex-arrowLen*Math.cos(angle+Math.PI/6),ey-arrowLen*Math.sin(angle+Math.PI/6));
+          ctx.stroke();
+        }
+      });
+    }
+  });
+  
+  ctx.setLineDash([]);
 }
 
 canvas.addEventListener('click',e=>{
