@@ -721,44 +721,38 @@ function drawPiece(piece,col,row){
   ctx.fillText(PIECE_NAMES[piece]||piece,x,y+1);
 }
 
-// Draw solid green arrows for ALL moves (mainline + variations) from each node up to cursor
+// Draw solid green arrows for variations ONLY from the current position (cursor)
 function drawVariationLines(){
-  // Collect all nodes from root to cursor (mainline path)
-  const path=[];
-  let n=cursor;
-  while(n){ path.unshift(n); n=n.parent; }
+  // Only draw green lines if the current position (cursor) has variations
+  // i.e., more than one child node (multiple possible moves from this position)
+  if (!cursor || cursor.children.length <= 1) return;
   
-  // For each node in the path, draw arrows for ALL children (mainline + variations)
-  ctx.strokeStyle='rgba(0,180,0,0.95)';
-  ctx.lineWidth=2.5;
+  // Draw arrows for ALL children from the current position (mainline + variations)
+  ctx.strokeStyle = 'rgba(0,180,0,0.95)';
+  ctx.lineWidth = 2.5;
   ctx.setLineDash([]);
   
-  path.forEach(node=>{
-    if(node.children.length>0){
-      // Draw arrows for ALL children (mainline and variations)
-      node.children.forEach(child=>{
-        const sx=PAD+child.fromCol*CELL;
-        const sy=PAD+child.fromRow*CELL;
-        const ex=PAD+child.toCol*CELL;
-        const ey=PAD+child.toRow*CELL;
-        
-        // Draw arrow line
-        ctx.beginPath();
-        ctx.moveTo(sx,sy);
-        ctx.lineTo(ex,ey);
-        ctx.stroke();
-        
-        // Draw arrowhead at destination
-        const angle=Math.atan2(ey-sy,ex-sx);
-        const arrowLen=10;
-        ctx.beginPath();
-        ctx.moveTo(ex,ey);
-        ctx.lineTo(ex-arrowLen*Math.cos(angle-Math.PI/6),ey-arrowLen*Math.sin(angle-Math.PI/6));
-        ctx.moveTo(ex,ey);
-        ctx.lineTo(ex-arrowLen*Math.cos(angle+Math.PI/6),ey-arrowLen*Math.sin(angle+Math.PI/6));
-        ctx.stroke();
-      });
-    }
+  cursor.children.forEach(child => {
+    const sx = PAD + child.fromCol * CELL;
+    const sy = PAD + child.fromRow * CELL;
+    const ex = PAD + child.toCol * CELL;
+    const ey = PAD + child.toRow * CELL;
+    
+    // Draw arrow line
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+    
+    // Draw arrowhead at destination
+    const angle = Math.atan2(ey - sy, ex - sx);
+    const arrowLen = 10;
+    ctx.beginPath();
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - arrowLen * Math.cos(angle - Math.PI / 6), ey - arrowLen * Math.sin(angle - Math.PI / 6));
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - arrowLen * Math.cos(angle + Math.PI / 6), ey - arrowLen * Math.sin(angle + Math.PI / 6));
+    ctx.stroke();
   });
   
   ctx.setLineDash([]);
