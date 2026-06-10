@@ -268,16 +268,71 @@ function getLegal(b,col,row){
 function hasAnyLegal(b,color){
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=b[r][c];if(!p||((color==='red'&&!isRed(p))||(color==='black'&&!isBlack(p))))continue;if(getLegal(b,c,r).length>0)return true;}return false;
 }
+
+// Check if there are multiple pieces of the same type on the same file (column)
+function countPiecesOnFile(board, piece, col){
+  let count = 0;
+  for(let r = 0; r < ROWS; r++){
+    if(board[r][col] === piece) count++;
+  }
+  return count;
+}
+
+// Find all pieces of the same type on the same file
+function findSamePiecesOnFile(board, piece, col){
+  const positions = [];
+  for(let r = 0; r < ROWS; r++){
+    if(board[r][col] === piece) positions.push(r);
+  }
+  return positions.sort((a,b) => a - b); // Sort by row (ascending)
+}
+
 function toNot(piece,fc,fr_,tc,tr){
-  const pn=PIECE_NAMES[piece]||piece,red=isRed(piece);
-  const fcn=red?COL_RED[fc]:COL_BLK[fc];
-  const dr=tr-fr_;
-  const diag=['N','n','B','b','A','a'].includes(piece);
-  let dir,num;
-  if(dr===0){dir='平';num=red?COL_RED[tc]:COL_BLK[tc];}
-  else if((red&&dr<0)||(!red&&dr>0)){dir='进';num=diag?(red?COL_RED[tc]:COL_BLK[tc]):Math.abs(dr).toString();}
-  else{dir='退';num=diag?(red?COL_RED[tc]:COL_BLK[tc]):Math.abs(dr).toString();}
-  return`${pn}${fcn}${dir}${num}`;
+  const board = cursor.board;
+  const pn = PIECE_NAMES[piece] || piece;
+  const red = isRed(piece);
+  const fcn = red ? COL_RED[fc] : COL_BLK[fc];
+  const dr = tr - fr_;
+  const diag = ['N','n','B','b','A','a'].includes(piece);
+  let dir, num;
+  
+  // Check if there are multiple pieces of the same type on the same file
+  const samePieces = findSamePiecesOnFile(board, piece, fc);
+  const useFrontBack = samePieces.length > 1;
+  
+  let prefix = '';
+  if(useFrontBack){
+    // For red: higher row = front (closer to opponent)
+    // For black: lower row = front (closer to opponent)
+    const sortedForFrontBack = red ? [...samePieces].sort((a,b) => b - a) : [...samePieces].sort((a,b) => a - b);
+    const frontRow = sortedForFrontBack[0];
+    const backRow = sortedForFrontBack[sortedForFrontBack.length - 1];
+    
+    if(fr_ === frontRow && fr_ !== backRow){
+      prefix = '前';
+    } else if(fr_ === backRow && fr_ !== frontRow){
+      prefix = '后';
+    } else {
+      // If more than 2 pieces or ambiguous, use middle/etc. - but typically just 2
+      // For simplicity, if it's not front or back uniquely, still use position-based
+      const idx = sortedForFrontBack.indexOf(fr_);
+      if(idx === 0) prefix = '前';
+      else if(idx === sortedForFrontBack.length - 1) prefix = '后';
+    }
+  }
+  
+  if(dr === 0){
+    dir = '平';
+    num = red ? COL_RED[tc] : COL_BLK[tc];
+  } else if((red && dr < 0) || (!red && dr > 0)){
+    dir = '进';
+    num = diag ? (red ? COL_RED[tc] : COL_BLK[tc]) : Math.abs(dr).toString();
+  } else {
+    dir = '退';
+    num = diag ? (red ? COL_RED[tc] : COL_BLK[tc]) : Math.abs(dr).toString();
+  }
+  
+  return `${prefix}${pn}${fcn}${dir}${num}`;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -568,15 +623,61 @@ function parsePGN(pgn){
 }
 
 function applyNot(notation){
-  const board=cursor.board, turn=cursor.turn;
-  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-    const p=board[r][c]; if(!p)continue;
-    if(turn==='red'&&!isRed(p))continue;
-    if(turn==='black'&&!isBlack(p))continue;
-    const legal=getLegal(board,c,r);
-    for(const[tc,tr]of legal){
-      if(toNot(p,c,r,tc,tr)===notation){ makeMove(c,r,tc,tr); return; }
+  const board = cursor.board, turn = cursor.turn;
+  
+  // Check if notation has a prefix (前 or 后)
+  const hasPrefix = notation.startsWith('前') || notation.startsWith('后');
+  const prefix = hasPrefix ? notation[0] : '';
+  const notationWithoutPrefix = hasPrefix ? notation.slice(1) : notation;
+  
+  // Find all matching moves
+  const matchingMoves = [];
+  
+  for(let r = 0; r < ROWS; r++) {
+    for(let c = 0; c < COLS; c++){
+      const p = board[r][c]; 
+      if(!p) continue;
+      if(turn === 'red' && !isRed(p)) continue;
+      if(turn === 'black' && !isBlack(p)) continue;
+      const legal = getLegal(board, c, r);
+      for(const [tc, tr] of legal){
+        const generatedNot = toNot(p, c, r, tc, tr);
+        if(generatedNot === notation){
+          makeMove(c, r, tc, tr); 
+          return;
+        }
+        // Also check without prefix for backward compatibility
+        if(hasPrefix && generatedNot === notationWithoutPrefix){
+          matchingMoves.push({c, r, tc, tr, row: r, piece: p});
+        }
+      }
     }
+  }
+  
+  // If we have prefix and found matching moves, select the correct one
+  if(hasPrefix && matchingMoves.length > 0){
+    // Sort by row to determine front/back
+    // For red: higher row = front
+    // For black: lower row = front
+    const isRedTurn = turn === 'red';
+    matchingMoves.sort((a, b) => isRedTurn ? b.row - a.row : a.row - b.row);
+    
+    if(prefix === '前'){
+      const move = matchingMoves[0];
+      makeMove(move.c, move.r, move.tc, move.tr);
+      return;
+    } else if(prefix === '后'){
+      const move = matchingMoves[matchingMoves.length - 1];
+      makeMove(move.c, move.r, move.tc, move.tr);
+      return;
+    }
+  }
+  
+  // Fallback: try without prefix matching
+  if(matchingMoves.length === 1){
+    const move = matchingMoves[0];
+    makeMove(move.c, move.r, move.tc, move.tr);
+    return;
   }
 }
 
