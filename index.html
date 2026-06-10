@@ -302,9 +302,11 @@ function toNot(piece,fc,fr_,tc,tr){
   
   let prefix = '';
   if(useFrontBack){
-    // For red: higher row = front (closer to opponent)
-    // For black: lower row = front (closer to opponent)
-    const sortedForFrontBack = red ? [...samePieces].sort((a,b) => b - a) : [...samePieces].sort((a,b) => a - b);
+    // For red: lower row = front (closer to opponent, further from self)
+    // For black: higher row = front (closer to opponent, further from self)
+    // Front (前) = piece further along the board toward opponent
+    // Back (后) = piece closer to your own side
+    const sortedForFrontBack = red ? [...samePieces].sort((a,b) => a - b) : [...samePieces].sort((a,b) => b - a);
     const frontRow = sortedForFrontBack[0];
     const backRow = sortedForFrontBack[sortedForFrontBack.length - 1];
     
@@ -657,10 +659,10 @@ function applyNot(notation){
   // If we have prefix and found matching moves, select the correct one
   if(hasPrefix && matchingMoves.length > 0){
     // Sort by row to determine front/back
-    // For red: higher row = front
-    // For black: lower row = front
+    // For red: lower row = front (closer to opponent, further from self)
+    // For black: higher row = front (closer to opponent, further from self)
     const isRedTurn = turn === 'red';
-    matchingMoves.sort((a, b) => isRedTurn ? b.row - a.row : a.row - b.row);
+    matchingMoves.sort((a, b) => isRedTurn ? a.row - b.row : b.row - a.row);
     
     if(prefix === '前'){
       const move = matchingMoves[0];
