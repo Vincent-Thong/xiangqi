@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="象棋残局研究 - 麒麟象棋队在线课堂">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>">
+<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<title>残局研究 - 麒麟象棋队</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+  :root{--bg:#1a1208;--board-bg:#c8922a;--board-line:#7a4f10;--red:#c0392b;--red-light:#e74c3c;--gold:#d4a017;--gold-light:#f0c040;--ui-bg:#12100a;--ui-border:#3a2a10;--ui-text:#e8d5a0;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ui-text);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:radial-gradient(ellipse at 20% 20%,rgba(200,146,42,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(192,57,43,.06) 0%,transparent 60%)}
+  h1{font-family:'Cinzel',serif;font-size:2rem;letter-spacing:.2em;color:var(--gold);text-shadow:0 0 20px rgba(212,160,23,.4);margin-bottom:4px}
+  .subtitle{font-size:.85rem;color:#8a7050;letter-spacing:.3em;margin-bottom:30px}
+  .lesson-container{max-width:900px;width:100%;display:flex;flex-direction:column;gap:20px}
+  .lesson-nav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+  .lesson-nav-btn{padding:10px 20px;background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;color:var(--ui-text);font-family:'Noto Serif SC',serif;font-size:.85rem;cursor:pointer;transition:all .2s;text-decoration:none}
+  .lesson-nav-btn:hover{border-color:var(--gold);color:var(--gold)}
+  .lesson-nav-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+  .lesson-content{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:8px;padding:24px}
+  .lesson-section{margin-bottom:30px}
+  .lesson-section h2{font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:.15em;color:var(--gold);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--ui-border)}
+  .lesson-section p{font-size:.9rem;line-height:1.8;color:#b09070;margin-bottom:12px}
+  .lesson-section ul{padding-left:24px;margin-bottom:16px}
+  .lesson-section li{font-size:.85rem;line-height:1.8;color:#8a7050;margin-bottom:8px}
+  .endgame-tip{background:rgba(212,160,23,.05);border:1px dashed var(--gold);border-radius:6px;padding:16px;margin:16px 0}
+  .endgame-tip h3{font-size:.95rem;color:var(--gold-light);margin-bottom:10px}
+  .back-link{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;color:var(--ui-text);text-decoration:none;font-size:.85rem;transition:all .2s;margin-bottom:20px}
+  .back-link:hover{border-color:var(--gold);color:var(--gold)}
+  @media (max-width: 768px){
+    .lesson-nav{flex-direction:column}
+    .lesson-nav-btn{text-align:center}
+  }
+</style>
+</head>
+<body>
+<common-header></common-header>
+
+<div class="lesson-container">
+  <a href="../index.html" class="back-link"><i class="fas fa-arrow-left"></i> 返回课堂首页</a>
+  
+  <h1>残局研究</h1>
+  <p class="subtitle">精研经典残局定式</p>
+
+  <div class="lesson-nav">
+    <a href="#intro" class="lesson-nav-btn active">残局概述</a>
+    <a href="#rook" class="lesson-nav-btn">单车残局</a>
+    <a href="#horse-cannon" class="lesson-nav-btn">马炮残局</a>
+    <a href="#pawn" class="lesson-nav-btn">兵卒残局</a>
+    <a href="#theory" class="lesson-nav-btn">例胜例和</a>
+  </div>
+
+  <div class="lesson-content">
+    <div id="intro" class="lesson-section">
+      <h2><i class="fas fa-trophy"></i> 残局概述</h2>
+      <p>残局是棋局的最后阶段，双方子力减少，胜负往往取决于细微的差别。掌握残局技巧，能够将优势转化为胜利，或将劣势守成和棋。</p>
+      <p>残局学习的要点：</p>
+      <ul>
+        <li>熟记常见例胜、例和定式</li>
+        <li>理解各兵种在残局中的价值变化</li>
+        <li>掌握基本的杀法和守和方法</li>
+        <li>培养精确计算的能力</li>
+      </ul>
+    </div>
+
+    <div id="rook" class="lesson-section">
+      <h2><i class="fas fa-car"></i> 单车残局</h2>
+      <p>车是威力最大的棋子，单车残局是最常见的残局类型之一。</p>
+      <div class="endgame-tip">
+        <h3><i class="fas fa-lightbulb"></i> 关键要点</h3>
+        <p>单车方要充分利用车的控制力，限制对方将（帅）的活动空间；防守方则要注意避免被对方形成绝杀。</p>
+      </div>
+      <ul>
+        <li><strong>单车胜单士：</strong>必胜残局，关键是困毙对方将（帅）</li>
+        <li><strong>单车胜单象：</strong>必胜残局，注意避免长捉</li>
+        <li><strong>单车对士象全：</strong>例和残局，防守方正确应对可守和</li>
+        <li><strong>单车对马双士：</strong>例和残局，马方注意保护双士</li>
+      </ul>
+    </div>
+
+    <div id="horse-cannon" class="lesson-section">
+      <h2><i class="fas fa-chess-knight"></i> 马炮残局</h2>
+      <p>马炮配合灵活多变，是残局中最具技术含量的类型之一。</p>
+      <div class="endgame-tip">
+        <h3><i class="fas fa-lightbulb"></i> 关键要点</h3>
+        <p>马炮方要发挥两子的协调性，寻找对方的弱点；防守方要注意子力的联络和保护。</p>
+      </div>
+      <ul>
+        <li><strong>马炮胜单士象：</strong>必胜残局，需要耐心推进</li>
+        <li><strong>马炮对车：</strong>通常例和，车方注意避免被偷袭</li>
+        <li><strong>双马对士象全：</strong>例和残局，双马难以突破完整防线</li>
+        <li><strong>马炮兵对士象全：</strong>可胜残局，兵是关键突破口</li>
+      </ul>
+    </div>
+
+    <div id="pawn" class="lesson-section">
+      <h2><i class="fas fa-flag"></i> 兵卒残局</h2>
+      <p>兵（卒）虽然威力有限，但在残局中往往起到决定性作用。</p>
+      <div class="endgame-tip">
+        <h3><i class="fas fa-lightbulb"></i> 关键要点</h3>
+        <p>兵贵神速，尽早过河；高兵优于低兵；有仕相保护的兵更具威胁。</p>
+      </div>
+      <ul>
+        <li><strong>单兵胜单士：</strong>高兵可胜，低兵难胜</li>
+        <li><strong>单兵对单象：</strong>通常例和，象方注意避免被困</li>
+        <li><strong>双兵胜单士象：</strong>必胜残局，双兵配合威力大</li>
+        <li><strong>兵卒对攻：</strong>速度是关键，先手往往决定胜负</li>
+      </ul>
+    </div>
+
+    <div id="theory" class="lesson-section">
+      <h2><i class="fas fa-book-open"></i> 例胜例和定式</h2>
+      <p>以下是必须掌握的经典残局定式：</p>
+      <ul>
+        <li><strong>例胜定式：</strong>
+          <ul>
+            <li>车胜单士、单象</li>
+            <li>马炮胜单缺士、单缺象</li>
+            <li>车兵胜士象全</li>
+            <li>马兵胜单士象</li>
+          </ul>
+        </li>
+        <li><strong>例和定式：</strong>
+          <ul>
+            <li>单车对士象全</li>
+            <li>单车对马双士</li>
+            <li>马炮对车</li>
+            <li>单兵对单士、单象</li>
+          </ul>
+        </li>
+        <li><strong>实用残局：</strong>
+          <ul>
+            <li>车兵对车卒</li>
+            <li>马炮兵对马炮卒</li>
+            <li>多兵残局的胜负判断</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script src="../../assets/js/headerFooterManager.js"></script>
+<script src="../../assets/js/dropdown.js"></script>
+<script>
+  document.querySelectorAll('.lesson-nav-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href');
+      const targetSection = document.querySelector(targetId);
+      if (targetSection) {
+        targetSection.scrollIntoView({ behavior: 'smooth' });
+      }
+      document.querySelectorAll('.lesson-nav-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

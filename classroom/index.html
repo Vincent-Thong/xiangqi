@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="麒麟象棋队在线课堂 - 学习象棋，提升棋艺">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<title>在线课堂 - 麒麟象棋队</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+  :root{--bg:#1a1208;--board-bg:#c8922a;--board-line:#7a4f10;--red:#c0392b;--red-light:#e74c3c;--gold:#d4a017;--gold-light:#f0c040;--ui-bg:#12100a;--ui-border:#3a2a10;--ui-text:#e8d5a0;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ui-text);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:radial-gradient(ellipse at 20% 20%,rgba(200,146,42,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(192,57,43,.06) 0%,transparent 60%)}
+  h1{font-family:'Cinzel',serif;font-size:2rem;letter-spacing:.2em;color:var(--gold);text-shadow:0 0 20px rgba(212,160,23,.4);margin-bottom:4px}
+  .subtitle{font-size:.85rem;color:#8a7050;letter-spacing:.3em;margin-bottom:30px}
+  .classroom-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:1200px;width:100%}
+  .section-card{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:8px;padding:24px;transition:all .3s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+  .section-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 8px 30px rgba(212,160,23,.15)}
+  .section-icon{font-size:2.5rem;color:var(--gold);margin-bottom:16px}
+  .section-title{font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:.15em;color:var(--gold);margin-bottom:10px}
+  .section-desc{font-size:.85rem;color:#8a7050;line-height:1.7}
+  .feature-list{margin-top:14px;padding-left:18px}
+  .feature-list li{font-size:.78rem;color:#6a5a30;margin-bottom:6px;line-height:1.5}
+  @media (max-width: 768px){
+    .classroom-container{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<common-header></common-header>
+
+<h1>在线课堂</h1>
+<p class="subtitle">麒麟象棋队教学平台</p>
+
+<div class="classroom-container">
+  <a href="lesson/basics.html" class="section-card">
+    <div class="section-icon"><i class="fas fa-book-open"></i></div>
+    <div class="section-title">基础课程</div>
+    <div class="section-desc">适合初学者的入门教程，从棋盘认知到基本走法</div>
+    <ul class="feature-list">
+      <li>棋盘与棋子介绍</li>
+      <li>各兵种走法规则</li>
+      <li>基本杀法技巧</li>
+      <li>开局基本原则</li>
+    </ul>
+  </a>
+
+  <a href="lesson/tactics.html" class="section-card">
+    <div class="section-icon"><i class="fas fa-chess-knight"></i></div>
+    <div class="section-title">战术训练</div>
+    <div class="section-desc">提升中局战斗力的战术组合与策略</div>
+    <ul class="feature-list">
+      <li>常见战术组合</li>
+      <li>弃子攻杀技巧</li>
+      <li>防守反击策略</li>
+      <li>局面判断方法</li>
+    </ul>
+  </a>
+
+  <a href="lesson/endgame.html" class="section-card">
+    <div class="section-icon"><i class="fas fa-trophy"></i></div>
+    <div class="section-title">残局研究</div>
+    <div class="section-desc">经典残局定式与实用残局技巧</div>
+    <ul class="feature-list">
+      <li>单车残局</li>
+      <li>马炮残局</li>
+      <li>兵卒残局</li>
+      <li>例胜例和定式</li>
+    </ul>
+  </a>
+
+  <a href="practice/puzzles.html" class="section-card">
+    <div class="section-icon"><i class="fas fa-puzzle-piece"></i></div>
+    <div class="section-title">习题训练</div>
+    <div class="section-desc">海量棋局习题，巩固所学知识</div>
+    <ul class="feature-list">
+      <li>每日精选习题</li>
+      <li>难度分级训练</li>
+      <li>解题统计分析</li>
+      <li>错题本功能</li>
+    </ul>
+  </a>
+
+  <a href="practice/analysis.html" class="section-card">
+    <div class="section-icon"><i class="fas fa-chart-line"></i></div>
+    <div class="section-title">棋局分析</div>
+    <div class="section-desc">上传或输入棋谱进行深度分析</div>
+    <ul class="feature-list">
+      <li>PGN 棋谱导入</li>
+      <li>关键着法标注</li>
+      <li>胜率变化曲线</li>
+      <li>改进建议提示</li>
+    </ul>
+  </a>
+
+  <a href="teacher/dashboard.html" class="section-card">
+    <div class="section-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+    <div class="section-title">教师专区</div>
+    <div class="section-desc">创建课程、管理学生、布置作业</div>
+    <ul class="feature-list">
+      <li>课程创建工具</li>
+      <li>学员进度跟踪</li>
+      <li>作业批改系统</li>
+      <li>在线直播授课</li>
+    </ul>
+  </a>
+</div>
+
+<script src="../assets/js/headerFooterManager.js"></script>
+<script src="../assets/js/dropdown.js"></script>
+</body>
+</html>
