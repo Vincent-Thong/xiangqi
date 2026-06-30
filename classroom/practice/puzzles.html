@@ -15,7 +15,7 @@
   body{background:var(--bg);color:var(--ui-text);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:radial-gradient(ellipse at 20% 20%,rgba(200,146,42,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(192,57,43,.06) 0%,transparent 60%)}
   h1{font-family:'Cinzel',serif;font-size:2rem;letter-spacing:.2em;color:var(--gold);text-shadow:0 0 20px rgba(212,160,23,.4);margin-bottom:4px}
   .subtitle{font-size:.85rem;color:#8a7050;letter-spacing:.3em;margin-bottom:30px}
-  .puzzle-container{max-width:1000px;width:100%;display:flex;flex-direction:column;gap:20px}
+  .puzzle-container{max-width:1200px;width:100%;display:flex;flex-direction:column;gap:20px}
   .back-link{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;color:var(--ui-text);text-decoration:none;font-size:.85rem;transition:all .2s;margin-bottom:20px}
   .back-link:hover{border-color:var(--gold);color:var(--gold)}
   .puzzle-filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
@@ -40,9 +40,51 @@
   .coming-soon p{color:#8a7050;line-height:1.8;max-width:500px;margin:0 auto}
   .feature-list{margin-top:24px;text-align:left;display:inline-block}
   .feature-list li{font-size:.85rem;color:#6a5a30;margin-bottom:8px}
+  
+  /* Puzzle Board Section */
+  .puzzle-board-section{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+  .board-wrap{position:relative;background:var(--board-bg);border:3px solid var(--board-line);border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,.7),inset 0 0 60px rgba(0,0,0,.15);padding:30px}
+  canvas#puzzleBoard{display:block;cursor:pointer}
+  .puzzle-side{width:260px;display:flex;flex-direction:column;gap:14px}
+  .panel{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;padding:14px}
+  .panel-title{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.2em;color:var(--gold);border-bottom:1px solid var(--ui-border);padding-bottom:8px;margin-bottom:10px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border:1px solid var(--ui-border);border-radius:4px;background:#1e1808;color:var(--ui-text);font-family:'Noto Serif SC',serif;font-size:.82rem;cursor:pointer;transition:all .2s;gap:6px;width:100%;margin-bottom:6px}
+  .btn:hover{background:var(--ui-border);border-color:var(--gold);color:var(--gold)}
+  .btn:active{transform:scale(.97)}
+  .btn:disabled{opacity:.35;cursor:default;pointer-events:none}
+  #puzzleStatus{font-size:.85rem;padding:8px;border-radius:4px;background:rgba(200,146,42,.08);border:1px solid var(--ui-border);text-align:center;min-height:36px;line-height:1.4}
+  #puzzleStatus.red-turn{border-color:rgba(192,57,43,.4);color:#e07060}
+  #puzzleStatus.black-turn{border-color:rgba(100,80,40,.4);color:#b09070}
+  #puzzleStatus.check{border-color:var(--red);color:var(--red-light);animation:pulse .6s ease infinite alternate}
+  #puzzleStatus.checkmate{border-color:var(--red);color:var(--gold);background:rgba(192,57,43,.15)}
+  @keyframes pulse{from{box-shadow:none}to{box-shadow:0 0 12px rgba(192,57,43,.5)}}
+  
+  /* Edit Mode Styles */
+  .edit-controls{display:flex;flex-direction:column;gap:8px}
+  .edit-mode-indicator{font-size:.75rem;color:#8a7050;text-align:center;padding:6px;background:rgba(212,160,23,.1);border-radius:4px;border:1px solid var(--ui-border)}
+  .edit-mode-indicator.active{background:rgba(212,160,23,.2);border-color:var(--gold);color:var(--gold)}
+  .piece-selector{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px}
+  .piece-btn{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#1e1808;border:1px solid var(--ui-border);border-radius:4px;cursor:pointer;font-size:1.1rem;transition:all .2s}
+  .piece-btn:hover{border-color:var(--gold);background:var(--ui-border)}
+  .piece-btn.selected{border-color:var(--gold);background:rgba(212,160,23,.2);box-shadow:0 0 8px rgba(212,160,23,.3)}
+  .turn-indicator{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;background:rgba(200,146,42,.08);border:1px solid var(--ui-border);border-radius:4px;margin-top:8px;cursor:pointer;transition:all .2s}
+  .turn-indicator:hover{background:rgba(200,146,42,.15);border-color:var(--gold)}
+  .turn-indicator .turn-dot{width:16px;height:16px;border-radius:50%;transition:all .2s}
+  .turn-indicator .turn-dot.red{background:radial-gradient(circle,#e74c3c,#c0392b)}
+  .turn-indicator .turn-dot.black{background:radial-gradient(circle,#505050,#202020)}
+  .turn-indicator.active .turn-dot{box-shadow:0 0 10px currentColor}
+  .turn-indicator .turn-dot.red.active{transform:scale(1.3);box-shadow:0 0 12px rgba(231,76,60,.8)}
+  .turn-indicator .turn-dot.black.active{transform:scale(1.3);box-shadow:0 0 12px rgba(80,80,80,.8)}
+  
   @media (max-width: 768px){
     .puzzle-filters{flex-direction:column}
     .filter-btn{text-align:center}
+    .puzzle-board-section{flex-direction:column;align-items:center}
+    .puzzle-side{width:100%;max-width:450px}
+  }
+  @media (max-width: 500px){
+    .board-wrap{padding:15px}
+    canvas#puzzleBoard{width:100%;max-width:360px;height:auto}
   }
 </style>
 </head>
@@ -55,7 +97,60 @@
   <h1>习题训练</h1>
   <p class="subtitle">海量棋局习题，巩固所学知识</p>
 
-  <div class="puzzle-filters">
+  <!-- Puzzle Board Section -->
+  <div class="puzzle-board-section">
+    <div>
+      <div class="board-wrap">
+        <canvas id="puzzleBoard" width="450" height="500" aria-label="Chinese chess board" role="img"></canvas>
+      </div>
+    </div>
+    <div class="puzzle-side">
+      <div class="panel">
+        <div class="panel-title">PUZZLE STATUS</div>
+        <div id="puzzleStatus" class="red-turn">Red's Turn</div>
+      </div>
+      
+      <div class="panel">
+        <div class="panel-title">EDIT MODE</div>
+        <div class="edit-controls">
+          <button class="btn" id="btnToggleEdit" onclick="toggleEditMode()" aria-label="Toggle edit mode">✏️ Edit Position</button>
+          <div class="edit-mode-indicator" id="editIndicator">Click on board to place pieces</div>
+          <div class="piece-selector" id="pieceSelector">
+            <button class="piece-btn selected" data-piece="K" title="Red King">帅</button>
+            <button class="piece-btn" data-piece="A" title="Red Advisor">仕</button>
+            <button class="piece-btn" data-piece="B" title="Red Elephant">相</button>
+            <button class="piece-btn" data-piece="N" title="Red Horse">马</button>
+            <button class="piece-btn" data-piece="R" title="Red Rook">车</button>
+            <button class="piece-btn" data-piece="C" title="Red Cannon">炮</button>
+            <button class="piece-btn" data-piece="P" title="Red Pawn">兵</button>
+            <button class="piece-btn" data-piece="k" title="Black General">将</button>
+            <button class="piece-btn" data-piece="a" title="Black Advisor">士</button>
+            <button class="piece-btn" data-piece="b" title="Black Elephant">象</button>
+            <button class="piece-btn" data-piece="n" title="Black Horse">馬</button>
+            <button class="piece-btn" data-piece="r" title="Black Rook">車</button>
+            <button class="piece-btn" data-piece="c" title="Black Cannon">砲</button>
+            <button class="piece-btn" data-piece="p" title="Black Pawn">卒</button>
+            <button class="piece-btn" data-piece="" title="Empty">⊘</button>
+          </div>
+          <div class="turn-indicator" id="turnIndicator" onclick="cycleTurn()" style="cursor:pointer" title="Click to change turn">
+            <span class="turn-dot red"></span>
+            <span style="font-size:.8rem;color:#8a7050">Turn:</span>
+            <span class="turn-dot black"></span>
+          </div>
+          <button class="btn" onclick="resetToInitial()" aria-label="Reset to initial position">↺ Reset Position</button>
+          <button class="btn" onclick="startGameFromPosition()" aria-label="Start game from current position">▶ Start Game</button>
+        </div>
+      </div>
+      
+      <div class="panel">
+        <div class="panel-title">GAME</div>
+        <button class="btn" onclick="newPuzzleGame()" aria-label="Start new puzzle game">♟ New Puzzle</button>
+        <button class="btn danger" onclick="confirmResign()" aria-label="Resign game">⚑ Resign</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="puzzle-filters" style="margin-top:30px">
     <button class="filter-btn active">全部</button>
     <button class="filter-btn">入门</button>
     <button class="filter-btn">初级</button>
@@ -156,12 +251,419 @@
 <script src="../../assets/js/headerFooterManager.js"></script>
 <script src="../../assets/js/dropdown.js"></script>
 <script>
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-    });
+// ═══════════════════════════════════════════════════════════
+//  PUZZLE BOARD - Xiangqi Board with Edit Mode
+// ═══════════════════════════════════════════════════════════
+const COLS=9,ROWS=10,CELL=50,PAD=25;
+const PIECE_NAMES={K:'将',k:'将',A:'仕',a:'士',B:'相',b:'象',N:'马',n:'馬',R:'车',r:'車',C:'炮',c:'砲',P:'兵',p:'卒'};
+const INIT=[
+  ['r','n','b','a','k','a','b','n','r'],
+  ['','','','','','','','',''],
+  ['','c','','','','','','c',''],
+  ['p','','p','','p','','p','','p'],
+  ['','','','','','','','',''],
+  ['','','','','','','','',''],
+  ['P','','P','','P','','P','','P'],
+  ['','C','','','','','','C',''],
+  ['','','','','','','','',''],
+  ['R','N','B','A','K','A','B','N','R']
+];
+
+let puzzleRoot, puzzleCursor, puzzleGameOver, puzzleSelectedCell=null;
+let editMode=false, selectedPiece='K', currentTurn='red';
+let nodeId=0;
+
+function makeNode(parent, board, turn, moveData){
+  return { id:nodeId++, parent, board:board.map(r=>[...r]), turn,
+           children:[], ...moveData };
+}
+
+function clone(b){return b.map(r=>[...r])}
+function isRed(p){return p&&p===p.toUpperCase()}
+function isBlack(p){return p&&p===p.toLowerCase()}
+function inB(c,r){return c>=0&&c<COLS&&r>=0&&r<ROWS}
+
+function getRaw(b,col,row,piece){
+  const p=piece.toUpperCase(),moves=[],fr=isRed(piece)?isRed:isBlack,en=isRed(piece)?isRed:isBlack;
+  if(p==='R'){for(const[dc,dr]of[[1,0],[-1,0],[0,1],[0,-1]]){let c=col+dc,r=row+dr;while(inB(c,r)){if(fr(b[r][c]))break;moves.push([c,r]);if(en(b[r][c]))break;c+=dc;r+=dr;}}}
+  else if(p==='N'){const steps=[[[0,-1],[[-1,-2],[1,-2]]],[[0,1],[[-1,2],[1,2]]],[[-1,0],[[-2,-1],[-2,1]]],[[1,0],[[2,-1],[2,1]]]];for(const[leg,ends]of steps){const lc=col+leg[0],lr=row+leg[1];if(!inB(lc,lr)||b[lr][lc])continue;for(const[ec,er]of ends){const tc=col+ec,tr=row+er;if(inB(tc,tr)&&!fr(b[tr][tc]))moves.push([tc,tr]);}}}
+  else if(p==='B'){for(const[dc,dr]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const mc=col+dc,mr=row+dr,tc=col+2*dc,tr=row+2*dr;if(!inB(tc,tr))continue;if(isRed(piece)&&tr<5)continue;if(isBlack(piece)&&tr>4)continue;if(inB(mc,mr)&&b[mr][mc])continue;if(!fr(b[tr][tc]))moves.push([tc,tr]);}}
+  else if(p==='A'){const pr=isRed(piece)?[7,8,9]:[0,1,2],pc=[3,4,5];for(const[dc,dr]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const tc=col+dc,tr=row+dr;if(pc.includes(tc)&&pr.includes(tr)&&!fr(b[tr][tc]))moves.push([tc,tr]);}}
+  else if(p==='K'){const pr=isRed(piece)?[7,8,9]:[0,1,2],pc=[3,4,5];for(const[dc,dr]of[[1,0],[-1,0],[0,1],[0,-1]]){const tc=col+dc,tr=row+dr;if(pc.includes(tc)&&pr.includes(tr)&&!fr(b[tr][tc]))moves.push([tc,tr]);}}
+  else if(p==='C'){for(const[dc,dr]of[[1,0],[-1,0],[0,1],[0,-1]]){let c=col+dc,r=row+dr,jumped=false;while(inB(c,r)){if(!jumped){if(!b[r][c])moves.push([c,r]);else jumped=true;}else{if(b[r][c]){if(en(b[r][c]))moves.push([c,r]);break;}}c+=dc;r+=dr;}}}
+  else if(p==='P'){if(isRed(piece)){if(inB(col,row-1)&&!fr(b[row-1][col]))moves.push([col,row-1]);if(row<=4){if(inB(col+1,row)&&!fr(b[row][col+1]))moves.push([col+1,row]);if(inB(col-1,row)&&!fr(b[row][col-1]))moves.push([col-1,row]);}}else{if(inB(col,row+1)&&!fr(b[row+1][col]))moves.push([col,row+1]);if(row>=5){if(inB(col+1,row)&&!fr(b[row][col+1]))moves.push([col+1,row]);if(inB(col-1,row)&&!fr(b[row][col-1]))moves.push([col-1,row]);}}}
+  return moves;
+}
+
+function findKing(b,color){const k=color==='red'?'K':'k';for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(b[r][c]===k)return[c,r];return null;}
+function isInCheck(b,color){
+  const kp=findKing(b,color);if(!kp)return false;
+  const[kc,kr]=kp;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=b[r][c];if(!p)continue;if((color==='red'&&isRed(p))||(color==='black'&&isBlack(p)))continue;if(getRaw(b,c,r,p).some(([tc,tr])=>tc===kc&&tr===kr))return true;}
+  const ok=findKing(b,color==='red'?'black':'red');
+  if(ok&&ok[0]===kc){let bl=false;const mn=Math.min(kr,ok[1]),mx=Math.max(kr,ok[1]);for(let rr=mn+1;rr<mx;rr++)if(b[rr][kc]){bl=true;break;}if(!bl)return true;}
+  return false;
+}
+
+function getLegal(b,col,row){
+  const piece=b[row][col];if(!piece)return[];
+  return getRaw(b,col,row,piece).filter(([tc,tr])=>{const nb=clone(b);nb[tr][tc]=piece;nb[row][col]='';return!isInCheck(nb,isRed(piece)?'red':'black');});
+}
+
+function hasAnyLegal(b,color){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=b[r][c];if(!p||((color==='red'&&!isRed(p))||(color==='black'&&!isBlack(p))))continue;if(getLegal(b,c,r).length>0)return true;}return false;
+}
+
+function newPuzzleGame(){
+  nodeId=0;
+  puzzleRoot=makeNode(null, INIT.map(r=>[...r]), 'red',
+    {notation:'',fromCol:-1,fromRow:-1,toCol:-1,toRow:-1,piece:'',captured:''});
+  puzzleCursor=puzzleRoot;
+  puzzleGameOver=false;
+  puzzleSelectedCell=null;
+  editMode=false;
+  updatePuzzleStatus();
+  renderPuzzleBoard();
+  updateEditModeUI();
+}
+
+function startGameFromPosition(){
+  // Start game from the current edited position
+  const currentBoard = puzzleCursor ? puzzleCursor.board : puzzleRoot.board;
+  nodeId=0;
+  puzzleRoot=makeNode(null, currentBoard.map(r=>[...r]), currentTurn,
+    {notation:'',fromCol:-1,fromRow:-1,toCol:-1,toRow:-1,piece:'',captured:''});
+  puzzleCursor=puzzleRoot;
+  puzzleGameOver=false;
+  puzzleSelectedCell=null;
+  editMode=false;
+  updatePuzzleStatus();
+  renderPuzzleBoard();
+  updateEditModeUI();
+}
+
+function resetToInitial(){
+  if(editMode){
+    puzzleRoot=makeNode(null, INIT.map(r=>[...r]), 'red',
+      {notation:'',fromCol:-1,fromRow:-1,toCol:-1,toRow:-1,piece:'',captured:''});
+    puzzleCursor=puzzleRoot;
+    renderPuzzleBoard();
+  }
+}
+
+function toggleEditMode(){
+  editMode=!editMode;
+  updateEditModeUI();
+  renderPuzzleBoard();
+}
+
+function updateEditModeUI(){
+  const btn=document.getElementById('btnToggleEdit');
+  const indicator=document.getElementById('editIndicator');
+  const selector=document.getElementById('pieceSelector');
+  const turnInd=document.getElementById('turnIndicator');
+  
+  if(editMode){
+    btn.innerHTML='✓ Done Editing';
+    btn.style.borderColor='var(--gold)';
+    btn.style.color='var(--gold)';
+    indicator.classList.add('active');
+    indicator.textContent='Click on board to place pieces. Click piece below to select.';
+    selector.style.display='grid';
+    turnInd.style.display='flex';
+    updateTurnIndicator();
+  }else{
+    btn.innerHTML='✏️ Edit Position';
+    btn.style.borderColor='';
+    btn.style.color='';
+    indicator.classList.remove('active');
+    indicator.textContent='Click on board to place pieces';
+    selector.style.display='none';
+    turnInd.style.display='none';
+  }
+}
+
+function setPuzzlePiece(col,row){
+  if(!editMode) return;
+  const board=puzzleCursor.board;
+  board[row][col]=selectedPiece;
+  renderPuzzleBoard();
+}
+
+function cycleTurn(){
+  currentTurn=currentTurn==='red'?'black':'red';
+  updatePuzzleStatus();
+  updateTurnIndicator();
+}
+
+function updateTurnIndicator(){
+  const turnInd=document.getElementById('turnIndicator');
+  const redDot=turnInd.querySelector('.turn-dot.red');
+  const blackDot=turnInd.querySelector('.turn-dot.black');
+  if(currentTurn==='red'){
+    redDot.classList.add('active');
+    blackDot.classList.remove('active');
+  }else{
+    redDot.classList.remove('active');
+    blackDot.classList.add('active');
+  }
+}
+
+function updatePuzzleStatus(){
+  if(puzzleGameOver){
+    setStatus(`${puzzleCursor.turn==='red'?'🔴 Red':'⚫ Black'} wins!`,'checkmate');
+  }else if(editMode){
+    setStatus('Edit Mode - Set up position','');
+  }else{
+    setStatus(`${puzzleCursor.turn==='red'?'🔴 Red':'⚫ Black'}'s Turn`,puzzleCursor.turn+'-turn');
+  }
+}
+
+function setStatus(msg,cls){
+  const el=document.getElementById('puzzleStatus');
+  el.textContent=msg;
+  el.className=cls||'';
+}
+
+function confirmResign(){
+  showModal('Resign?',`${puzzleCursor.turn==='red'?'Red':'Black'} resigns.`,()=>{
+    puzzleGameOver=true;
+    const w=puzzleCursor.turn==='red'?'Black':'Red';
+    setStatus(`${w} wins by resignation!`,'checkmate');
   });
+}
+
+function showModal(title,msg,onOk){
+  // Create modal if not exists
+  let overlay=document.getElementById('modalOverlay');
+  if(!overlay){
+    overlay=document.createElement('div');
+    overlay.id='modalOverlay';
+    overlay.className='modal-overlay';
+    overlay.innerHTML=`
+      <div class="modal">
+        <h3 id="modalTitle">Confirm</h3>
+        <p id="modalMsg"></p>
+        <div class="modal-btns">
+          <button class="btn" id="modalOk">OK</button>
+          <button class="btn" onclick="closeModal()">Cancel</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+  }
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalMsg').textContent=msg;
+  document.getElementById('modalOk').onclick=()=>{closeModal();onOk();};
+  overlay.classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// Canvas rendering
+const puzzleCanvas=document.getElementById('puzzleBoard'),puzzleCtx=puzzleCanvas.getContext('2d');
+function xy(col,row){return[PAD+col*CELL,PAD+row*CELL];}
+
+function renderPuzzleBoard(){
+  const board=puzzleCursor.board;
+  const W=puzzleCanvas.width,H=puzzleCanvas.height;
+  puzzleCtx.clearRect(0,0,W,H);
+  puzzleCtx.fillStyle='#c8922a';puzzleCtx.fillRect(0,0,W,H);
+  for(let i=0;i<H;i+=3){puzzleCtx.strokeStyle=`rgba(100,60,10,${.03+.02*Math.sin(i*.1)})`;puzzleCtx.lineWidth=1;puzzleCtx.beginPath();puzzleCtx.moveTo(0,i);puzzleCtx.lineTo(W,i);puzzleCtx.stroke();}
+  puzzleCtx.strokeStyle='#7a4f10';puzzleCtx.lineWidth=1;
+  for(let c=0;c<COLS;c++){const x=PAD+c*CELL;if(c===0||c===COLS-1){puzzleCtx.beginPath();puzzleCtx.moveTo(x,PAD);puzzleCtx.lineTo(x,PAD+9*CELL);puzzleCtx.stroke();}else{puzzleCtx.beginPath();puzzleCtx.moveTo(x,PAD);puzzleCtx.lineTo(x,PAD+4*CELL);puzzleCtx.stroke();puzzleCtx.beginPath();puzzleCtx.moveTo(x,PAD+5*CELL);puzzleCtx.lineTo(x,PAD+9*CELL);puzzleCtx.stroke();}}
+  for(let r=0;r<ROWS;r++){const y=PAD+r*CELL;puzzleCtx.beginPath();puzzleCtx.moveTo(PAD,y);puzzleCtx.lineTo(PAD+8*CELL,y);puzzleCtx.stroke();}
+  puzzleCtx.fillStyle='rgba(100,60,10,.4)';puzzleCtx.font='bold 14px "Noto Serif SC",serif';puzzleCtx.textAlign='center';
+  puzzleCtx.fillText('楚  河',PAD+1.7*CELL,PAD+4.65*CELL);puzzleCtx.fillText('汉  界',PAD+6.3*CELL,PAD+4.65*CELL);
+  puzzleCtx.strokeStyle='#7a4f10';puzzleCtx.lineWidth=1;
+  [[3,0,5,2],[5,0,3,2],[3,7,5,9],[5,7,3,9]].forEach(([c1,r1,c2,r2])=>{puzzleCtx.beginPath();puzzleCtx.moveTo(PAD+c1*CELL,PAD+r1*CELL);puzzleCtx.lineTo(PAD+c2*CELL,PAD+r2*CELL);puzzleCtx.stroke();});
+  drawX([[1,2],[7,2],[1,7],[7,7]]);
+  drawX([[0,3],[2,3],[4,3],[6,3],[8,3],[0,6],[2,6],[4,6],[6,6],[8,6]]);
+  
+  // Last move highlight
+  if(puzzleCursor!==puzzleRoot && !editMode){
+    for(const[c,r]of[[puzzleCursor.fromCol,puzzleCursor.fromRow],[puzzleCursor.toCol,puzzleCursor.toRow]]){
+      const[x,y]=xy(c,r);puzzleCtx.fillStyle='rgba(200,180,60,.2)';puzzleCtx.beginPath();puzzleCtx.arc(x,y,22,0,Math.PI*2);puzzleCtx.fill();
+    }
+  }
+  
+  // Selection + legal moves (only when not in edit mode)
+  let legal=[];
+  if(puzzleSelectedCell && !editMode && !puzzleGameOver){
+    const[sc,sr]=puzzleSelectedCell; legal=getLegal(board,sc,sr);
+    const[sx,sy]=xy(sc,sr);puzzleCtx.fillStyle='rgba(255,220,80,.35)';puzzleCtx.beginPath();puzzleCtx.arc(sx,sy,22,0,Math.PI*2);puzzleCtx.fill();
+  }
+  for(const[tc,tr]of legal){
+    const[x,y]=xy(tc,tr);
+    if(board[tr][tc]){puzzleCtx.strokeStyle='rgba(255,200,50,.7)';puzzleCtx.lineWidth=3;puzzleCtx.beginPath();puzzleCtx.arc(x,y,22,0,Math.PI*2);puzzleCtx.stroke();}
+    else{puzzleCtx.fillStyle='rgba(255,210,60,.55)';puzzleCtx.beginPath();puzzleCtx.arc(x,y,8,0,Math.PI*2);puzzleCtx.fill();}
+  }
+  
+  // Pieces
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){const p=board[r][c];if(p)drawPiece(p,c,r);}
+}
+
+function drawX(positions){
+  const arm=6,gap=3;puzzleCtx.strokeStyle='#7a4f10';puzzleCtx.lineWidth=1;
+  for(const[c,r]of positions){
+    const[x,y]=xy(c,r),L=c>0,R=c<COLS-1,T=r>0,Bo=r<ROWS-1;
+    if(L&&T){puzzleCtx.beginPath();puzzleCtx.moveTo(x-gap,y-arm);puzzleCtx.lineTo(x-gap,y);puzzleCtx.moveTo(x-arm,y-gap);puzzleCtx.lineTo(x,y-gap);puzzleCtx.stroke();}
+    if(R&&T){puzzleCtx.beginPath();puzzleCtx.moveTo(x+gap,y-arm);puzzleCtx.lineTo(x+gap,y);puzzleCtx.moveTo(x+arm,y-gap);puzzleCtx.lineTo(x,y-gap);puzzleCtx.stroke();}
+    if(L&&Bo){puzzleCtx.beginPath();puzzleCtx.moveTo(x-gap,y+arm);puzzleCtx.lineTo(x-gap,y);puzzleCtx.moveTo(x-arm,y+gap);puzzleCtx.lineTo(x,y+gap);puzzleCtx.stroke();}
+    if(R&&Bo){puzzleCtx.beginPath();puzzleCtx.moveTo(x+gap,y+arm);puzzleCtx.lineTo(x+gap,y);puzzleCtx.moveTo(x+arm,y+gap);puzzleCtx.lineTo(x,y+gap);puzzleCtx.stroke();}
+  }
+}
+
+function drawPiece(piece,col,row){
+  const[x,y]=xy(col,row),red=isRed(piece),R=20;
+  puzzleCtx.save();puzzleCtx.shadowColor='rgba(0,0,0,.45)';puzzleCtx.shadowBlur=6;puzzleCtx.shadowOffsetY=3;
+  const og=puzzleCtx.createRadialGradient(x-4,y-4,2,x,y,R+2);
+  if(red){og.addColorStop(0,'#d06050');og.addColorStop(1,'#7a1510');}else{og.addColorStop(0,'#505050');og.addColorStop(1,'#101010');}
+  puzzleCtx.fillStyle=og;puzzleCtx.beginPath();puzzleCtx.arc(x,y,R+2,0,Math.PI*2);puzzleCtx.fill();puzzleCtx.restore();
+  const fg=puzzleCtx.createRadialGradient(x-5,y-5,2,x,y,R);
+  if(red){fg.addColorStop(0,'#f08070');fg.addColorStop(.5,'#c03020');fg.addColorStop(1,'#801010');}
+  else{fg.addColorStop(0,'#706050');fg.addColorStop(.5,'#201a10');fg.addColorStop(1,'#0a0808');}
+  puzzleCtx.fillStyle=fg;puzzleCtx.beginPath();puzzleCtx.arc(x,y,R,0,Math.PI*2);puzzleCtx.fill();
+  puzzleCtx.strokeStyle=red?'rgba(255,180,150,.5)':'rgba(200,160,80,.4)';puzzleCtx.lineWidth=1.5;puzzleCtx.beginPath();puzzleCtx.arc(x,y,R-4,0,Math.PI*2);puzzleCtx.stroke();
+  puzzleCtx.fillStyle=red?'#ffe0c0':'#d4a060';puzzleCtx.font='bold 16px "Noto Serif SC",serif';puzzleCtx.textAlign='center';puzzleCtx.textBaseline='middle';
+  puzzleCtx.fillText(PIECE_NAMES[piece]||piece,x,y+1);
+}
+
+// Handle click on puzzle board
+puzzleCanvas.addEventListener('click',e=>{
+  const rect=puzzleCanvas.getBoundingClientRect(),sx=puzzleCanvas.width/rect.width,sy=puzzleCanvas.height/rect.height;
+  const mx=(e.clientX-rect.left)*sx,my=(e.clientY-rect.top)*sy;
+  const col=Math.round((mx-PAD)/CELL),row=Math.round((my-PAD)/CELL);
+  if(col<0||col>=COLS||row<0||row>=ROWS)return;
+  
+  if(editMode){
+    setPuzzlePiece(col,row);
+  }else{
+    handlePuzzleClick(col,row);
+  }
+});
+
+function handlePuzzleClick(col,row){
+  if(puzzleGameOver) return;
+  const board=puzzleCursor.board;
+  const piece=board[row][col];
+  if(puzzleSelectedCell){
+    const[sc,sr]=puzzleSelectedCell, legal=getLegal(board,sc,sr);
+    if(legal.some(([tc,tr])=>tc===col&&tr===row)){ 
+      makePuzzleMove(sc,sr,col,row); 
+      return; 
+    }
+    puzzleSelectedCell=null;
+  }
+  if(piece&&((puzzleCursor.turn==='red'&&isRed(piece))||(puzzleCursor.turn==='black'&&isBlack(piece)))){
+    puzzleSelectedCell=[col,row];
+  }
+  renderPuzzleBoard();
+}
+
+function makePuzzleMove(fc,fr_,tc,tr){
+  const board=puzzleCursor.board;
+  const piece=board[fr_][fc], captured=board[tr][tc];
+  const notation=toNot(piece,fc,fr_,tc,tr);
+  const newBoard=clone(board);
+  newBoard[tr][tc]=piece; newBoard[fr_][fc]='';
+  const nextTurn=puzzleCursor.turn==='red'?'black':'red';
+
+  const existing=puzzleCursor.children.find(c=>c.fromCol===fc&&c.fromRow===fr_&&c.toCol===tc&&c.toRow===tr);
+  if(existing){ puzzleCursor=existing; }
+  else{
+    const node=makeNode(puzzleCursor, newBoard, nextTurn,
+      {notation, fromCol:fc, fromRow:fr_, toCol:tc, toRow:tr, piece, captured});
+    puzzleCursor.children.push(node);
+    puzzleCursor=node;
+  }
+
+  puzzleSelectedCell=null;
+  const opp=puzzleCursor.turn;
+  if(!hasAnyLegal(puzzleCursor.board,opp)){
+    puzzleGameOver=true;
+    const w=opp==='red'?'Black':'Red';
+    setStatus(`${w==='Red'?'🔴':'⚫'} Checkmate! ${w} wins!`,'checkmate');
+  } else if(isInCheck(puzzleCursor.board,puzzleCursor.turn)){
+    setStatus(`${puzzleCursor.turn==='red'?'🔴 Red':'⚫ Black'} is in CHECK!`,'check');
+  } else {
+    updatePuzzleStatus();
+  }
+  renderPuzzleBoard();
+}
+
+function toNot(piece,fc,fr_,tc,tr){
+  const board = puzzleCursor.board;
+  const pn = PIECE_NAMES[piece] || piece;
+  const red = isRed(piece);
+  const fcn = red ? ['九','八','七','六','五','四','三','二','一'][fc] : ['1','2','3','4','5','6','7','8','9'][fc];
+  const dr = tr - fr_;
+  const diag = ['N','n','B','b','A','a'].includes(piece);
+  let dir, num;
+
+  const samePieces = findSamePiecesOnFile(board, piece, fc);
+  const useFrontBack = samePieces.length > 1;
+
+  let prefix = '';
+  if(useFrontBack){
+    const sortedForFrontBack = red ? [...samePieces].sort((a,b) => a - b) : [...samePieces].sort((a,b) => b - a);
+    const frontRow = sortedForFrontBack[0];
+    const backRow = sortedForFrontBack[sortedForFrontBack.length - 1];
+
+    if(fr_ === frontRow && fr_ !== backRow){
+      prefix = '前';
+    } else if(fr_ === backRow && fr_ !== frontRow){
+      prefix = '后';
+    } else {
+      const idx = sortedForFrontBack.indexOf(fr_);
+      if(idx === 0) prefix = '前';
+      else if(idx === sortedForFrontBack.length - 1) prefix = '后';
+    }
+  }
+
+  if(dr === 0){
+    dir = '平';
+    num = red ? ['九','八','七','六','五','四','三','二','一'][tc] : ['1','2','3','4','5','6','7','8','9'][tc];
+  } else if((red && dr < 0) || (!red && dr > 0)){
+    dir = '进';
+    num = diag ? (red ? ['九','八','七','六','五','四','三','二','一'][tc] : ['1','2','3','4','5','6','7','8','9'][tc]) : Math.abs(dr).toString();
+  } else {
+    dir = '退';
+    num = diag ? (red ? ['九','八','七','六','五','四','三','二','一'][tc] : ['1','2','3','4','5','6','7','8','9'][tc]) : Math.abs(dr).toString();
+  }
+
+  return `${prefix}${pn}${fcn}${dir}${num}`;
+}
+
+function findSamePiecesOnFile(board, piece, col){
+  const positions = [];
+  for(let r = 0; r < ROWS; r++){
+    if(board[r][col] === piece) positions.push(r);
+  }
+  return positions.sort((a,b) => a - b);
+}
+
+// Piece selector
+document.querySelectorAll('.piece-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.piece-btn').forEach(b => b.classList.remove('selected'));
+    this.classList.add('selected');
+    selectedPiece = this.dataset.piece;
+  });
+});
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Initialize
+newPuzzleGame();
+updateEditModeUI();
 </script>
 </body>
 </html>
