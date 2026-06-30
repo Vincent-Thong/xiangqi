@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="象棋习题训练 - 麒麟象棋队在线课堂">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>">
+<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<title>习题训练 - 麒麟象棋队</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+  :root{--bg:#1a1208;--board-bg:#c8922a;--board-line:#7a4f10;--red:#c0392b;--red-light:#e74c3c;--gold:#d4a017;--gold-light:#f0c040;--ui-bg:#12100a;--ui-border:#3a2a10;--ui-text:#e8d5a0;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ui-text);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:radial-gradient(ellipse at 20% 20%,rgba(200,146,42,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(192,57,43,.06) 0%,transparent 60%)}
+  h1{font-family:'Cinzel',serif;font-size:2rem;letter-spacing:.2em;color:var(--gold);text-shadow:0 0 20px rgba(212,160,23,.4);margin-bottom:4px}
+  .subtitle{font-size:.85rem;color:#8a7050;letter-spacing:.3em;margin-bottom:30px}
+  .puzzle-container{max-width:1000px;width:100%;display:flex;flex-direction:column;gap:20px}
+  .back-link{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;color:var(--ui-text);text-decoration:none;font-size:.85rem;transition:all .2s;margin-bottom:20px}
+  .back-link:hover{border-color:var(--gold);color:var(--gold)}
+  .puzzle-filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+  .filter-btn{padding:8px 16px;background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;color:var(--ui-text);font-family:'Noto Serif SC',serif;font-size:.8rem;cursor:pointer;transition:all .2s}
+  .filter-btn:hover{border-color:var(--gold);color:var(--gold)}
+  .filter-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+  .puzzle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+  .puzzle-card{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:8px;padding:20px;transition:all .3s;cursor:pointer}
+  .puzzle-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 8px 30px rgba(212,160,23,.15)}
+  .puzzle-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .puzzle-title{font-family:'Cinzel',serif;font-size:.9rem;color:var(--gold)}
+  .puzzle-difficulty{font-size:.7rem;padding:4px 8px;border-radius:4px}
+  .difficulty-easy{background:rgba(46,204,113,.2);color:#2ecc71}
+  .difficulty-medium{background:rgba(241,196,15,.2);color:#f1c40f}
+  .difficulty-hard{background:rgba(231,76,60,.2);color:#e74c3c}
+  .puzzle-desc{font-size:.8rem;color:#8a7050;line-height:1.6;margin-bottom:12px}
+  .puzzle-stats{display:flex;gap:16px;font-size:.75rem;color:#6a5a30}
+  .stat-item{display:flex;align-items:center;gap:4px}
+  .coming-soon{text-align:center;padding:60px 20px}
+  .coming-soon i{font-size:4rem;color:var(--gold);opacity:.5;margin-bottom:20px}
+  .coming-soon h2{font-family:'Cinzel',serif;color:var(--gold);margin-bottom:16px}
+  .coming-soon p{color:#8a7050;line-height:1.8;max-width:500px;margin:0 auto}
+  .feature-list{margin-top:24px;text-align:left;display:inline-block}
+  .feature-list li{font-size:.85rem;color:#6a5a30;margin-bottom:8px}
+  @media (max-width: 768px){
+    .puzzle-filters{flex-direction:column}
+    .filter-btn{text-align:center}
+  }
+</style>
+</head>
+<body>
+<common-header></common-header>
+
+<div class="puzzle-container">
+  <a href="../index.html" class="back-link"><i class="fas fa-arrow-left"></i> 返回课堂首页</a>
+  
+  <h1>习题训练</h1>
+  <p class="subtitle">海量棋局习题，巩固所学知识</p>
+
+  <div class="puzzle-filters">
+    <button class="filter-btn active">全部</button>
+    <button class="filter-btn">入门</button>
+    <button class="filter-btn">初级</button>
+    <button class="filter-btn">中级</button>
+    <button class="filter-btn">高级</button>
+    <button class="filter-btn">杀法专项</button>
+    <button class="filter-btn">残局专项</button>
+  </div>
+
+  <div class="puzzle-grid">
+    <div class="puzzle-card">
+      <div class="puzzle-header">
+        <span class="puzzle-title">每日一题</span>
+        <span class="puzzle-difficulty difficulty-medium">中级</span>
+      </div>
+      <p class="puzzle-desc">红先胜：利用车马配合，突破黑方防线</p>
+      <div class="puzzle-stats">
+        <span class="stat-item"><i class="fas fa-users"></i> 1,234 人做过</span>
+        <span class="stat-item"><i class="fas fa-check-circle"></i> 68% 正确率</span>
+      </div>
+    </div>
+
+    <div class="puzzle-card">
+      <div class="puzzle-header">
+        <span class="puzzle-title">卧槽马杀法</span>
+        <span class="puzzle-difficulty difficulty-easy">初级</span>
+      </div>
+      <p class="puzzle-desc">红先胜：经典卧槽马杀法练习</p>
+      <div class="puzzle-stats">
+        <span class="stat-item"><i class="fas fa-users"></i> 2,567 人做过</span>
+        <span class="stat-item"><i class="fas fa-check-circle"></i> 85% 正确率</span>
+      </div>
+    </div>
+
+    <div class="puzzle-card">
+      <div class="puzzle-header">
+        <span class="puzzle-title">车兵冷着</span>
+        <span class="puzzle-difficulty difficulty-hard">高级</span>
+      </div>
+      <p class="puzzle-desc">红先胜：精妙的车兵配合冷着</p>
+      <div class="puzzle-stats">
+        <span class="stat-item"><i class="fas fa-users"></i> 892 人做过</span>
+        <span class="stat-item"><i class="fas fa-check-circle"></i> 42% 正确率</span>
+      </div>
+    </div>
+
+    <div class="puzzle-card">
+      <div class="puzzle-header">
+        <span class="puzzle-title">马炮联攻</span>
+        <span class="puzzle-difficulty difficulty-medium">中级</span>
+      </div>
+      <p class="puzzle-desc">红先胜：马炮配合的典型攻杀</p>
+      <div class="puzzle-stats">
+        <span class="stat-item"><i class="fas fa-users"></i> 1,456 人做过</span>
+        <span class="stat-item"><i class="fas fa-check-circle"></i> 61% 正确率</span>
+      </div>
+    </div>
+
+    <div class="puzzle-card">
+      <div class="puzzle-header">
+        <span class="puzzle-title">双车错杀</span>
+        <span class="puzzle-difficulty difficulty-easy">初级</span>
+      </div>
+      <p class="puzzle-desc">红先胜：基础双车错杀法</p>
+      <div class="puzzle-stats">
+        <span class="stat-item"><i class="fas fa-users"></i> 3,123 人做过</span>
+        <span class="stat-item"><i class="fas fa-check-circle"></i> 91% 正确率</span>
+      </div>
+    </div>
+
+    <div class="puzzle-card">
+      <div class="puzzle-header">
+        <span class="puzzle-title">弃车入局</span>
+        <span class="puzzle-difficulty difficulty-hard">高级</span>
+      </div>
+      <p class="puzzle-desc">红先胜：精彩的弃车攻杀组合</p>
+      <div class="puzzle-stats">
+        <span class="stat-item"><i class="fas fa-users"></i> 678 人做过</span>
+        <span class="stat-item"><i class="fas fa-check-circle"></i> 35% 正确率</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="coming-soon" style="margin-top: 40px;">
+    <i class="fas fa-chart-line"></i>
+    <h2>更多功能即将上线</h2>
+    <p>我们正在开发以下功能，敬请期待：</p>
+    <ul class="feature-list">
+      <li><i class="fas fa-clock"></i> 每日精选习题推送</li>
+      <li><i class="fas fa-signal"></i> 个人解题统计分析</li>
+      <li><i class="fas fa-bookmark"></i> 错题本功能</li>
+      <li><i class="fas fa-medal"></i> 难度分级训练系统</li>
+      <li><i class="fas fa-trophy"></i> 解题排行榜</li>
+    </ul>
+  </div>
+</div>
+
+<script src="../../assets/js/headerFooterManager.js"></script>
+<script src="../../assets/js/dropdown.js"></script>
+<script>
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

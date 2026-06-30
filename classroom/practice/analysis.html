@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="象棋棋局分析 - 麒麟象棋队在线课堂">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>">
+<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<title>棋局分析 - 麒麟象棋队</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+  :root{--bg:#1a1208;--board-bg:#c8922a;--board-line:#7a4f10;--red:#c0392b;--red-light:#e74c3c;--gold:#d4a017;--gold-light:#f0c040;--ui-bg:#12100a;--ui-border:#3a2a10;--ui-text:#e8d5a0;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ui-text);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:radial-gradient(ellipse at 20% 20%,rgba(200,146,42,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(192,57,43,.06) 0%,transparent 60%)}
+  h1{font-family:'Cinzel',serif;font-size:2rem;letter-spacing:.2em;color:var(--gold);text-shadow:0 0 20px rgba(212,160,23,.4);margin-bottom:4px}
+  .subtitle{font-size:.85rem;color:#8a7050;letter-spacing:.3em;margin-bottom:30px}
+  .analysis-container{max-width:1000px;width:100%;display:flex;flex-direction:column;gap:20px}
+  .back-link{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;color:var(--ui-text);text-decoration:none;font-size:.85rem;transition:all .2s;margin-bottom:20px}
+  .back-link:hover{border-color:var(--gold);color:var(--gold)}
+  .upload-section{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:8px;padding:40px;text-align:center}
+  .upload-icon{font-size:4rem;color:var(--gold);opacity:.7;margin-bottom:20px}
+  .upload-section h2{font-family:'Cinzel',serif;color:var(--gold);margin-bottom:16px}
+  .upload-section p{color:#8a7050;line-height:1.8;margin-bottom:24px;max-width:600px;margin-left:auto;margin-right:right}
+  .upload-btn{display:inline-flex;align-items:center;gap:10px;padding:12px 30px;background:var(--gold);color:var(--bg);border:none;border-radius:6px;font-family:'Noto Serif SC',serif;font-size:.9rem;cursor:pointer;transition:all .2s}
+  .upload-btn:hover{background:var(--gold-light);transform:translateY(-2px)}
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-top:40px}
+  .feature-card{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:8px;padding:24px;text-align:left}
+  .feature-card i{font-size:2rem;color:var(--gold);margin-bottom:16px}
+  .feature-card h3{font-family:'Cinzel',serif;font-size:.95rem;color:var(--gold);margin-bottom:12px}
+  .feature-card p{font-size:.85rem;color:#8a7050;line-height:1.7}
+  .supported-formats{margin-top:30px;padding-top:20px;border-top:1px solid var(--ui-border)}
+  .supported-formats p{font-size:.8rem;color:#6a5a30;margin-bottom:10px}
+  .format-tags{display:flex;gap:8px;flex-wrap:wrap}
+  .format-tag{font-size:.7rem;padding:4px 10px;background:rgba(212,160,23,.1);border:1px solid var(--gold);border-radius:4px;color:var(--gold)}
+  .coming-soon-note{margin-top:40px;padding:20px;background:rgba(212,160,23,.05);border:1px dashed var(--gold);border-radius:8px;text-align:center}
+  .coming-soon-note p{font-size:.85rem;color:#8a7050}
+  @media (max-width: 768px){
+    .features-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<common-header></common-header>
+
+<div class="analysis-container">
+  <a href="../index.html" class="back-link"><i class="fas fa-arrow-left"></i> 返回课堂首页</a>
+  
+  <h1>棋局分析</h1>
+  <p class="subtitle">上传或输入棋谱进行深度分析</p>
+
+  <div class="upload-section">
+    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+    <h2>上传您的棋谱</h2>
+    <p>支持多种格式的棋谱文件，系统将自动分析关键着法、胜率变化，并提供改进建议。</p>
+    <label class="upload-btn">
+      <i class="fas fa-file-upload"></i> 选择文件
+      <input type="file" accept=".pgn,.xqf,.cbl" style="display:none">
+    </label>
+    
+    <div class="supported-formats">
+      <p>支持的格式：</p>
+      <div class="format-tags">
+        <span class="format-tag">PGN</span>
+        <span class="format-tag">XQF</span>
+        <span class="format-tag">CBL</span>
+        <span class="format-tag">TXT</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <i class="fas fa-chart-line"></i>
+      <h3>胜率变化曲线</h3>
+      <p>直观展示整盘棋的胜率波动，帮助您了解关键时刻和转折点。</p>
+    </div>
+
+    <div class="feature-card">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3>关键着法标注</h3>
+      <p>自动识别并标注好棋、坏棋、漏算等关键着法，便于复盘学习。</p>
+    </div>
+
+    <div class="feature-card">
+      <i class="fas fa-lightbulb"></i>
+      <h3>改进建议提示</h3>
+      <p>针对问题着法提供改进建议，展示更优的变化图。</p>
+    </div>
+
+    <div class="feature-card">
+      <i class="fas fa-bookmark"></i>
+      <h3>收藏与分享</h3>
+      <p>保存分析结果，生成分享链接，与棋友交流讨论。</p>
+    </div>
+
+    <div class="feature-card">
+      <i class="fas fa-history"></i>
+      <h3>历史对局管理</h3>
+      <p>建立个人对局库，按时间、对手、赛事等分类管理。</p>
+    </div>
+
+    <div class="feature-card">
+      <i class="fas fa-robot"></i>
+      <h3>AI 引擎分析</h3>
+      <p>集成强大 AI 引擎，提供专业级别的分析深度和准确度。</p>
+    </div>
+  </div>
+
+  <div class="coming-soon-note">
+    <p><i class="fas fa-tools"></i> <strong>功能开发中</strong> — 棋局分析功能正在紧张开发中，敬请期待！</p>
+  </div>
+</div>
+
+<script src="../../assets/js/headerFooterManager.js"></script>
+<script src="../../assets/js/dropdown.js"></script>
+</body>
+</html>

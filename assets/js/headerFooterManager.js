@@ -17,6 +17,7 @@ class CommonHeader extends HTMLElement {
         <a href="https://xiangqi.xyz/livestream.html">直播室</a>
         <a href="https://xiangqi.xyz/merchant.html">商品</a>
         <a href="https://xiangqi.xyz/tournament_manager.html">编排比赛</a>
+        <a href="https://xiangqi.xyz/classroom/index.html">在线课堂</a>
         <a href="https://xiangqi.xyz/contact.html">联络我们</a>
         <!--
         <div class="dropdown">

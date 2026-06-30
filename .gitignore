@@ -1,1 +1,1 @@
-Nothing needs to be added to the .gitignore file since only a source file (index.html) was modified and no build artifacts, dependencies, or temporary files were detected in the changes.
+(classroom/ is a directory containing HTML files, which are source files, so they should not be ignored)

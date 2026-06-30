@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="象棋战术训练 - 麒麟象棋队在线课堂">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>">
+<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<title>战术训练 - 麒麟象棋队</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+  :root{--bg:#1a1208;--board-bg:#c8922a;--board-line:#7a4f10;--red:#c0392b;--red-light:#e74c3c;--gold:#d4a017;--gold-light:#f0c040;--ui-bg:#12100a;--ui-border:#3a2a10;--ui-text:#e8d5a0;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ui-text);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:radial-gradient(ellipse at 20% 20%,rgba(200,146,42,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(192,57,43,.06) 0%,transparent 60%)}
+  h1{font-family:'Cinzel',serif;font-size:2rem;letter-spacing:.2em;color:var(--gold);text-shadow:0 0 20px rgba(212,160,23,.4);margin-bottom:4px}
+  .subtitle{font-size:.85rem;color:#8a7050;letter-spacing:.3em;margin-bottom:30px}
+  .lesson-container{max-width:900px;width:100%;display:flex;flex-direction:column;gap:20px}
+  .lesson-nav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+  .lesson-nav-btn{padding:10px 20px;background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;color:var(--ui-text);font-family:'Noto Serif SC',serif;font-size:.85rem;cursor:pointer;transition:all .2s;text-decoration:none}
+  .lesson-nav-btn:hover{border-color:var(--gold);color:var(--gold)}
+  .lesson-nav-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+  .lesson-content{background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:8px;padding:24px}
+  .lesson-section{margin-bottom:30px}
+  .lesson-section h2{font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:.15em;color:var(--gold);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--ui-border)}
+  .lesson-section p{font-size:.9rem;line-height:1.8;color:#b09070;margin-bottom:12px}
+  .lesson-section ul{padding-left:24px;margin-bottom:16px}
+  .lesson-section li{font-size:.85rem;line-height:1.8;color:#8a7050;margin-bottom:8px}
+  .tactic-example{background:rgba(212,160,23,.05);border:1px dashed var(--gold);border-radius:6px;padding:16px;margin:16px 0}
+  .tactic-example h3{font-size:.95rem;color:var(--gold-light);margin-bottom:10px}
+  .back-link{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:6px;color:var(--ui-text);text-decoration:none;font-size:.85rem;transition:all .2s;margin-bottom:20px}
+  .back-link:hover{border-color:var(--gold);color:var(--gold)}
+  @media (max-width: 768px){
+    .lesson-nav{flex-direction:column}
+    .lesson-nav-btn{text-align:center}
+  }
+</style>
+</head>
+<body>
+<common-header></common-header>
+
+<div class="lesson-container">
+  <a href="../index.html" class="back-link"><i class="fas fa-arrow-left"></i> 返回课堂首页</a>
+  
+  <h1>战术训练</h1>
+  <p class="subtitle">提升中局战斗力</p>
+
+  <div class="lesson-nav">
+    <a href="#intro" class="lesson-nav-btn active">战术概述</a>
+    <a href="#double-attack" class="lesson-nav-btn">双重攻击</a>
+    <a href="#discovered" class="lesson-nav-btn">闪击战术</a>
+    <a href="#pin" class="lesson-nav-btn">牵制战术</a>
+    <a href="#sacrifice" class="lesson-nav-btn">弃子攻杀</a>
+  </div>
+
+  <div class="lesson-content">
+    <div id="intro" class="lesson-section">
+      <h2><i class="fas fa-chess-knight"></i> 战术概述</h2>
+      <p>战术是中局战斗的核心，是通过一系列强制性的着法获得优势或取胜的手段。掌握常见战术组合，能够大幅提升您的棋艺水平。</p>
+      <p>学习战术的要点：</p>
+      <ul>
+        <li>熟悉各种基本战术的模式和特征</li>
+        <li>培养发现战术机会的敏锐眼光</li>
+        <li>计算准确，确保战术执行的可行性</li>
+        <li>通过大量练习形成战术直觉</li>
+      </ul>
+    </div>
+
+    <div id="double-attack" class="lesson-section">
+      <h2><i class="fas fa-crosshairs"></i> 双重攻击</h2>
+      <p>双重攻击是指一子同时攻击对方两个目标的战术，是最常见也最有效的战术之一。</p>
+      <div class="tactic-example">
+        <h3><i class="fas fa-lightbulb"></i> 典型示例</h3>
+        <p>马跳至对方阵地，同时威胁对方的车和炮；或者炮镇中路，同时瞄准对方的中卒和底象。</p>
+      </div>
+      <ul>
+        <li><strong>马的双重攻击：</strong>马的走法特殊，容易形成同时攻击两子的局面</li>
+        <li><strong>炮的双重攻击：</strong>利用炮架，同时威胁多个目标</li>
+        <li><strong>车的双重攻击：</strong>车控要道，同时压制对方多子</li>
+      </ul>
+    </div>
+
+    <div id="discovered" class="lesson-section">
+      <h2><i class="fas fa-bolt"></i> 闪击战术</h2>
+      <p>闪击是指移动一个棋子后，露出后面的棋子进行攻击的战术。这种战术往往出其不意，效果显著。</p>
+      <div class="tactic-example">
+        <h3><i class="fas fa-lightbulb"></i> 典型示例</h3>
+        <p>移开阻挡的棋子，让后面的炮直接将军；或者移动前子，让后车控制重要线路。</p>
+      </div>
+      <ul>
+        <li><strong>闪将：</strong>移动棋子后露出后面的炮或车进行将军</li>
+        <li><strong>闪捉：</strong>移动棋子后露出后面的强子捉对方弱子</li>
+        <li><strong>双重闪击：</strong>移动的棋子和露出的棋子同时发起攻击</li>
+      </ul>
+    </div>
+
+    <div id="pin" class="lesson-section">
+      <h2><i class="fas fa-thumbtack"></i> 牵制战术</h2>
+      <p>牵制是指攻击对方某个棋子，使其不能移动，否则会导致更有价值的棋子被吃或造成其他损失。</p>
+      <div class="tactic-example">
+        <h3><i class="fas fa-lightbulb"></i> 典型示例</h3>
+        <p>炮镇中路牵制对方中路的马或士；车占肋道牵制对方的士象。</p>
+      </div>
+      <ul>
+        <li><strong>绝对牵制：</strong>被牵制的棋子完全不能移动（如将帅被牵制）</li>
+        <li><strong>相对牵制：</strong>被牵制的棋子可以移动，但会造成更大损失</li>
+        <li><strong>解除牵制：</strong>通过垫子、逃跑、反击等方式化解牵制</li>
+      </ul>
+    </div>
+
+    <div id="sacrifice" class="lesson-section">
+      <h2><i class="fas fa-fire"></i> 弃子攻杀</h2>
+      <p>弃子是主动牺牲某个棋子以换取更大利益的战术，是象棋中最精彩也最考验棋力的战术之一。</p>
+      <div class="tactic-example">
+        <h3><i class="fas fa-lightbulb"></i> 典型示例</h3>
+        <p>弃马破士象，打开对方防线；弃车砍士，形成绝杀。</p>
+      </div>
+      <ul>
+        <li><strong>弃子入局：</strong>通过弃子突破对方防线，形成杀势</li>
+        <li><strong>弃子取势：</strong>牺牲物质换取局面优势</li>
+        <li><strong>弃子争先：</strong>放弃小利争取先手主动</li>
+        <li><strong>计算要点：</strong>必须精确计算后续变化，确保弃子有足够补偿</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script src="../../assets/js/headerFooterManager.js"></script>
+<script src="../../assets/js/dropdown.js"></script>
+<script>
+  document.querySelectorAll('.lesson-nav-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href');
+      const targetSection = document.querySelector(targetId);
+      if (targetSection) {
+        targetSection.scrollIntoView({ behavior: 'smooth' });
+      }
+      document.querySelectorAll('.lesson-nav-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
